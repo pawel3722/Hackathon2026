@@ -19,17 +19,7 @@ async def handle_connection(ws: WebSocket, lobby_id: str, token: str):
         await ws.close()
         return
 
-    player = Player()
-    lobby.players[player_id] = player
-
-    await broadcast(lobby, {"type": "update_lobby", "users": [p.name for p in lobby.players.values()]})
-
-    try:
-        while True:
-            msg = await ws.receive_json()
-            await handle_event(lobby, player, msg)
-    except:
-        del lobby.players[player_id]
+    await broadcast(lobby, {"type": "update_lobby", "users": [u.name for u in lobby.users.values()]})
 
 async def start_round_timer(lobby):
     # uruchamiany przy pierwszym ruchu w rundzie
