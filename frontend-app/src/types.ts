@@ -119,3 +119,35 @@ export const GameStatus = {
 } as const;
 
 export type GameStatusType = typeof GameStatus[keyof typeof GameStatus];
+
+interface Action {
+  action_type: string; // "buy", "sell", "bank", "stakeholder", "card"
+  assets_type: string; // "stock", "crypto", "property", "credit", "deposit", "insurance"
+  assets_id: number; // ID aktywa
+  amount: number; // ilość lub kwota
+}
+
+interface Move {
+  steps: number; // liczba kroków (0-3)
+  actions: Action[]; // lista akcji
+}
+
+interface PlayerEndGame {
+  id: string;
+  money: number;
+  is_bankrupt: boolean;
+  position: number;
+  insurance: number;
+  stocks: any[]; // Lista akcji (StockShare)
+  cryptos: any[]; // Lista kryptowalut (CryptoShare)
+  credits: any[]; // Lista kredytów (Credit)
+  deposits: any[]; // Lista depozytów (Deposit)
+  properties: any[]; // Lista nieruchomości (Property)
+  all_money: number; // Całkowite pieniądze
+}
+
+interface GameOver {
+  game_ended: boolean; // zawsze true
+  players: PlayerEndGame[]; // lista graczy na koniec gry
+  turn: number; // numer tury
+}
