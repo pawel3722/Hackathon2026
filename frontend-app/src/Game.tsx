@@ -14,6 +14,13 @@ type Field = {
   d: number;
 };
 
+type FieldData = {
+  f: string;
+  d: number;
+  name: string;
+
+};
+
 const FIELD: Field[] = [
   { f: "start_field", d: 0 },
   { f: "stock_1_field", d: 1 },
@@ -36,6 +43,30 @@ const FIELD: Field[] = [
   { f: "crypto_4_field", d: 18 },
   { f: "estate_4_field", d: 19 }
 ];
+
+const fieldsData: FieldData[] = [
+  { f: "start_field", d: 0, name: "Start" },
+  { f: "stock_1_field", d: 1, name: "Stockmarket" },
+  { f: "bank_1_field", d: 2, name: "Bank" },
+  { f: "crypto_1_field", d: 3, name: "Crypto" },
+  { f: "estate_1_field", d: 4, name: "Estate" },
+  { f: "chance_1_field", d: 5, name: "Chance" },
+  { f: "stock_2_field", d: 6, name: "Stockmarket" },
+  { f: "score_field", d: 7, name: "Bet" },
+  { f: "crypto_2_field", d: 8, name: "Crypto" },
+  { f: "estate_2_field", d: 9, name: "Estate" },
+  { f: "park_field", d: 10, name: "Park" },
+  { f: "stock_3_field", d: 11, name: "Stockmarket" },
+  { f: "bank_2_field", d: 12, name: "Bank" },
+  { f: "crypto_3_field", d: 13, name: "Crypto" },
+  { f: "estate_3_field", d: 14, name: "Estate" },
+  { f: "chance_2_field", d: 15, name: "Chance" },
+  { f: "stock_4_field", d: 16, name: "Stockmarket" },
+  { f: "tax_field", d: 17, name: "Tax" },
+  { f: "crypto_4_field", d: 18, name: "Crypto" },
+  { f: "estate_4_field", d: 19, name: "Estate" }
+];
+
 import { getActiveGameWebSocket, getOrCreateGameWebSocket } from "./websocketBridge";
 
 type GameLocationState = {
@@ -158,7 +189,52 @@ export default function Game() {
       <div className="game-modal" style={{ transform: showModal ? "translateY(0)" : "translateY(100%)" }}>
         <button onClick={() => { setShowModal(prev => !prev) }}>Close</button>
         <div>
-          {selectedField.f}
+          {fieldsData.find(f => f.f === selectedField.f)?.name == "Start" ?(
+            <div>
+              <h1>Start</h1>
+              <p>You receive 200 PLN for passing Start!</p>
+            </div>
+          ) : fieldsData.find(f => f.f === selectedField.f)?.name == "Stockmarket" ?(
+           <div>
+              <h1>Stock Market - {getGlobalGameState().board[selectedField.d].name}</h1>
+              <p>You can buy and sell stocks here.</p>
+            </div>
+          ) : fieldsData.find(f => f.f === selectedField.f)?.name == "Bank" ?(
+           <div>
+              <h1>Bank - {getGlobalGameState().board[selectedField.d].name}</h1>
+              <p>You can deposit and withdraw money here.</p>
+            </div>
+          ) : fieldsData.find(f => f.f === selectedField.f)?.name == "Crypto" ?(
+           <div>
+              <h1>Crypto Exchange - {getGlobalGameState().board[selectedField.d].name}</h1>
+              <p>You can buy and sell cryptocurrencies here.</p>
+            </div>
+          ) : fieldsData.find(f => f.f === selectedField.f)?.name == "Estate" ?(
+           <div>
+              <h1>Estate - {getGlobalGameState().board[selectedField.d].name}</h1>
+              <p>You can buy and sell properties here.</p>
+            </div>
+          ) : fieldsData.find(f => f.f === selectedField.f)?.name == "Chance" ?(
+           <div>
+              <h1>Chance</h1>
+              <p>You can draw a Chance card here.</p>
+            </div>
+          ) : fieldsData.find(f => f.f === selectedField.f)?.name == "Bet" ?(
+           <div>
+              <h1>Bookmaker</h1>
+              <p>You can place bets here.</p>
+            </div>
+          ) : fieldsData.find(f => f.f === selectedField.f)?.name == "Tax" ?(
+           <div>
+              <h1>Tax</h1>
+              <p>You must pay taxes here.</p>
+            </div>
+          ) : (
+            <div>
+              <h1>Parking</h1>
+              <p>You can rest here.</p>
+            </div>
+          )}
         </div>
       </div>
 
