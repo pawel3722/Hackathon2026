@@ -81,7 +81,7 @@ async def handle_event(lobby, player, msg):
                 return
 
             lobby.started = True
-            lobby.game_state = GameState(list(lobby.players.keys()))
+            lobby.game_state = GameState(list(lobby.users.keys()))
 
             await broadcast(lobby, {"type": "started"})
 

@@ -3,13 +3,13 @@ from models import Player, Stock, Crypto, Property
 from update_market_prices import update_stock_price, update_crypto_price, next_regime, STOCK_REGIME
 
 class GameState:
-    def __init__(self, num_of_players : int):
+    def __init__(self, playe_ids : list[int]):
         self.turn : int = 1 
         self.max_turns : int = 100
         self.game_ended : bool = False
         
-        self.players : list[Player] = [Player() for i in range(num_of_players)]
-        
+        self.players : dict[int, Player] = {pid: Player(pid) for pid in playe_ids}
+
         self.board : list[dict[str, str]] = self.create_board()
 
         self.rng = np.random.default_rng(seed=444)
@@ -144,7 +144,7 @@ class GameState:
 
 def _self_test_apply_moves():
     """Run a small smoke test for apply_moves when file is executed directly."""
-    game_state = GameState(num_of_players=3)
+    game_state = GameState(playe_ids=[0, 1, 2])
     moves = {
         0: {"steps": 2, "actions": []},
         1: {"steps": 3, "actions": []},
