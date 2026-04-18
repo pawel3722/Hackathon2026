@@ -28,9 +28,9 @@ class Player:
         self.properties : list[Property] = []
 
 class Lobby:
-    def __init__(self, id : str, host_id : str):
+    def __init__(self, id : str):
         self.id : str = id
-        self.host_id : str = host_id
+        self.host_id : str = None
         self.players : list[User] = {}
         self.started : bool = False
         self.game_state : GameState = None

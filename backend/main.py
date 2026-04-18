@@ -1,24 +1,14 @@
 from fastapi import FastAPI, WebSocket
 from fastapi.responses import FileResponse
-# from fastapi.middleware.cors import CORSMiddleware
 import uuid
 
 from game_manager import game_manager
 from models import Lobby
-# from auth import create_token
 from websocket import handle_connection
 
 import models
 
 app = FastAPI()
-
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_origins=["*"],  # Allows all origins
-#     allow_credentials=True,
-#     allow_methods=["*"],  # Allows all methods
-#     allow_headers=["*"],  # Allows all headers
-# )
 
 @app.get("/")
 def serve_index():
@@ -27,11 +17,9 @@ def serve_index():
 @app.post("/create")
 def create():
     lobby_id = str(uuid.uuid4())
-    host_id = str(uuid.uuid4())
 
-    lobby = Lobby(lobby_id, host_id)
+    lobby = Lobby(lobby_id)
     game_manager.add_lobby(lobby)
-
 
     return {
         "lobby_id": lobby_id
@@ -51,6 +39,10 @@ def join(lobby_id: str, name: str = None):
 
     user = models.User(user_id, user_name)
     lobby.users[user_id] = user
+
+    if len(lobby.users) == 1:
+        lobby.host_id = user_id
+        
 
     return {
         "ws": f"/ws/{lobby_id}",
