@@ -1,6 +1,4 @@
 import { useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useState } from "react";
 import { useEffect } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import PlayerStatus from "./PlayerStatus";
@@ -50,10 +48,15 @@ export default function Game() {
   const routeState = location.state as GameLocationState | null;
   const playerId = routeState?.playerId ?? localStorage.getItem("playerId") ?? "";
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
-  const [selectedField, setSelectedField] = useState<Field>({ f: "start_field", d: 0 })
+  const [selectedField, setSelectedField] = useState<Field>(FIELD[0])
+  const selectedFieldRef = useRef(FIELD[0]);
   const spline = useRef<Application | null>(null)
   const [showModal, setShowModal] = useState(false)
   const [lastWsMessage, setLastWsMessage] = useState<any>(null);
+
+  useEffect(() => {
+    selectedFieldRef.current = selectedField;
+  }, [selectedField]);
 
   useEffect(() => {
     if (!gameIdFromRoute || !playerId) {
@@ -149,24 +152,34 @@ export default function Game() {
   };
 
   const onSplineMouseDown = (e: SplineEvent) => {
-    console.log(e.target.name);
+    const nextField = FIELD.find(f => f.f === e.target.name);
+    const pawn = spline.current?.findObjectByName("p2-start");
+
+    if (!nextField || !pawn) return;
+
+    const currentField = selectedFieldRef.current;
+    const dist = nextField.d - currentField.d;
+
+    // ❌ blokady
+    if (dist <= 0) {
+      console.log("Nie możesz się cofać ani stać w miejscu");
+      return;
+    }
+
+    if (dist > 3) {
+      console.log("Możesz przesunąć się maksymalnie o 3 pola");
+      return;
+    }
 
     const obj = spline.current?.findObjectByName(e.target.name);
-    if (obj) obj.color = "#42f587";
+    const prevObj = spline.current?.findObjectByName(currentField.f);
 
-    const pawn = spline.current?.findObjectByName("p2-start")
-    console.log(pawn?.name)
-    if (pawn) {
-      const f = FIELD.find(f => f.f === e.target.name)!.d
-      const dist = f - selectedField.d
+    if (obj) obj.state = "selected";
+    if (prevObj) prevObj.state = "Base State";
 
-      console.log("wybrany ", f)
-      console.log("aktyalny ", selectedField.d)
+    pawn.position.x -= dist * 370;
 
-      pawn.position.x -= dist * 370
-    } 
-
-    setSelectedField(prev => FIELD.find(f => f.f === e.target.name) ?? prev)
+    setSelectedField(nextField);
     setShowModal(prev => !prev);
   };
 
