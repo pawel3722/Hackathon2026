@@ -29,82 +29,82 @@ def chance_cards() -> list[ChanceCard]:
         return [
             ChanceCard(
                  id=1, 
-                 description='CD Projekt Red wypuścił Cyberpunk 2077, ale premiera okazała się niewypałem. Cena akcji CDR spada o 20%.',
+                 description='CD Projekt Red released a disappointing game. CDR stock plummets 20%.',
                  effect=lambda game, _: game.change_stock_prices(tickers={"CDR"}, change_pct=-0.20)
                  ),  
             ChanceCard(
                  id=2, 
-                 description='NBP obniża stopy procentowe. Oprocentowanie kredytów i lokat maleje o połowę.',
+                 description='NBP cuts interest rates by 50%. All interest rates drop by 50% .',
                  effect=lambda game, _: game.change_interest_rates(change_pct=-0.50)
                  ),
             ChanceCard(
                  id=3, 
-                 description='Awaria dużej sieci energetycznej w Europie. Akcje spółek energetycznych tracą 15%.',
+                 description='Energy crisis worsens. Energy and utilities stocks drop 15%.',
                  effect=lambda game, _: game.change_stock_prices(industries={"energy", "utilities"}, change_pct=-0.15)
                  ),
             ChanceCard(
                  id=4, 
-                 description='Globalna panika na rynku krypto. Wszystkie kryptowaluty spadają o 25%.',
+                 description='Regulatory crackdown on crypto. All crypto prices drop by 25%.',
                  effect=lambda game, _: game.change_crypto_prices(change_pct=-0.25)
                  ),
             ChanceCard(
                  id=5, 
-                 description='ETF na Bitcoin i ETH zatwierdzony. BTC i ETH rosną o 18%.',
+                 description='ETF with BTC and ETH gets approved. Both cryptocurrencies surge by 18%.',
                  effect=lambda game, _: game.change_crypto_prices(tickers={"BTC", "ETH"}, change_pct=0.18)
                  ),
             ChanceCard(
                  id=6, 
-                 description='Wyciek danych w dużym banku. Akcje banków spadają o 10%.',
+                 description='Data leak at a major bank. Bank stocks drop by 10%.',
                  effect=lambda game, _: game.change_stock_prices(industries={"banking"}, change_pct=-0.10)
                  ),
             ChanceCard(
                  id=7, 
-                 description='Wiedźmin 4 okazuje się nowym hitem. CD Projekt Red zyskuje +25%.',
+                 description='Witcher 4 announced! CDR stock jumps 25%.',
                  effect=lambda game, _: game.change_stock_prices(tickers={"CDR"}, change_pct=0.25)
                  ),
             ChanceCard(
                  id=8, 
-                 description='Globalny wzrost cen ropy! Paliwo drożeje dwukrotnie na 5 tur, a spółki paliwowe rosną o 20%.',
+                 description='Global increase in fuel prices! Fuel becomes twice as expensive for 5 turns, and energy companies grow by 20%.',
                  effect=lambda game, _: game.change_fuel_price_multiplier(2.0, 5) and game.change_stock_prices(industries={"energy"}, change_pct=0.20)
                  ),
             ChanceCard(
                  id=9, 
-                 description='Cyberatak na dużą giełdę krypto. ETH i SOL spadają o 17%.',
+                 description='Cyberattack on a major crypto exchange. ETH and SOL drop by 17%.',
                  effect=lambda game, _: game.change_crypto_prices(tickers={"ETH", "SOL"}, change_pct=-0.17)
                  ),
             ChanceCard(
                  id=10, 
-                 description='Korekta na rynku akcji. Wszystkie akcje spadają o 15%.',
+                 description='Recession fears grow. Stock market drops 15% in the next turn.',
                  effect=lambda game, _: game.change_stock_prices(change_pct=-0.15)
                  ),
             ChanceCard(
                  id=11, 
-                 description='Zyski firm lepsze od oczekiwań. Szeroki rynek akcji rośnie o 9%.',
+                 description='Tech boom! Tech stocks surge by 9% in the next turn.',
                  effect=lambda game, _: game.change_stock_prices(change_pct=0.09)
                  ),
             ChanceCard(
                  id=12, 
-                 description='Rekordowe wydobycie ropy. Spółki paliwowe notują dodatkowe +12%.',
+                 description='Record oil production. Energy companies surge by 12%.',
                  effect=lambda game, _: game.change_stock_prices(industries={"energy"}, change_pct=0.12)
                  ),
             ChanceCard(
                  id=13, 
-                 description='Powódź! Kursy ubezpieczycieli spadają o 8%.',
+                 description='Flood! Insurance rates drop by 8%.',
                  effect=lambda game, _: game.change_stock_prices(industries={"insurance"}, change_pct=-0.08)
                  ),
             ChanceCard(
                  id=14, 
-                 description='Altseason na rynku krypto. SOL +20%, ETH +10%.',
+                 description='Solana announces a major upgrade. SOL surges 20%, ETH follows with a 10% increase.',
                  effect=lambda game, _: game.change_crypto_prices(tickers={"SOL"}, change_pct=0.20) and game.change_crypto_prices(tickers={"ETH"}, change_pct=0.10)
                  ),
             ChanceCard(
                  id=15, 
-                 description='Silna zima i wysokie zużycie energii. Spółki energetyczne +14%.',
+                 description='Cold winter and high energy consumption. Energy companies grow by 14%.',
                  effect=lambda game, _: game.change_stock_prices(industries={"energy", "utilities"}, change_pct=0.14)
                  ),
             ChanceCard(
                  id=16, 
-                 description='Kryzys na rynku nieruchomości! Ceny wszystkich nieruchomości spadają o 15% w kolejnej turze.',
+                 description='Real estate market crisis! All property prices drop by 15% in the next turn.',
                  effect=lambda game, _: game.change_property_prices(change_pct=-0.15)
                 ),
         ]
