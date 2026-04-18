@@ -56,6 +56,7 @@ export default function Game() {
   const [lastWsMessage, setLastWsMessage] = useState<any>(null);
   const [showMarkets, setShowMarkets] = useState(false);
   const [marketState, setMarketState] = useState<any>(() => getGlobalGameState());
+  const [playerState, setPlayerState] = useState<any>(() => getGlobalGameState());
 
 
   useEffect(() => {
@@ -70,7 +71,10 @@ export default function Game() {
         setLastWsMessage(data);
         console.log("[Game WS]", data);
         const gs = getGlobalGameState();
-        if (gs) setMarketState(gs);
+        if (gs) {
+          setMarketState(gs);
+          setPlayerState(gs);
+        }
       },
       (error: Event) => {
         console.error("[Game WS] error:", error);
@@ -81,54 +85,23 @@ export default function Game() {
     );
   }, [gameIdFromRoute, playerId]);
 
-  // Mock player data - in real app this would come from server
-  const [currentPlayer] = useState<Player>({
+  // Get player data from player state
+  const allPlayers = Array.isArray(playerState?.players) ? playerState.players : [];
+  
+  const currentPlayer = allPlayers.find((p: Player) => p.id === playerId) || {
     id: playerId || "1",
     name: "Ty",
-    money: 1500.00,
+    money: 0,
     is_bankrupt: false,
     position: 0,
     stocks: [],
     cryptos: [],
     credits: [],
     deposits: [],
-    properties: [
-      { id: 1, name: "Ulica Marszałkowska", price: 400, rent: 40, energy_use: 10 },
-      { id: 2, name: "Rynek Główny", price: 600, rent: 60, energy_use: 15 }
-    ]
-  });
+    properties: []
+  };
 
-  const [otherPlayers] = useState<Player[]>([
-    {
-      id: "2",
-      name: "Player 2",
-      money: 1200.00,
-      is_bankrupt: false,
-      position: 5,
-      stocks: [],
-      cryptos: [],
-      credits: [],
-      deposits: [],
-      properties: [
-        { id: 3, name: "Plac Wilsona", price: 350, rent: 35, energy_use: 8 }
-      ]
-    },
-    {
-      id: "3",
-      name: "Player 3",
-      money: 1800.00,
-      is_bankrupt: false,
-      position: 12,
-      stocks: [],
-      cryptos: [],
-      credits: [],
-      deposits: [],
-      properties: [
-        { id: 4, name: "Ulica Floriańska", price: 500, rent: 50, energy_use: 12 },
-        { id: 5, name: "Rynek Główny", price: 600, rent: 60, energy_use: 15 }
-      ]
-    }
-  ]);
+  const otherPlayers = allPlayers.filter((p: Player) => p.id !== playerId);
 
   const stocks = Array.isArray(marketState?.stocks) ? marketState.stocks : [];
   const cryptos = Array.isArray(marketState?.cryptos) ? marketState.cryptos : [];
@@ -209,7 +182,7 @@ export default function Game() {
 
           <div className="other-players">
             <h3>Other Players</h3>
-            {otherPlayers.map((player) => (
+            {otherPlayers.map((player : Player) => (
               <div
                 key={player.id}
                 className="other-player-card"
