@@ -2,11 +2,13 @@ from models import Player, Stock, Crypto
 
 class GameState:
     def __init__(self, num_of_players : int):
-        self.game_ended : bool = False
         self.turn : int = 1 
-        self.players : list[Player] = [Player() for i in range(num_of_players)]
-        self.board = self.create_board()
         self.max_turns : int = 100
+        self.game_ended : bool = False
+        
+        self.players : list[Player] = [Player() for i in range(num_of_players)]
+        
+        self.board = self.create_board()
 
         self.stocks = [
             Stock(
@@ -74,9 +76,29 @@ class GameState:
             {"type": "crypto_exchange", "name": "Binance"},
             {"type": "real_estate", "name": "Domki"},
         ]
+    
+    def _apply_player_move(self, player_id, steps):
+        pass
+
+    def _update_market(self):
+        pass
+
+    def _apply_chance_card(self, player_id):
+        pass
+
+    def _get_chance_card(self):
+        pass
+
+    def _get_event(self):
+        pass
 
     def apply_moves(self, moves):
         results = []
+
+        for player_id, move in moves.items():
+            self._apply_player_move(player_id, move.get("steps"))
+
+
 
         # 1. ruch wszystkich
         for player_id, move in moves.items():
