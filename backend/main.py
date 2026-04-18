@@ -8,6 +8,9 @@ from models import Lobby
 from auth import create_token
 from websocket import handle_connection
 
+from pydantic import BaseModel
+import models
+
 app = FastAPI()
 
 # app.add_middleware(
@@ -38,13 +41,24 @@ def create():
     }
 
 
+
+class JoinRequest(BaseModel):
+    name: str
+
 @app.post("/join/{lobby_id}")
-def join(lobby_id: str):
+def join(lobby_id: str, request: JoinRequest):
     if lobby_id not in game_manager.lobbies:
         return {"error": "Lobby not found"}
+    
+    lobby = game_manager.get_lobby(lobby_id)
 
-    player_id = str(uuid.uuid4())
-    token = create_token(player_id, lobby_id)
+    user_id = str(uuid.uuid4())
+    token = create_token(user_id, lobby_id)
+
+    user_name = request.name | "Unnamed user"
+
+    player = models.User(user_id, user_name)
+    lobby.players[user_id] = player
 
     return {
         "token": token,
