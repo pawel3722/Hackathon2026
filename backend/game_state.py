@@ -1,16 +1,19 @@
+from shutil import move
+
+from contract import Move
 from models import Player, Stock, Crypto, Property
 import update_market_prices
 
 class GameState:
-    def __init__(self, num_of_players : int):
+    def __init__(self, players_ids : list[str]):
         self.turn : int = 1 
         self.max_turns : int = 100
         self.game_ended : bool = False
-        self.players : list[Player] = [Player() for i in range(num_of_players)]
-        self.board : list[dict[str, str]] = self._create_board()
-        self.stocks : list[Stock] = self._init_stocks()
-        self.cryptos : list[Crypto] = self._init_crypto()
-        self.properties : list[Property] = self._init_properties()
+        self.players : dict[str, Player] = {player_id: Player(player_id) for player_id in players_ids}
+        self.board : list[dict[str, str]] = self.create_board()
+        self.stocks : list[Stock] = self.init_stocks()
+        self.cryptos : list[Crypto] = self.init_crypto()
+        self.properties : list[Property] = self.init_properties()
 
     def _init_properties(self):
         return [
@@ -89,8 +92,12 @@ class GameState:
             {"type": "real_estate", "name": "Domy"},
         ]
     
-    def _apply_player_move(self, player_id, steps):
-        pass
+    def _apply_player_move(self, player_id : str, move: Move):
+        self.players[player_id].position += move.steps
+        if self.players[player_id].position >= len(self.board):
+            self.players[player_id].position %= len(self.board)
+            self.players[player_id].money += 200  # bonus za przejście przez start
+        
 
     def _update_market(self):
         pass
@@ -106,20 +113,17 @@ class GameState:
 
     def apply_moves(self, moves):
         results = []
-
         for player_id, move in moves.items():
-            self._apply_player_move(player_id, move.get("steps"))
+            self._apply_player_move(player_id, move)
 
 
 
         # 1. ruch wszystkich
         for player_id, move in moves.items():
             steps = move.get("steps") or self.roll_dice()
-            self.positions[player_id] += steps
+            
 
-            if self.positions[player_id] >= len(self.board):
-                self.positions[player_id] %= len(self.board)
-                self.money[player_id] += 200
+            
 
             pos = self.positions[player_id]
             field = self.board[pos]
