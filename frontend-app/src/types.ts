@@ -7,6 +7,7 @@ export interface Stock {
   industry: string; // enum-like: fuel, food, media, etc.
   price: number;
   number_of_shares: number;
+  price_history?: number[];
 }
 
 export interface Crypto {
@@ -14,6 +15,7 @@ export interface Crypto {
   ticker: string;
   name: string;
   price: number;
+  price_history?: number[];
 }
 
 export interface Property {

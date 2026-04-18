@@ -1,6 +1,4 @@
 import { useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useState } from "react";
 import { useEffect } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import PlayerStatus from "./PlayerStatus";
@@ -8,6 +6,8 @@ import type { Player } from "./types";
 import "./Game.css";
 import Spline, { type SplineEvent } from '@splinetool/react-spline';
 import type { Application } from "@splinetool/runtime";
+import { getGlobalGameState } from "./gameStateStore";
+import { PriceChart } from "./components/PriceChart";
 
 type Field = {
   f: string;
@@ -54,6 +54,9 @@ export default function Game() {
   const spline = useRef<Application | null>(null)
   const [showModal, setShowModal] = useState(false)
   const [lastWsMessage, setLastWsMessage] = useState<any>(null);
+  const [showMarkets, setShowMarkets] = useState(false);
+  const [marketState, setMarketState] = useState<any>(() => getGlobalGameState());
+
 
   useEffect(() => {
     if (!gameIdFromRoute || !playerId) {
@@ -66,6 +69,8 @@ export default function Game() {
       (data: any) => {
         setLastWsMessage(data);
         console.log("[Game WS]", data);
+        const gs = getGlobalGameState();
+        if (gs) setMarketState(gs);
       },
       (error: Event) => {
         console.error("[Game WS] error:", error);
@@ -125,28 +130,8 @@ export default function Game() {
     }
   ]);
 
-  const handleLeaveGame = () => {
-    console.log(currentPlayer.id);
-    navigate("/");
-  };
-
-  const handleBuyProperty = () => {
-    const ws = getActiveGameWebSocket();
-    if (!ws) {
-      console.warn("Game WebSocket is missing");
-      return;
-    }
-
-    console.warn("Sending buy property action via WebSocket");
-
-    ws.send({
-      type: "move",
-      move: {
-        steps: 2,
-        actions: []
-      },
-    });
-  };
+  const stocks = Array.isArray(marketState?.stocks) ? marketState.stocks : [];
+  const cryptos = Array.isArray(marketState?.cryptos) ? marketState.cryptos : [];
 
   const onSplineMouseDown = (e: SplineEvent) => {
     console.log(e.target.name);
@@ -182,9 +167,6 @@ export default function Game() {
 
       <div className="game-header">
         <h1 className="game-title">Moneypoly</h1>
-        <button className="leave-button" onClick={handleLeaveGame}>
-          Leave Game
-        </button>
       </div>
 
       <div className="game-content">
@@ -220,7 +202,9 @@ export default function Game() {
 
           <div className="game-actions">
             <button className="action-button primary">Roll Dice</button>
-            <button className="action-button" onClick={handleBuyProperty}>Buy Property</button>
+            <button className="action-button" onClick={() => setShowMarkets((v) => !v)}>
+              {showMarkets ? "Close Markets" : "Markets"}
+            </button>
             <button className="action-button">Sell Property</button>
             <button className="action-button">End Turn</button>
           </div>
@@ -235,27 +219,51 @@ export default function Game() {
 
         <div className="board-container">
           <div className="board">
-            {/* Placeholder for the board game - this would be the actual game board */}
-            <div className="board-placeholder">
-              {/* <div className="board-center">
-                <h2>Plansza gry</h2>
-                <p>Tutaj będzie plansza Monopoly/Moneypoly</p>
-                <div className="board-grid">
-                  
-                  {Array.from({ length: 40 }, (_, i) => (
-                    <div key={i} className={`board-square square-${i % 4}`}>
-                      {i + 1}
-                    </div>
-                  ))}
-                </div>
-              </div> */}
-              <Spline
-                scene="https://prod.spline.design/RBNliUZGiPREVqU2/scene.splinecode"
-                onSplineMouseDown={onSplineMouseDown}
-                onLoad={(s) => spline.current = s}
-              />
+            {showMarkets ? (
+              <div className="markets-view">
+                {stocks.length === 0 && cryptos.length === 0 ? (
+                  <div className="markets-empty">No market data yet (start the game first).</div>
+                ) : (
+                  <>
+                    {stocks.length > 0 && (
+                      <div className="markets-section">
+                        <h2 className="markets-title" style={{ textAlign: "center", fontSize: "1.5rem" }}>Stocks</h2>
+                        <div className="markets-grid">
+                          {stocks.map((s: any) => (
+                            <div key={`stock-${s.id}`} className="market-card">
+                              <div className="market-card-title" style={{ textAlign: "center" }}>{s.name} - {Number(s.price).toFixed(2)} PLN</div>
+                              <PriceChart priceHistory={Array.isArray(s.price_history) ? s.price_history : [s.price]} />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
-            </div>
+                    {cryptos.length > 0 && (
+                      <div className="markets-section">
+                        <h2 className="markets-title" style={{ textAlign: "center", fontSize: "1.5rem" }}>Crypto</h2>
+                        <div className="markets-grid">
+                          {cryptos.map((c: any) => (
+                            <div key={`crypto-${c.id}`} className="market-card">
+                              <div className="market-card-title" style={{ textAlign: "center" }}>{c.name} - ${Number(c.price).toFixed(2)}</div>
+                              <PriceChart priceHistory={Array.isArray(c.price_history) ? c.price_history : [c.price]} />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            ) : (
+              <div className="board-placeholder">
+                <Spline
+                  scene="https://prod.spline.design/RBNliUZGiPREVqU2/scene.splinecode"
+                  onSplineMouseDown={onSplineMouseDown}
+                  onLoad={(s) => spline.current = s}
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>
