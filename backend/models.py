@@ -1,13 +1,16 @@
 import asyncio
 
-class Player:
-    def __init__(self, id, name, websocket=None):
-        self.id = id
+class User:
+    def __init__(self, id : int, name : str):
         self.name = name
-        self.ws = websocket
         self.current_move = None
         self.ready = False
+        
+class Player:
+    def __init__(self):
         self.money = 5000.00
+        self.is_bankrupt = False
+        self.position = 0
         self.stocks = {}
         self.cryptos = {}
         self.credits = {}
