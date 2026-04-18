@@ -90,7 +90,7 @@ async def handle_disconnect(lobby: Lobby, user: User):
             await broadcast(lobby, render_lobby_state(lobby))
             lobby.host_id = next(iter(lobby.users.keys()))
         else:
-            del game_manager.delete_lobby(lobby.id)
+            game_manager.remove_lobby(lobby.id)
 
 
 
