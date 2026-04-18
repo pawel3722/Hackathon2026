@@ -1,10 +1,10 @@
 import json
 import numpy as np
-from contract import TurnResult
+from contract import GameOver, TurnResult
 # from collections import deque
 from shutil import move
 from contract import Move
-from models import Credit, CryptoShare, Deposit, Mapper, Player, Stock, Crypto, Property, ChanceCard, StockShare
+from models import Credit, CryptoShare, Deposit, Mapper, Player, PlayerEndGame, Stock, Crypto, Property, ChanceCard, StockShare
 from update_market_prices import update_crypto_price, update_stock_price, update_regime, init_stock_history, update_market
 import game_init
 
@@ -203,6 +203,7 @@ class GameState:
 
         if self.turn > self.max_turns:
             self.game_ended = True
+            return GameOver(players=[PlayerEndGame(player) for player in self.players.values()].sort(key=lambda p: p.all_money, reverse=True))
 
         return TurnResult(
             turn=self.turn,

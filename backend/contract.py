@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
-from models import Property
+from models import PlayerEndGame, Property
 
 if TYPE_CHECKING:
     from models import ChanceCardPlayer, Crypto, Player, Stock, Property
@@ -52,3 +52,9 @@ class TurnResult:
         self.properties : list[Property] = properties
         self.cards : list[ChanceCardPlayer] = cards
         self.board : list[dict[str, str]] = board
+
+class GameOver:
+    def __init__(self, players : list[PlayerEndGame]):
+        self.game_ended : bool = True
+        self.players : list[PlayerEndGame] = players
+        
