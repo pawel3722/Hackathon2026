@@ -1,4 +1,4 @@
-from backend.game_state import GameState
+from game_state import GameState
 from fastapi import WebSocket, WebSocketDisconnect
 import asyncio
 
