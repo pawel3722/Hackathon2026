@@ -1,6 +1,4 @@
 import { useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useState } from "react";
 import { useEffect } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import PlayerStatus from "./PlayerStatus";
