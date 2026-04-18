@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import PlayerStatus from "./PlayerStatus";
 import type { Player } from "./types";
 import "./Game.css";
+import Spline, { type SplineEvent } from '@splinetool/react-spline';
 
 export default function Game() {
   const navigate = useNavigate();
@@ -61,25 +62,29 @@ export default function Game() {
     navigate("/");
   };
 
+  const onSplineMouseDown = (e: SplineEvent) => {
+    console.log(e.target.name)
+  }
+
   return (
     <div className="game-container">
       <div className="game-header">
         <h1 className="game-title">Moneypoly</h1>
         <button className="leave-button" onClick={handleLeaveGame}>
-            Opuść grę
-          </button>
+          Opuść grę
+        </button>
       </div>
 
       <div className="game-content">
         <div className="left-panel">
           {selectedPlayer ? (
-            <PlayerStatus 
-              player={selectedPlayer} 
+            <PlayerStatus
+              player={selectedPlayer}
               onClose={() => setSelectedPlayer(null)}
             />
           ) : (
-            <PlayerStatus 
-              player={currentPlayer} 
+            <PlayerStatus
+              player={currentPlayer}
               isCurrentPlayer={true}
             />
           )}
@@ -87,8 +92,8 @@ export default function Game() {
           <div className="other-players">
             <h3>Inni gracze</h3>
             {otherPlayers.map((player) => (
-              <div 
-                key={player.id} 
+              <div
+                key={player.id}
                 className="other-player-card"
                 onClick={() => setSelectedPlayer(player)}
               >
@@ -113,18 +118,23 @@ export default function Game() {
           <div className="board">
             {/* Placeholder for the board game - this would be the actual game board */}
             <div className="board-placeholder">
-              <div className="board-center">
+              {/* <div className="board-center">
                 <h2>Plansza gry</h2>
                 <p>Tutaj będzie plansza Monopoly/Moneypoly</p>
                 <div className="board-grid">
-                  {/* Mock board squares */}
+                  
                   {Array.from({ length: 40 }, (_, i) => (
                     <div key={i} className={`board-square square-${i % 4}`}>
                       {i + 1}
                     </div>
                   ))}
                 </div>
-              </div>
+              </div> */}
+              <Spline
+                scene="https://prod.spline.design/RBNliUZGiPREVqU2/scene.splinecode"
+                onSplineMouseDown={onSplineMouseDown}
+              />
+
             </div>
           </div>
         </div>
