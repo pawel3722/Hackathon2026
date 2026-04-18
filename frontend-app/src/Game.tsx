@@ -89,6 +89,7 @@ export default function Game() {
   const [showMarkets, setShowMarkets] = useState(false);
   const [marketState, setMarketState] = useState<any>(() => getGlobalGameState());
   const [playerState, setPlayerState] = useState<any>(() => getGlobalGameState());
+  const [isWaitingForState, setIsWaitingForState] = useState(false);
 
 
   useEffect(() => {
@@ -110,6 +111,7 @@ export default function Game() {
         if (gs) {
           setMarketState(gs);
           setPlayerState(gs);
+          setIsWaitingForState(false);
         }
       },
       (error: Event) => {
@@ -146,6 +148,8 @@ export default function Game() {
   const cryptos = Array.isArray(marketState?.cryptos) ? marketState.cryptos : [];
 
   const onSplineMouseDown = (e: SplineEvent) => {
+    if (isWaitingForState) return;
+
     const nextField = FIELD.find(f => f.f === e.target.name);
     const pawn = spline.current?.findObjectByName(currentPlayer.pawn_id);
 
@@ -191,6 +195,7 @@ export default function Game() {
     }
 
     console.log("handleEndTurn")
+    setIsWaitingForState(true);
 
     ws.send({
       type: "move",
@@ -203,6 +208,14 @@ export default function Game() {
 
   return (
     <div className="game-container">
+      {isWaitingForState && (
+        <div className="waiting-overlay">
+          <div className="waiting-message">
+            <div className="waiting-title">Waiting for turn to end...</div>
+            <div className="waiting-subtitle">Please wait for the updated game state.</div>
+          </div>
+        </div>
+      )}
 
       <div className="game-modal" style={{ transform: showModal ? "translateY(0)" : "translateY(100%)" }}>
         <button onClick={() => { setShowModal(prev => !prev) }}>Close</button>
@@ -292,12 +305,14 @@ export default function Game() {
           </div>
 
           <div className="game-actions">
-            <button className="action-button primary">Roll Dice</button>
-            <button className="action-button" onClick={() => setShowMarkets((v) => !v)}>
+            <button className="action-button primary" disabled={isWaitingForState}>Roll Dice</button>
+            <button className="action-button" disabled={isWaitingForState} onClick={() => setShowMarkets((v) => !v)}>
               {showMarkets ? "Close Markets" : "Markets"}
             </button>
-            <button className="action-button">Sell Property</button>
-            <button className="action-button" onClick={handleEndTurn}>End Turn</button>
+            <button className="action-button" disabled={isWaitingForState}>Sell Property</button>
+            <button className="action-button" disabled={isWaitingForState} onClick={handleEndTurn}>
+              {isWaitingForState ? "Waiting…" : "End Turn"}
+            </button>
           </div>
 
           {lastWsMessage && (
