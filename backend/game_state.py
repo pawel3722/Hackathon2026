@@ -4,15 +4,20 @@ from contract import TurnResult
 from collections import deque
 from shutil import move
 from contract import Move
-from models import Player, Stock, Crypto, Property, ChanceCard
+from models import CryptoShare, Mapper, Player, Stock, Crypto, Property, ChanceCard, StockShare
 from update_market_prices import update_crypto_price, update_stock_price, update_regime
 import game_init
 
 class GameState:
+    STEP_COST = 10.0
+    FOOD_COST = 20.0
+    ENERGY_COST = 0.15
+
     def __init__(self, players_ids : list[str]):
         self.turn : int = 1 
         self.max_turns : int = 100
         self.game_ended : bool = False
+        self.is_destroyed : bool = False
 
         self.rng = np.random.default_rng()  # wspólne źródło losowości dla całej gry
 
@@ -30,11 +35,81 @@ class GameState:
         self.max_excluded_chance_cards: int = 10
         self.excluded_chance_card_queue: deque[int] = deque()
 
-    def _apply_player_move(self, player_id : str, move: Move):
-        self.players[player_id].position += move.steps
-        if self.players[player_id].position >= len(self.board):
-            self.players[player_id].position %= len(self.board)
-            self.players[player_id].money += 200  # bonus za przejście przez start
+    def _apply_player_move(self, player_id : str, move: Move, all_steps: int):
+        current_player = self.players[player_id]
+
+        current_player.position += move.steps
+        if current_player.position >= len(self.board):
+            current_player.position %= len(self.board)
+            current_player.money += 200  # bonus za przejście przez start
+        pos = current_player.position
+        field = self.board[pos]
+
+        if field["type"] == "stock_market" and any(a.assets_type == "stock" for a in move.actions):
+            stock_actions = [a for a in move.actions if a.assets_type == "stock"]
+            for action in stock_actions:
+                if(action.action_type == "buy"):
+                    stock = next((s for s in self.stocks if s.id == action.assets_id), None)
+                    if current_player.money >= stock.price * action.amount and stock.number_of_shares >= action.amount:
+                        current_player.money -= stock.price * action.amount
+                        stock.number_of_shares -= action.amount
+                        player_stock = next((ps for ps in current_player.stocks if ps.stock.id == stock.id), None)
+                        if player_stock:
+                            player_stock.quantity += action.amount
+                        else:
+                            current_player.stocks.append(StockShare(stock=Mapper.stock_to_dto(stock), quantity=action.amount))
+                elif(action.action_type == "sell"):
+                    stock = next((s for s in self.stocks if s.id == action.assets_id), None)
+                    player_stock = next((ps for ps in current_player.stocks if ps.stock.id == stock.id), None)
+                    if player_stock and player_stock.quantity >= action.amount:
+                        current_player.money += stock.price * action.amount
+                        stock.number_of_shares += action.amount
+                        player_stock.quantity -= action.amount
+                        if player_stock.quantity == 0:
+                            current_player.stocks.remove(player_stock)
+
+        elif field["type"] == "crypto_exchange":
+            if(action.action_type == "buy"):
+                crypto = next((s for s in self.cryptos if s.id == action.assets_id), None)
+                if current_player.money >= crypto.price * action.amount:
+                    current_player.money -= crypto.price * action.amount
+                    player_crypto = next((pc for pc in current_player.cryptos if pc.crypto.id == crypto.id), None)
+                    if player_crypto:
+                        player_crypto.quantity += action.amount
+                    else:
+                        current_player.cryptos.append(CryptoShare(crypto=Mapper.crypto_to_dto(crypto), quantity=action.amount))
+            elif(action.action_type == "sell"):
+                crypto = next((s for s in self.cryptos if s.id == action.assets_id), None)
+                player_crypto = next((pc for pc in current_player.cryptos if pc.crypto.id == crypto.id), None)
+                if player_crypto and player_crypto.quantity >= action.amount:
+                    current_player.money += crypto.price * action.amount
+                    player_crypto.quantity -= action.amount
+                    if player_crypto.quantity == 0:
+                        current_player.cryptos.remove(player_crypto)
+
+        for deposit in current_player.deposits:
+            deposit.number_of_instalments -= 1
+        for credit in current_player.credits:
+            credit.number_of_instalments -= 1
+
+        fuel_cost = move.steps * self.STEP_COST
+        energy_cost = self.ENERGY_COST * current_player.properties.sum(p.energy_use for p in current_player.properties)
+        instalment_cost = current_player.credits.sum(c.instalment_rate for c in current_player.credits)
+
+        fuel_revenue = all_steps * self.STEP_COST * sum(s.quantity for s in current_player.stocks if s.stock.industry == "energy") / (s.number_of_shares for s in self.stocks if s.industry == "energy").sum()
+        food_revenue = self.FOOD_COST * len(self.players) * sum(s.quantity for s in current_player.stocks if s.stock.industry == "food") / (s.number_of_shares for s in self.stocks if s.industry == "food").sum()
+        energy_revenue = self.ENERGY_COST * sum(sum(p.energy_use for p in player.properties) for player in self.players.values()) * sum(s.quantity for s in current_player.stocks if s.stock.industry == "utilities") / (s.number_of_shares for s in self.stocks if s.industry == "utilities").sum()
+        credits_revenue = sum(c.lending_rate for c in current_player.deposits if c.number_of_instalments == 0)
+        insurance_revenue = sum(p.price for p in current_player.properties) if current_player.insurance > 0 else 0
+
+        balance_money = fuel_revenue + food_revenue + energy_revenue + credits_revenue + insurance_revenue - fuel_cost - self.FOOD_COST - energy_cost - instalment_cost
+        current_player.money += balance_money
+
+        if current_player.insurance > 0:
+            current_player.insurance -= 1
+
+        current_player.deposits.remove_all(lambda d: d.number_of_instalments == 0)
+        current_player.credits.remove_all(lambda c: c.number_of_instalments == 0)
         
     def _update_market(self):
         for stock in self.stocks:
@@ -154,8 +229,9 @@ class GameState:
 
     def apply_moves(self, moves):
         results = []
+        all_steps = sum(move.steps for move in moves.values())
         for player_id, move in moves.items():
-            self._apply_player_move(player_id, move)
+            self._apply_player_move(player_id, move, all_steps)
 
         self._update_market()
         self._apply_turn_status_effects()
