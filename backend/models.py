@@ -16,7 +16,7 @@ class User:
         self.ws = None
         
 class Player:
-    def __init__(self, id: str):
+    def __init__(self, id: str, name: str):
         self.id : str = id
         self.name : str = None
         self.money : float = 50000.00

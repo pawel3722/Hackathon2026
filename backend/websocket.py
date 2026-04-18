@@ -114,7 +114,7 @@ async def handle_event(lobby, user, msg):
         move_data = msg.get("move")
         actions = [Action(**a) for a in move_data.get("actions", [])]
         user.current_move = Move(steps=move_data["steps"], actions=actions)
-        if all(hasattr(user, "current_move") and user.current_move is not None for user in lobby.users.values()):
+        if all(hasattr(user, "current_move") and user.current_move is not None for user in lobby.users.items()):
             result = lobby.game_state.apply_moves({u.id: u.current_move for u in lobby.users.values()})
             for u in lobby.users.values():
                 del u.current_move
