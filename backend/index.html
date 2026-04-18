@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiplayer Sum Game</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; margin-top: 50px; }
+        input, button { padding: 10px; font-size: 16px; margin: 5px; cursor: pointer; }
+        #identity-text { color: #0066cc; }
+    </style>
+</head>
+<body>
+
+    <button id="create-button" onclick="createGame()">Create Game</button>
+    
+    <input type="text" id="game-id">
+    <button id="join-btn" onclick="joinGame()">Join Game</button>
+
+    <script>
+        let socket = null;
+
+        // DOM Elements
+        const joinBtn = document.getElementById('join-btn');
+        const createBtn = document.getElementById('create-button');
+        const gameIdInput = document.getElementById('game-id');
+
+        const createGame = async () => {
+            fetch('/create', {
+                method: 'POST'
+            })
+                .then((res) => {
+                    if (!res.ok) throw new Error('Failed to create game');
+                    return res.json().catch(() => null);
+                })
+                .then((data) => {
+                    console.log('Game created:', data);
+                    gameIdInput.value = data.lobby_id;
+                })
+                .catch((err) => {
+                    alert(err.message);
+                });
+
+        }
+
+        const joinGame = async () => {
+            const gameId = gameIdInput?.value.trim();
+
+            if (!gameId) {
+                alert('Please enter a game ID.');
+                return;
+            }
+
+            fetch(`/join/${encodeURIComponent(gameId)}`, {
+                method: 'POST'
+            })
+                .then((res) => {
+                    if (!res.ok) throw new Error('Failed to join game');
+                    return res.json().catch(() => null);
+                })
+                .then((data) => {
+                    console.log(`Join request sent for game ${gameId}`, data);
+
+                    const wsUrl = `ws://${window.location.host}${data.ws}`;
+                    socket = new WebSocket(wsUrl);
+                    
+                    socket.onopen = () => {
+                        console.log('Connected to game WebSocket');
+                    };
+                    
+                    socket.onmessage = (event) => {
+                        console.log('Message from server:', event.data);
+                    };
+                    
+                    socket.onerror = (error) => {
+                        console.error('WebSocket error:', error);
+                    };
+                    
+                    socket.onclose = () => {
+                        console.log('WebSocket connection closed');
+                    };
+                })
+                .catch((err) => {
+                    alert(err.message);
+                });
+            }
+
+
+    </script>
+</body>
+</html>

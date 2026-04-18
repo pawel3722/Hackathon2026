@@ -1,4 +1,6 @@
 from fastapi import FastAPI, WebSocket
+from fastapi.responses import FileResponse
+# from fastapi.middleware.cors import CORSMiddleware
 import uuid
 
 from game_manager import game_manager
@@ -7,6 +9,18 @@ from auth import create_token
 from websocket import handle_connection
 
 app = FastAPI()
+
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=["*"],  # Allows all origins
+#     allow_credentials=True,
+#     allow_methods=["*"],  # Allows all methods
+#     allow_headers=["*"],  # Allows all headers
+# )
+
+@app.get("/")
+def serve_index():
+    return FileResponse("index.html")
 
 @app.post("/create")
 def create():
@@ -20,8 +34,7 @@ def create():
 
     return {
         "lobby_id": lobby_id,
-        "token": token,
-        "ws": f"ws://localhost:8000/ws/{lobby_id}?token={token}"
+        # "token": token,
     }
 
 @app.post("/join/{lobby_id}")
@@ -34,7 +47,7 @@ def join(lobby_id: str):
 
     return {
         "token": token,
-        "ws": f"ws://localhost:8000/ws/{lobby_id}?token={token}"
+        "ws": f"/ws/{lobby_id}?token={token}"
     }
 
 @app.websocket("/ws/{lobby_id}")
