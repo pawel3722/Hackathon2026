@@ -50,6 +50,7 @@ class Stock:
         self.risk : float = risk
         self.market_sensitivity : float = market_sensitivity
         self.book_value_floor : float = book_value_floor
+        self.price_history : list[float] = [float(price)]
 
 class StockDto:
     def __init__(self, id : int, ticker : str, name : str, industry : str, price : float, number_of_shares : int):
@@ -74,6 +75,7 @@ class Crypto:
         self.growth  : float = growth
         self.risk : float = risk
         self.market_sensitivity : float = market_sensitivity
+        self.price_history : list[float] = [float(price)]
 
 class CryptoDto:
     def __init__(self, id : int, ticker : str, name : str, price : float):

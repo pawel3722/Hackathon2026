@@ -5,7 +5,7 @@ from collections import deque
 from shutil import move
 from contract import Move
 from models import Player, Stock, Crypto, Property, ChanceCard
-from update_market_prices import update_crypto_price, update_stock_price, update_regime
+from update_market_prices import update_market, init_stock_history
 import game_init
 
 class GameState:
@@ -22,6 +22,7 @@ class GameState:
         self.cryptos : list[Crypto] = game_init.crypto()
         self.properties : list[Property] = game_init.properties()
         self.chance_cards : list[ChanceCard] = game_init.chance_cards()
+        init_stock_history(self.stocks, self.cryptos, self.rng)
 
         # Timed / deferred effects triggered by chance cards.
         self.fuel_price_multiplier: float = 1.0
@@ -37,13 +38,7 @@ class GameState:
             self.players[player_id].money += 200  # bonus za przejście przez start
         
     def _update_market(self):
-        for stock in self.stocks:
-            update_stock_price(stock)
-
-        for crypto in self.cryptos:
-            update_crypto_price(crypto)
-
-        update_regime(rng = self.rng)
+        update_market(self.stocks, self.cryptos, self.rng)
 
     def _change_stock_prices(self, change_pct: float, tickers: set[str] | None = None, industries: set[str] | None = None):
         for stock in self.stocks:
