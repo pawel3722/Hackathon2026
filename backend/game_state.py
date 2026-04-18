@@ -8,9 +8,9 @@ class GameState:
         
         self.players : list[Player] = [Player() for i in range(num_of_players)]
         
-        self.board = self.create_board()
+        self.board : list[dict[str, str]] = self.create_board()
 
-        self.stocks = [
+        self.stocks : list[Stock] = [
             Stock(
                 id=1, ticker='PKO', name='PKO Bank', type='banking',
                 price=67.40, number_of_shares=125,
@@ -38,7 +38,7 @@ class GameState:
             ),
         ]
 
-        self.cryptos = [
+        self.cryptos : list[Crypto] = [
             Crypto(
                 id=101, ticker='BTC', name='Bitcoin',
                 price=84500.0, growth=0.006, risk=0.08, market_sensitivity=0.90
@@ -55,7 +55,7 @@ class GameState:
 
     def create_board(self):
         return [
-            {"type": "go"},
+            {"type": "go", "name": "Start"},
             {"type": "stock_market", "name": "WSE"},
             {"type": "bank", "name": "Bank Pekao SA"},
             {"type": "crypto_exchange", "name": "OKX"},
