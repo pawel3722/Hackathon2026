@@ -54,7 +54,8 @@ class TurnResult:
         self.board : list[dict[str, str]] = board
 
 class GameOver:
-    def __init__(self, players : list[PlayerEndGame]):
+    def __init__(self, players : list[PlayerEndGame], turn : int):
         self.game_ended : bool = True
         self.players : list[PlayerEndGame] = players
+        self.turn : int = turn
         

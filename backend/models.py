@@ -28,8 +28,8 @@ class Player:
         self.deposits : list[Deposit] = []
         self.properties : list[Property] = []
 
-        def count_all_money(self) -> float:
-            return self.money + sum(s.stock.price * s.quantity for s in self.stocks) + sum(c.crypto.price * c.quantity for c in self.cryptos) + sum(p.price for p in self.properties) - sum(cr.instalment_rate * cr.number_of_instalments for cr in self.credits) + sum(d.price for d in self.deposits)
+    def count_all_money(self) -> float:
+        return self.money + sum(s.stock.price * s.quantity for s in self.stocks) + sum(c.crypto.price * c.quantity for c in self.cryptos) + sum(p.price for p in self.properties) - sum(cr.instalment_rate * cr.number_of_instalments for cr in self.credits) + sum(d.price for d in self.deposits)
 
 class PlayerEndGame:
     def __init__(self, player: Player):

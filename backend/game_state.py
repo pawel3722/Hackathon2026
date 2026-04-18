@@ -92,7 +92,7 @@ class GameState:
         elif field["type"] == "bank" and any(a.action_type == "bank" for a in move.actions):
             bank_actions = [a for a in move.actions if a.action_type == "bank"]
             for action in bank_actions:
-                if action.assets_type == "credit" and action.assets_id in [1, 2, 3]:
+                if action.assets_type == "credit" and action.assets_id in [1, 2, 3] and current_player.count_all_money():
                     if action.assets_id == 1:
                         credit = Credit(amount=action.amount, instalment_rate=action.amount * 1.15 / 12 , number_of_instalments=12)
                     elif action.assets_id == 2:
@@ -101,6 +101,15 @@ class GameState:
                         credit = Credit(amount=action.amount, instalment_rate=action.amount * 1.1 / 36, number_of_instalments=36)
                     current_player.money += action.amount
                     current_player.credits.append(credit)
+                elif action.assets_type == "deposit" and action.assets_id in [4, 5, 6]:
+                    if action.assets_id == 4:
+                        deposit = Deposit(amount=action.amount, lending_rate=action.amount * 1.06, number_of_instalments=12)
+                    elif action.assets_id == 5:
+                        deposit = Deposit(amount=action.amount, lending_rate=action.amount * 1.065, number_of_instalments=24)
+                    elif action.assets_id == 6:
+                        deposit = Deposit(amount=action.amount, lending_rate=action.amount * 1.07, number_of_instalments=36)
+                    current_player.money -= action.amount
+                    current_player.deposits.append(deposit)
                 elif action.assets_type == "deposit" and action.assets_id in [4, 5, 6]:
                     if action.assets_id == 4:
                         deposit = Deposit(amount=action.amount, lending_rate=action.amount * 1.06, number_of_instalments=12)
@@ -225,7 +234,7 @@ class GameState:
 
         if self.turn > self.max_turns:
             self.game_ended = True
-            return GameOver(players=[PlayerEndGame(player) for player in self.players.values()].sort(key=lambda p: p.all_money, reverse=True))
+            return GameOver(players=[PlayerEndGame(player) for player in self.players.values()].sort(key=lambda p: p.all_money, reverse=True), turn = self.turn)
 
         return TurnResult(
             turn=self.turn,
