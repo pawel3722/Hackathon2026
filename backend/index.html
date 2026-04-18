@@ -21,6 +21,7 @@
 
     <script>
         let socket = null;
+        let user_id = null;
 
         // DOM Elements
         const joinBtn = document.getElementById('join-btn');
@@ -66,8 +67,10 @@
                 .then((data) => {
                     console.log(`Join request sent for game ${gameId}`, data);
 
+                    user_id = data.user_id;
+
                     const wsUrl = `ws://${window.location.host}${data.ws}`;
-                    createSocket(wsUrl);
+                    createSocket(wsUrl, user_id);
                     
                 })
                 .catch((err) => {
@@ -76,8 +79,8 @@
         }
 
 
-        const createSocket = (url) => {
-            socket = new WebSocket(url);
+        const createSocket = (url, uid) => {
+            socket = new WebSocket(`${url}?user_id=${uid}`);
             
             socket.onopen = () => {
                 console.log('Connected to game WebSocket');

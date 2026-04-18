@@ -3,25 +3,41 @@ import asyncio
 from game_manager import game_manager
 from models import Player
 from utils import broadcast
-from auth import verify_token
+# from auth import verify_token
 from game_state import GameState
 
 ROUND_TIMEOUT = 10  # sekundy
 
-async def handle_connection(ws: WebSocket, lobby_id: str, token: str):
+async def handle_connection(ws: WebSocket, lobby_id: str, user_id: str):
     await ws.accept()
 
-    data = verify_token(token)
-    player_id = data["player_id"]
-
     lobby = game_manager.get_lobby(lobby_id)
+
     if not lobby:
         await ws.close()
         return
 
+    user = lobby.users.get(user_id)
+
+    if not user:
+        await ws.close()
+        return
+    
+    user.ws = ws
+
     print("UPDATING USERS IN LOBBY")
     d = {"type": "update_lobby", "users": [u.name for u in lobby.users.values()]}
+    print(d)
+
     await broadcast(lobby, d)
+
+    while True:
+        try:
+            msg = await ws.receive_json()
+            await handle_event(lobby, user, msg)
+        except Exception as e:
+            print(f"Error handling message: {e}")
+            break
 
 async def start_round_timer(lobby):
     # uruchamiany przy pierwszym ruchu w rundzie

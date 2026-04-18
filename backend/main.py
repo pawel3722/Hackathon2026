@@ -5,7 +5,7 @@ import uuid
 
 from game_manager import game_manager
 from models import Lobby
-from auth import create_token
+# from auth import create_token
 from websocket import handle_connection
 
 import models
@@ -32,11 +32,9 @@ def create():
     lobby = Lobby(lobby_id, host_id)
     game_manager.add_lobby(lobby)
 
-    token = create_token(host_id, lobby_id)
 
     return {
-        "lobby_id": lobby_id,
-        "token": token
+        "lobby_id": lobby_id
     }
 
 
@@ -49,20 +47,17 @@ def join(lobby_id: str, name: str = None):
     lobby = game_manager.get_lobby(lobby_id)
 
     user_id = str(uuid.uuid4())
-    token = create_token(user_id, lobby_id)
-
     user_name = name or "Unnamed user"
 
-    player = models.User(user_id, user_name)
-    lobby.players[user_id] = player
+    user = models.User(user_id, user_name)
+    lobby.users[user_id] = user
 
     return {
-        "token": token,
-        "ws": f"/ws/{lobby_id}?token={token}"
+        "ws": f"/ws/{lobby_id}",
+        "user_id": user_id
     }
 
 
 @app.websocket("/ws/{lobby_id}")
-async def ws(ws: WebSocket, lobby_id: str):
-    token = ws.query_params.get("token")
-    await handle_connection(ws, lobby_id, token)
+async def ws(ws: WebSocket, lobby_id: str, user_id: str):
+    await handle_connection(ws, lobby_id, user_id)
