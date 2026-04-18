@@ -1,30 +1,23 @@
-import numpy as np
 from models import Player, Stock, Crypto, Property
-from update_market_prices import update_stock_price, update_crypto_price, next_regime, STOCK_REGIME
+import update_market_prices
 
 class GameState:
-    def __init__(self, playe_ids : list[int]):
+    def __init__(self, num_of_players : int):
         self.turn : int = 1 
         self.max_turns : int = 100
         self.game_ended : bool = False
-        
-        self.players : dict[int, Player] = {pid: Player(pid) for pid in playe_ids}
-
+        self.players : list[Player] = [Player() for i in range(num_of_players)]
         self.board : list[dict[str, str]] = self.create_board()
-
-        self.rng = np.random.default_rng(seed=444)
-        
-        self.current_modifiers = []
         self.stocks : list[Stock] = self.init_stocks()
         self.cryptos : list[Crypto] = self.init_crypto()
         self.properties : list[Property] = self.init_properties()
 
     def init_properties(self):
         return [
-            Property(id=201, name='garaz', price=75_000.0, rent=500.0, energy_use=50.0),
-            Property(id=202, name='kawalerka', price=160_000.0, rent=1_500.0, energy_use=160.0),
-            Property(id=203, name='mieszkanie', price=260_000.0, rent=2_200.0, energy_use=290.0),
-            Property(id=204, name='dom', price=1_350_000.0, rent=6_500.0, energy_use=520.0),
+            Property(id=201, name='Garaże', price=75_000.0, rent=500.0, energy_use=120.0),
+            Property(id=202, name='Kawalerki', price=160_000.0, rent=1_500.0, energy_use=1_600.0),
+            Property(id=203, name='Mieszkania', price=260_000.0, rent=2_200.0, energy_use=2_900.0),
+            Property(id=204, name='Domy', price=1_350_000.0, rent=6_500.0, energy_use=5_200.0),
         ]
     
     def init_stocks(self):
@@ -93,20 +86,14 @@ class GameState:
             {"type": "stock_market", "name": "NYSE"},
             {"type": "tax", "name": "Optymalizuj podatek"},
             {"type": "crypto_exchange", "name": "Binance"},
-            {"type": "real_estate", "name": "Domki"},
+            {"type": "real_estate", "name": "Domy"},
         ]
     
     def _apply_player_move(self, player_id, steps):
         pass
 
     def _update_market(self):
-        for stock in self.stocks:
-            update_stock_price(stock)
-
-        for crypto in self.cryptos:
-            update_crypto_price(crypto)
-
-        next_regime(rng = self.rng)
+        pass
 
     def _apply_chance_card(self, player_id):
         pass
@@ -123,39 +110,44 @@ class GameState:
         for player_id, move in moves.items():
             self._apply_player_move(player_id, move.get("steps"))
 
-        # get random chance card for the next round
-        self.current_modifiers.append(self._get_event())
 
-        self._update_market()
+
+        # 1. ruch wszystkich
+        for player_id, move in moves.items():
+            steps = move.get("steps") or self.roll_dice()
+            self.positions[player_id] += steps
+
+            if self.positions[player_id] >= len(self.board):
+                self.positions[player_id] %= len(self.board)
+                self.money[player_id] += 200
+
+            pos = self.positions[player_id]
+            field = self.board[pos]
+
+            if field["type"] == "property":
+                owner = self.properties.get(pos)
+
+                if not owner:
+                    if self.money[player_id] >= field["price"]:
+                        self.money[player_id] -= field["price"]
+                        self.properties[pos] = player_id
+                        results.append(f"{player_id} bought {field['name']}")
+
+                elif owner != player_id:
+                    rent = field["rent"]
+                    self.money[player_id] -= rent
+                    self.money[owner] += rent
+                    results.append(f"{player_id} paid {rent} to {owner}")
+
+            elif field["type"] == "tax":
+                self.money[player_id] -= field["amount"]
+                results.append(f"{player_id} paid tax {field['amount']}")
+
+
 
         self.turn += 1
+
         
+
         return results
-
-    def _print_state(self):
-        print(f"Turn: {self.turn}")
-
-        for stock in self.stocks:
-            print(f"Stock {stock.ticker}: Price {stock.price:.2f}, Growth {stock.growth:.4f}, Risk {stock.risk:.4f}")
-        
-        for crypto in self.cryptos:
-            print(f"Crypto {crypto.ticker}: Price {crypto.price:.2f}, Growth {crypto.growth:.4f}, Risk {crypto.risk:.4f}")
-
-
-def _self_test_apply_moves():
-    """Run a small smoke test for apply_moves when file is executed directly."""
-    game_state = GameState(playe_ids=[0, 1, 2])
-    moves = {
-        0: {"steps": 2, "actions": []},
-        1: {"steps": 3, "actions": []},
-        2: {"steps": 1, "actions": []},
-    }
-
-    game_state.apply_moves(moves)
-
-    game_state._print_state()
-
-
-if __name__ == "__main__":
-    _self_test_apply_moves()
 
