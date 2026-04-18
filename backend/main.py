@@ -28,14 +28,15 @@ def create():
     host_id = str(uuid.uuid4())
 
     lobby = Lobby(lobby_id, host_id)
-    game_manager.create_lobby(lobby)
+    game_manager.add_lobby(lobby)
 
     token = create_token(host_id, lobby_id)
 
     return {
         "lobby_id": lobby_id,
-        # "token": token,
+        "token": token
     }
+
 
 @app.post("/join/{lobby_id}")
 def join(lobby_id: str):
@@ -49,6 +50,7 @@ def join(lobby_id: str):
         "token": token,
         "ws": f"/ws/{lobby_id}?token={token}"
     }
+
 
 @app.websocket("/ws/{lobby_id}")
 async def ws(ws: WebSocket, lobby_id: str):

@@ -25,6 +25,7 @@ class Lobby:
         self.started = False
         self.game_state = None
         self.lock = asyncio.Lock()
+        self.users: dict[str, User] = {} # player_id -> User
 
 
 class Stock:
