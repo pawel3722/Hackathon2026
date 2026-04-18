@@ -127,7 +127,7 @@ interface Action {
   amount: number; // ilość lub kwota
 }
 
-interface Move {
+export interface Move {
   steps: number; // liczba kroków (0-3)
   actions: Action[]; // lista akcji
 }
@@ -146,7 +146,7 @@ interface PlayerEndGame {
   all_money: number; // Całkowite pieniądze
 }
 
-interface GameOver {
+export interface GameOver {
   game_ended: boolean; // zawsze true
   players: PlayerEndGame[]; // lista graczy na koniec gry
   turn: number; // numer tury
