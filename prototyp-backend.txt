@@ -1,0 +1,284 @@
+# Monopoly Backend (SIMULTANEOUS TURNS VERSION)
+
+# =========================
+# run.py
+# =========================
+import uvicorn
+
+if __name__ == "__main__":
+    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
+
+# =========================
+# app/game_manager.py
+# =========================
+class GameManager:
+    def __init__(self):
+        self.lobbies = {}
+
+    def create_lobby(self, lobby):
+        self.lobbies[lobby.id] = lobby
+
+    def get_lobby(self, lobby_id):
+        return self.lobbies.get(lobby_id)
+
+    def remove_lobby(self, lobby_id):
+        if lobby_id in self.lobbies:
+            del self.lobbies[lobby_id]
+
+
+game_manager = GameManager()
+
+# =========================
+# app/models.py
+# =========================
+import asyncio
+
+class Player:
+    def __init__(self, id, name, websocket=None):
+        self.id = id
+        self.name = name
+        self.ws = websocket
+        self.move = None
+        self.ready = False
+
+class Lobby:
+    def __init__(self, id, host_id):
+        self.id = id
+        self.host_id = host_id
+        self.players = {}
+        self.started = False
+        self.game_state = None
+        self.lock = asyncio.Lock()
+
+# =========================
+# app/game_state.py
+# =========================
+import random
+
+class GameState:
+    def __init__(self, players):
+        self.turn = 0
+        self.players = players
+
+        self.positions = {p: 0 for p in players}
+        self.money = {p: 1500 for p in players}
+        self.properties = {}
+
+        self.board = self.create_board()
+
+    def create_board(self):
+        return [
+            {"type": "go"},
+            {"type": "property", "name": "A", "price": 60, "rent": 10},
+            {"type": "property", "name": "B", "price": 100, "rent": 20},
+            {"type": "tax", "amount": 100},
+            {"type": "property", "name": "C", "price": 120, "rent": 30},
+        ]
+
+    def roll_dice(self):
+        return random.randint(1, 6) + random.randint(1, 6)
+
+    def apply_moves(self, moves):
+        results = []
+
+        # 1. ruch wszystkich
+        for player_id, move in moves.items():
+            steps = move.get("steps") or self.roll_dice()
+            self.positions[player_id] += steps
+
+            if self.positions[player_id] >= len(self.board):
+                self.positions[player_id] %= len(self.board)
+                self.money[player_id] += 200
+
+        # 2. rozliczenie pól (po wszystkich ruchach)
+        for player_id in moves:
+            pos = self.positions[player_id]
+            field = self.board[pos]
+
+            if field["type"] == "property":
+                owner = self.properties.get(pos)
+
+                if not owner:
+                    if self.money[player_id] >= field["price"]:
+                        self.money[player_id] -= field["price"]
+                        self.properties[pos] = player_id
+                        results.append(f"{player_id} bought {field['name']}")
+
+                elif owner != player_id:
+                    rent = field["rent"]
+                    self.money[player_id] -= rent
+                    self.money[owner] += rent
+                    results.append(f"{player_id} paid {rent} to {owner}")
+
+            elif field["type"] == "tax":
+                self.money[player_id] -= field["amount"]
+                results.append(f"{player_id} paid tax {field['amount']}")
+
+        self.turn += 1
+
+        return results
+
+# =========================
+# app/auth.py
+# =========================
+from jose import jwt
+
+SECRET = "SECRET"
+ALGO = "HS256"
+
+def create_token(player_id, lobby_id):
+    return jwt.encode({"player_id": player_id, "lobby_id": lobby_id}, SECRET, algorithm=ALGO)
+
+
+def verify_token(token):
+    return jwt.decode(token, SECRET, algorithms=[ALGO])
+
+# =========================
+# app/utils.py
+# =========================
+async def broadcast(lobby, message):
+    for p in lobby.players.values():
+        if p.ws:
+            await p.ws.send_json(message)
+
+# =========================
+# app/websocket.py
+# =========================
+from fastapi import WebSocket
+import asyncio
+from app.game_manager import game_manager
+from app.models import Player
+from app.utils import broadcast
+from app.auth import verify_token
+from app.game_state import GameState
+
+ROUND_TIMEOUT = 10  # sekundy
+
+async def handle_connection(ws: WebSocket, lobby_id: str, token: str):
+    await ws.accept()
+
+    data = verify_token(token)
+    player_id = data["player_id"]
+
+    lobby = game_manager.get_lobby(lobby_id)
+    if not lobby:
+        await ws.close()
+        return
+
+    # pomocnicze pola runtime
+    if not hasattr(lobby, "round_task"):
+        lobby.round_task = None
+
+    player = Player(player_id, f"P-{player_id[:4]}", ws)
+    lobby.players[player_id] = player
+
+    await broadcast(lobby, {"type": "join", "player": player.name})
+
+    try:
+        while True:
+            msg = await ws.receive_json()
+            await handle_event(lobby, player, msg)
+    except:
+        del lobby.players[player_id]
+
+async def start_round_timer(lobby):
+    # uruchamiany przy pierwszym ruchu w rundzie
+    await asyncio.sleep(ROUND_TIMEOUT)
+
+    async with lobby.lock:
+        # jeśli ktoś nie gotowy → auto-move (skip)
+        for p in lobby.players.values():
+            if not p.ready:
+                p.move = {"type": "skip"}
+                p.ready = True
+
+        await resolve_round(lobby)
+
+async def resolve_round(lobby):
+    moves = {p.id: p.move for p in lobby.players.values()}
+    results = lobby.game_state.apply_moves(moves)
+
+    # reset rundy
+    for p in lobby.players.values():
+        p.ready = False
+        p.move = None
+
+    # anuluj timer jeśli jeszcze działa
+    if getattr(lobby, "round_task", None):
+        lobby.round_task.cancel()
+        lobby.round_task = None
+
+    await broadcast(lobby, {
+        "type": "turn_result",
+        "results": results,
+        "positions": lobby.game_state.positions,
+        "money": lobby.game_state.money,
+        "turn": lobby.game_state.turn
+    })
+
+async def handle_event(lobby, player, msg):
+    async with lobby.lock:
+        if msg["type"] == "start":
+            if player.id != lobby.host_id:
+                return
+
+            lobby.started = True
+            lobby.game_state = GameState(list(lobby.players.keys()))
+
+            await broadcast(lobby, {"type": "started"})
+
+        elif msg["type"] == "move":
+            player.move = msg.get("move", {})
+            player.ready = True
+
+            # jeśli to pierwszy ruch w rundzie → start timera
+            if not getattr(lobby, "round_task", None):
+                lobby.round_task = asyncio.create_task(start_round_timer(lobby))
+
+            # jeśli wszyscy gotowi → resolve natychmiast
+            if all(p.ready for p in lobby.players.values()):
+                await resolve_round(lobby)
+
+# =========================
+# app/main.py
+# =========================
+from fastapi import FastAPI, WebSocket
+import uuid
+
+from app.game_manager import game_manager
+from app.models import Lobby
+from app.auth import create_token
+from app.websocket import handle_connection
+
+app = FastAPI()
+
+@app.post("/create")
+def create():
+    lobby_id = str(uuid.uuid4())
+    host_id = str(uuid.uuid4())
+
+    lobby = Lobby(lobby_id, host_id)
+    game_manager.create_lobby(lobby)
+
+    token = create_token(host_id, lobby_id)
+
+    return {
+        "lobby_id": lobby_id,
+        "token": token,
+        "ws": f"ws://localhost:8000/ws/{lobby_id}?token={token}"
+    }
+
+@app.post("/join/{lobby_id}")
+def join(lobby_id: str):
+    player_id = str(uuid.uuid4())
+    token = create_token(player_id, lobby_id)
+
+    return {
+        "token": token,
+        "ws": f"ws://localhost:8000/ws/{lobby_id}?token={token}"
+    }
+
+@app.websocket("/ws/{lobby_id}")
+async def ws(ws: WebSocket, lobby_id: str):
+    token = ws.query_params.get("token")
+    await handle_connection(ws, lobby_id, token)
