@@ -1,6 +1,6 @@
 from __future__ import annotations
 import asyncio
-from typing import List, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 
 if TYPE_CHECKING:
@@ -13,6 +13,7 @@ class User:
         self.name : str = name
         self.current_move : Move = None
         self.ready : bool = False
+        self.ws = None
         
 class Player:
     def __init__(self, id: str):
@@ -118,3 +119,32 @@ class ChanceCardPlayer:
         self.id : int = id
         self.description : str = description
         self.player_id : str = player_id
+
+class Mapper:
+    @staticmethod
+    def map_stock(stock: Stock) -> StockDto:
+        return StockDto(
+            id=stock.id,
+            ticker=stock.ticker,
+            name=stock.name,
+            industry=stock.industry,
+            price=stock.price,
+            number_of_shares=stock.number_of_shares
+        )
+
+    @staticmethod
+    def map_crypto(crypto: Crypto) -> CryptoDto:
+        return CryptoDto(
+            id=crypto.id,
+            ticker=crypto.ticker,
+            name=crypto.name,
+            price=crypto.price
+        )
+
+    @staticmethod
+    def map_chance_card(chance_card: ChanceCard, player_id: str) -> ChanceCardPlayer:
+        return ChanceCardPlayer(
+            id=chance_card.id,
+            description=chance_card.description,
+            player_id=player_id
+        )

@@ -21,10 +21,10 @@ class GameState:
 
     def init_properties(self):
         return [
-            Property(id=201, name='garaz', price=75_000.0, rent=500.0, energy_use=120.0),
-            Property(id=202, name='kawalerka', price=160_000.0, rent=1_500.0, energy_use=1_600.0),
-            Property(id=203, name='mieszkanie', price=260_000.0, rent=2_200.0, energy_use=2_900.0),
-            Property(id=204, name='dom', price=1_350_000.0, rent=6_500.0, energy_use=5_200.0),
+            Property(id=201, name='garaz', price=75_000.0, rent=500.0, energy_use=50.0),
+            Property(id=202, name='kawalerka', price=160_000.0, rent=1_500.0, energy_use=160.0),
+            Property(id=203, name='mieszkanie', price=260_000.0, rent=2_200.0, energy_use=290.0),
+            Property(id=204, name='dom', price=1_350_000.0, rent=6_500.0, energy_use=520.0),
         ]
     
     def init_stocks(self):
