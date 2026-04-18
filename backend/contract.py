@@ -15,8 +15,10 @@ class Action:
         ):
         self.action_type : str = action_type # "buy", "sell", "bank", "stakeholder", "card"
         self.assets_type : str = assets_type # "stock", "crypto", "property", "credit", "deposit", "issurance"
-        self.assets_id : int = assets_id
-        self.amount : float = amount
+        self.assets_id : int = assets_id # dla banku, jeśli = 1 to kredyt na 12 tur, jeśli = 2 to kredyt na 24 tur, jeśli = 3 to kredyt na 36 tur,
+                                         # jeśli = 4 to depozyt na 12 tur, jeśli = 5 to depozyt na 24 tur, jeśli = 6 to depozyt na 36 tur
+                                         # jeśli = 7 to ubezpieczenie na 12 tur, jeśli = 8 to ubezpieczenie na 24 tur, jeśli = 9 to ubezpieczenie na 36 tur
+        self.amount : float = amount # dla akcji - musi tu być ilość akcji, dla krypto może być ułamek krypto do kupienia, dla buka jest kwota obstawiona, dla banku jest kwota
 
 class Move:
     def __init__(
