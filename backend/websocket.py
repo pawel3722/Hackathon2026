@@ -19,14 +19,10 @@ async def handle_connection(ws: WebSocket, lobby_id: str, token: str):
         await ws.close()
         return
 
-    # pomocnicze pola runtime
-    if not hasattr(lobby, "round_task"):
-        lobby.round_task = None
-
-    player = Player(player_id, f"P-{player_id[:4]}", ws)
+    player = Player()
     lobby.players[player_id] = player
 
-    await broadcast(lobby, {"type": "update_lobby", "players": [p.name for p in lobby.players.values()]})
+    await broadcast(lobby, {"type": "update_lobby", "users": [p.name for p in lobby.players.values()]})
 
     try:
         while True:
