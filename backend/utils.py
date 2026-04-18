@@ -1,4 +1,6 @@
-async def broadcast(lobby, message):
+from models import Lobby
+
+async def broadcast(lobby: Lobby, message: dict):
     for p in lobby.users.values():
         if hasattr(p, 'ws') and p.ws:
             try:

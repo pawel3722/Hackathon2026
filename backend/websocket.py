@@ -74,25 +74,23 @@ async def resolve_round(lobby):
         "turn": lobby.game_state.turn
     })
 
-async def handle_event(lobby: Lobby, player: User, msg: dict):
+async def handle_event(lobby: Lobby, user: User, msg: dict):
     async with lobby.lock:
-        if msg["type"] == "start":
-            if player.id != lobby.host_id:
-                return
+        if msg.get("type") == "start":
 
             lobby.started = True
             lobby.game_state = GameState(list(lobby.users.keys()))
 
             await broadcast(lobby, {"type": "started"})
 
-        elif msg["type"] == "move":
-            player.move = msg.get("move", {})
-            player.ready = True
+        elif msg.get("type") == "move":
+            user.move = msg.get("move", {})
+            user.ready = True
 
             # jeśli to pierwszy ruch w rundzie → start timera
             if not getattr(lobby, "round_task", None):
                 lobby.round_task = asyncio.create_task(start_round_timer(lobby))
 
             # jeśli wszyscy gotowi → resolve natychmiast
-            if all(p.ready for p in lobby.players.values()):
+            if all(p.ready for p in lobby.users.values()):
                 await resolve_round(lobby)
