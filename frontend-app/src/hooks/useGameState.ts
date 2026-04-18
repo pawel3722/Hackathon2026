@@ -1,9 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-<<<<<<< HEAD
-import type { GameState, Player, ApiResponse } from '../types';
-=======
 import type { GameState, Player } from '../types';
->>>>>>> main
 import { gameApi, GameWebSocket, apiUtils } from '../api';
 
 interface UseGameStateReturn {
@@ -12,7 +8,7 @@ interface UseGameStateReturn {
   isLoading: boolean;
   error: string | null;
   joinGame: (gameId: string, playerName: string) => Promise<void>;
-  createGame: (playerName: string, difficulty: string, maxPlayers: number) => Promise<void>;
+  createGame: () => Promise<void>;
   startGame: () => Promise<void>;
   makeMove: (action: string, data?: any) => Promise<void>;
   rollDice: () => Promise<void>;
@@ -38,23 +34,15 @@ export function useGameState(gameId?: string): UseGameStateReturn {
 
   // Initialize WebSocket connection when gameId is available
   useEffect(() => {
-<<<<<<< HEAD
-    if (gameId && gameState) {
-      const ws = new GameWebSocket(
-        gameId,
-=======
     const userId = localStorage.getItem('playerId');
 
-    if (gameId && gameState && userId) {
+    if (gameId && userId) {
       const ws = new GameWebSocket(
         gameId,
         userId,
->>>>>>> main
         (data: any) => {
-          // Handle real-time updates
           if (data.type === 'game_state_update') {
             setGameState(data.game_state);
-            // Update current player if it's in the update
             const player = data.game_state.players.find((p: Player) =>
               p.id === localStorage.getItem('playerId')
             );
@@ -79,16 +67,11 @@ export function useGameState(gameId?: string): UseGameStateReturn {
         ws.disconnect();
       };
     }
-  }, [gameId, gameState]);
+  }, [gameId]);
 
   const handleApiCall = useCallback(async <T,>(
-<<<<<<< HEAD
-    apiCall: () => Promise<ApiResponse<T>>,
-    successCallback?: (result: ApiResponse<T>) => void
-=======
     apiCall: () => Promise<T>,
     successCallback?: (result: T) => void
->>>>>>> main
   ) => {
     setIsLoading(true);
     setError(null);
@@ -127,20 +110,6 @@ export function useGameState(gameId?: string): UseGameStateReturn {
     );
   }, [handleApiCall]);
 
-<<<<<<< HEAD
-  const createGame = useCallback(async (playerName: string, difficulty: string, maxPlayers: number) => {
-    await handleApiCall(
-      () => gameApi.createGame(playerName, difficulty, maxPlayers),
-      (response) => {
-        if (response.success && response.data) {
-          setGameState(response.data);
-          // Creator is the first player
-          const player = response.data.players[0];
-          if (player) {
-            setCurrentPlayer(player);
-            localStorage.setItem('playerId', player.id);
-          }
-=======
   const createGame = useCallback(async () => {
     await handleApiCall(
       () => gameApi.createGame(),
@@ -149,7 +118,6 @@ export function useGameState(gameId?: string): UseGameStateReturn {
           // Lobby created, waiting for players to join.
           // The actual game state will be available after the host starts the game.
           localStorage.setItem('lobbyId', response.lobby_id);
->>>>>>> main
         }
       }
     );

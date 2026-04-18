@@ -8,7 +8,7 @@ export default function Lobby() {
   const navigate = useNavigate();
   const [name, setName] = useState<string>("");
   const [difficulty, setDifficulty] = useState<string>("medium");
-  const [joinLink, setJoinLink] = useState<string>("");
+  const [joinGameId, setJoinLink] = useState<string>("");
   const [isWaiting, setIsWaiting] = useState<boolean>(false);
   const [gameId, setGameId] = useState<string>("");
   const [lobbyId, setLobbyId] = useState<string>("");
@@ -43,11 +43,11 @@ export default function Lobby() {
 
     try {
       const response = await gameApi.joinGame(localGameId, name);
-      const joinPlayerId = response.player_id;
+      const joinUserId = response.user_id;
 
-      if (joinPlayerId) {
-        setPlayerId(joinPlayerId);
-        localStorage.setItem('playerId', joinPlayerId);
+      if (joinUserId) {
+        setPlayerId(joinUserId);
+        localStorage.setItem('playerId', joinUserId);
       }
 
       if (response.success && response.data) {
@@ -60,35 +60,44 @@ export default function Lobby() {
   };
 
   const joinSession = async () => {
+    console.log('joinSession called');
     if (!name.trim()) {
       alert("Podaj imię!");
       return;
     }
 
-    if (!joinLink.trim()) {
-      alert("Wklej link do gry!");
+    if (!joinGameId.trim()) {
+      alert("Wklej id gry!");
       return;
     }
 
+    console.log('Parsing game ID from:', joinGameId);
+    const linkParts = joinGameId.split("/");
+    const gameIdFromLink = linkParts[linkParts.length - 1];
+    console.log('Extracted game ID:', gameIdFromLink);
+
+    console.log('Calling gameApi.joinGame with:', gameIdFromLink, name);
     try {
-      const linkParts = joinLink.split("/");
-      const gameIdFromLink = linkParts[linkParts.length - 1];
       setLobbyId(gameIdFromLink);
 
       const response = await gameApi.joinGame(gameIdFromLink, name);
-      const joinPlayerId = response.player_id;
+      console.log('joinGame response:', response.success, response.data, response.error);
+      const joinUserId = response.user_id;
 
-      if (joinPlayerId) {
-        setPlayerId(joinPlayerId);
-        localStorage.setItem('playerId', joinPlayerId);
+      if (joinUserId) {
+        setPlayerId(joinUserId);
+        localStorage.setItem('playerId', joinUserId);
+        console.log('User ID set:', joinUserId);
+      } else {
+        console.warn('No user_id in response');
       }
 
-      if (response.success && response.data) {
-        setGameId(response.data.game_id || gameIdFromLink);
-        setIsCreator(false);
+      setIsCreator(false);
         setIsWaiting(true);
-      }
+        console.log('Setting isWaiting to true');
+
     } catch (error) {
+      console.error('Error in joinSession:', error);
       const errorMessage = apiUtils.handleApiError(error);
       alert(`Błąd podczas dołączania do gry: ${errorMessage}`);
     }
@@ -186,7 +195,7 @@ export default function Lobby() {
                 <input
                     type="text"
                     placeholder="Wklej link do dołączenia"
-                    value={joinLink}
+                    value={joinGameId}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                     setJoinLink(e.target.value)
                     }
