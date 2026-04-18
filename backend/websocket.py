@@ -3,7 +3,6 @@ import asyncio
 from game_manager import game_manager
 from models import User, Lobby
 from utils import broadcast
-# from auth import verify_token
 from game_state import GameState
 
 ROUND_TIMEOUT = 10  # sekundy
@@ -25,10 +24,7 @@ async def handle_connection(ws: WebSocket, lobby_id: str, user_id: str):
     
     user.ws = ws
 
-    print("UPDATING USERS IN LOBBY")
     d = {"type": "update_lobby", "users": [u.name for u in lobby.users.values()]}
-    print(d)
-
     await broadcast(lobby, d)
 
     while True:
@@ -74,10 +70,12 @@ async def resolve_round(lobby):
         "turn": lobby.game_state.turn
     })
 
-async def handle_event(lobby, user, msg):
+async def handle_event(lobby: Lobby, user: User, msg: dict):
     async with lobby.lock:
-        if msg["type"] == "start":
-            if user.id != lobby.host_id:
+        msg_type = msg.get("type")
+
+        if msg_type == "start":
+            if lobby.host_id != user.id:
                 return
 
             lobby.started = True
@@ -85,7 +83,7 @@ async def handle_event(lobby, user, msg):
 
             await broadcast(lobby, {"type": "started"})
 
-        elif msg["type"] == "move":
+        elif msg_type == "move":
             user.current_move = msg.get("move", {})
 
             # jeśli to pierwszy ruch w rundzie → start timera
@@ -93,5 +91,5 @@ async def handle_event(lobby, user, msg):
                 lobby.round_task = asyncio.create_task(start_round_timer(lobby))
 
             # jeśli wszyscy gotowi → resolve natychmiast
-            if all(p.ready for p in lobby.players.values()):
+            if all(p.ready for p in lobby.users.values()):
                 await resolve_round(lobby)
