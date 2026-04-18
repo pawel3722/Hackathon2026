@@ -1,3 +1,6 @@
+from backend.models import Crypto, Player, Property, Stock
+
+
 class Action:
     def __init__(self, action_type : str, assets_type : str, assets_id : int, amount : float):
         self.action_type = action_type # "buy", "sell", "bank", "stakeholder", "card"
@@ -13,3 +16,10 @@ class Move:
         self.steps = steps
         self.actions = actions
 
+class TurnResult:
+    def __init__(self, turn : int, game_ended : bool, players : list[Player], stocks : list[Stock], cryptos : list[Crypto]):
+        self.turn = turn
+        self.game_ended = game_ended
+        self.players = players
+        self.stocks = stocks
+        self.cryptos = cryptos
