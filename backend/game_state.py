@@ -1,6 +1,7 @@
 import json
 import numpy as np
 from contract import TurnResult
+from collections import deque
 from shutil import move
 from contract import Move
 from models import Player, Stock, Crypto, Property, ChanceCard
@@ -25,6 +26,8 @@ class GameState:
         self.fuel_price_multiplier: float = 1.0
         self.fuel_price_turns_left: int = 0
         self.pending_property_drop_pct: float = 0.0
+        self.max_excluded_chance_cards: int = 10
+        self.excluded_chance_card_queue: deque[int] = deque()
 
     def _create_board(self):
         return [
@@ -66,37 +69,43 @@ class GameState:
 
         update_regime(rng = self.rng)
 
-    def _apply_pct_change(self, value: float, pct: float) -> float:
-        return round(value * (1.0 + pct), 2)
-
-    def _change_stock_prices(self, pct: float, tickers: set[str] | None = None, industries: set[str] | None = None):
+    def _change_stock_prices(self, change_pct: float, tickers: set[str] | None = None, industries: set[str] | None = None):
         for stock in self.stocks:
             if tickers and stock.ticker in tickers:
-                stock.price = self._apply_pct_change(stock.price, pct)
+                stock.price = stock.price * (1.0 + change_pct)
                 continue
 
             if industries and stock.industry in industries:
-                stock.price = self._apply_pct_change(stock.price, pct)
+                stock.price = stock.price * (1.0 + change_pct)
                 continue
 
             if tickers is None and industries is None:
-                stock.price = self._apply_pct_change(stock.price, pct)
+                stock.price = stock.price * (1.0 + change_pct)
 
-    def _change_crypto_prices(self, pct: float, tickers: set[str] | None = None):
+    def _change_crypto_prices(self, change_pct: float, tickers: set[str] | None = None):
         for crypto in self.cryptos:
             if tickers is None or crypto.ticker in tickers:
-                crypto.price = self._apply_pct_change(crypto.price, pct)
+                crypto.price = crypto.price * (1.0 + change_pct)
 
-    def _change_property_prices(self, pct: float):
+    def _change_property_prices(self, change_pct: float):
         for prop in self.properties:
-            prop.price = self._apply_pct_change(prop.price, pct)
+            prop.price = prop.price * (1.0 + change_pct)
 
-    def _apply_chance_card(self, player_id: str, drawn_card_ids: set[int]):
-        card = self._get_chance_card(drawn_card_ids)
+    def _exclude_chance_card(self, card_id: int):
+        if card_id in self.excluded_chance_card_queue:
+            return
+
+        if len(self.excluded_chance_card_queue) >= self.max_excluded_chance_cards:
+            self.excluded_chance_card_queue.popleft()
+
+        self.excluded_chance_card_queue.append(card_id)
+
+    def _apply_chance_card(self, player_id: str):
+        card = self._get_chance_card()
         if card is None:
             return None
 
-        drawn_card_ids.add(card.id)
+        self._exclude_chance_card(card.id)
 
         if card.id == 1:
             self._change_stock_prices(-0.20, tickers={"CDR"})
@@ -140,12 +149,14 @@ class GameState:
 
         return card
 
-    def _get_chance_card(self, excluded_card_ids: set[int] | None = None):
+    def _get_chance_card(self):
         if not self.chance_cards:
             return None
 
-        excluded_card_ids = excluded_card_ids or set()
-        available_cards = [card for card in self.chance_cards if card.id not in excluded_card_ids]
+        available_cards = [
+            card for card in self.chance_cards
+            if card.id not in self.excluded_chance_card_queue
+        ]
         if not available_cards:
             return None
 
