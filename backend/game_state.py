@@ -1,7 +1,7 @@
 import json
 import numpy as np
 from contract import TurnResult
-from collections import deque
+# from collections import deque
 from shutil import move
 from contract import Move
 from models import Player, Stock, Crypto, Property, ChanceCard
@@ -17,7 +17,7 @@ class GameState:
         self.rng = np.random.default_rng()  # wspólne źródło losowości dla całej gry
 
         self.players : dict[str, Player] = {player_id: Player(player_id) for player_id in players_ids}
-        self.board : list[dict[str, str]] = game_init.boards()
+        self.board : list[dict[str, str]] = game_init.board()
         self.stocks : list[Stock] = game_init.stocks()
         self.cryptos : list[Crypto] = game_init.crypto()
         self.properties : list[Property] = game_init.properties()
@@ -28,7 +28,6 @@ class GameState:
         self.fuel_price_turns_left: int = 0
         self.pending_property_drop_pct: float = 0.0
         self.max_excluded_chance_cards: int = 10
-        self.excluded_chance_card_queue: deque[int] = deque()
 
     def _apply_player_move(self, player_id : str, move: Move):
         self.players[player_id].position += move.steps
@@ -45,7 +44,7 @@ class GameState:
 
         update_regime(rng = self.rng)
 
-    def _change_stock_prices(self, change_pct: float, tickers: set[str] | None = None, industries: set[str] | None = None):
+    def change_stock_prices(self, change_pct: float, tickers: set[str] | None = None, industries: set[str] | None = None):
         for stock in self.stocks:
             if tickers and stock.ticker in tickers:
                 stock.price = stock.price * (1.0 + change_pct)
@@ -58,86 +57,36 @@ class GameState:
             if tickers is None and industries is None:
                 stock.price = stock.price * (1.0 + change_pct)
 
-    def _change_crypto_prices(self, change_pct: float, tickers: set[str] | None = None):
+    def change_crypto_prices(self, change_pct: float, tickers: set[str] | None = None):
         for crypto in self.cryptos:
             if tickers is None or crypto.ticker in tickers:
                 crypto.price = crypto.price * (1.0 + change_pct)
 
-    def _change_property_prices(self, change_pct: float):
+    def change_property_prices(self, change_pct: float):
         for prop in self.properties:
             prop.price = prop.price * (1.0 + change_pct)
 
-    def _exclude_chance_card(self, card_id: int):
-        if card_id in self.excluded_chance_card_queue:
-            return
+    def change_interest_rates(self, change_pct: float):
+        for player in self.players.values():
+            for credit in player.credits:
+                credit.instalment_rate = credit.instalment_rate * (1.0 + change_pct)
+            for deposit in player.deposits:
+                deposit.lending_rate = deposit.lending_rate * (1.0 + change_pct)
 
-        if len(self.excluded_chance_card_queue) >= self.max_excluded_chance_cards:
-            self.excluded_chance_card_queue.popleft()
+    def change_fuel_price_multiplier(self, multiplier: float, turns: int):
+        self.fuel_price_multiplier = multiplier
+        self.fuel_price_turns_left = max(self.fuel_price_turns_left, turns)
 
-        self.excluded_chance_card_queue.append(card_id)
-
-    def _apply_chance_card(self, player_id: str):
-        card = self._get_chance_card()
-        if card is None:
-            return None
-
-        self._exclude_chance_card(card.id)
-
-        if card.id == 1:
-            self._change_stock_prices(-0.20, tickers={"CDR"})
-        elif card.id == 2:
-            for player in self.players.values():
-                for credit in player.credits:
-                    credit.instalment_rate = self._apply_pct_change(credit.instalment_rate, -0.50)
-                for deposit in player.deposits:
-                    deposit.lending_rate = self._apply_pct_change(deposit.lending_rate, -0.50)
-        elif card.id == 3:
-            self._change_stock_prices(-0.15, industries={"energy", "utilities"})
-        elif card.id == 4:
-            self._change_crypto_prices(-0.25)
-        elif card.id == 5:
-            self._change_crypto_prices(0.18, tickers={"BTC", "ETH"})
-        elif card.id == 6:
-            self._change_stock_prices(-0.10, industries={"banking"})
-        elif card.id == 7:
-            self._change_stock_prices(0.25, tickers={"CDR"})
-        elif card.id == 8:
-            self.fuel_price_multiplier = 2.0
-            self.fuel_price_turns_left = max(self.fuel_price_turns_left, 5)
-            self._change_stock_prices(0.20, industries={"energy"})
-        elif card.id == 9:
-            self._change_crypto_prices(-0.17, tickers={"ETH", "SOL"})
-        elif card.id == 10:
-            self._change_stock_prices(-0.15)
-        elif card.id == 11:
-            self._change_stock_prices(0.09)
-        elif card.id == 12:
-            self._change_stock_prices(0.12, industries={"energy"})
-        elif card.id == 13:
-            self._change_stock_prices(-0.08, industries={"insurance"})
-        elif card.id == 14:
-            self._change_crypto_prices(0.20, tickers={"SOL"})
-            self._change_crypto_prices(0.10, tickers={"ETH"})
-        elif card.id == 15:
-            self._change_stock_prices(0.14, industries={"energy", "utilities"})
-        elif card.id == 16:
-            self.pending_property_drop_pct = max(self.pending_property_drop_pct, 0.15)
-
-        return card
+    def _apply_chance_card(self):
+        pass
 
     def _get_chance_card(self):
         if not self.chance_cards:
             return None
 
-        available_cards = [
-            card for card in self.chance_cards
-            if card.id not in self.excluded_chance_card_queue
-        ]
-        if not available_cards:
-            return None
-
-        card_idx = int(self.rng.integers(0, len(available_cards)))
-        return available_cards[card_idx]
+        card_idx = int(self.rng.integers(0, len(self.chance_cards)))
+        return self.chance_cards[card_idx]
+       
 
     def _apply_turn_status_effects(self):
         if self.pending_property_drop_pct > 0:
@@ -149,21 +98,16 @@ class GameState:
             if self.fuel_price_turns_left == 0:
                 self.fuel_price_multiplier = 1.0
 
-    def _get_event(self):
-        pass
-
     def apply_moves(self, moves):
-        results = []
         for player_id, move in moves.items():
             self._apply_player_move(player_id, move)
 
-        self._update_market()
+        current_card  = self._get_chance_card()
+
+        current_card.effect(self, None)
         self._apply_turn_status_effects()
-        self._get_event()
+        self._update_market()
 
-        self.turn += 1        
-
-        return results
         self.turn += 1
 
         if self.turn > self.max_turns:
@@ -176,7 +120,7 @@ class GameState:
             stocks=self.stocks,
             cryptos=self.cryptos,
             properties=self.properties,
-            cards=[],
+            cards=[self._get_chance_card(), self._get_chance_card(), self._get_chance_card()],
             board=self.board
         )
 

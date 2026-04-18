@@ -110,9 +110,10 @@ class Deposit:
         self.lending_rate : float = lending_rate
 
 class ChanceCard:
-    def __init__(self, id : int, description : str):
+    def __init__(self, id : int, description : str, effect : callable[[GameState, str], None]):
         self.id : int = id
         self.description : str = description
+        self.effect : callable[[GameState, str], None] = effect
 
 class ChanceCardPlayer:
     def __init__(self, id : int, description : str, player_id : str):
