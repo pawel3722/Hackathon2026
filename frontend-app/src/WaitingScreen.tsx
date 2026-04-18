@@ -23,7 +23,6 @@ export default function WaitingScreen({
 }: WaitingScreenProps) {
     const [connectedPlayers, setConnectedPlayers] = useState<number>(1);
     const [playersList, setPlayersList] = useState<string[]>([playerName]);
-    const [isChecking, setIsChecking] = useState<boolean>(false);
     const [copied, setCopied] = useState<boolean>(false);
     const lobbyCode = gameId;
 
@@ -38,14 +37,21 @@ export default function WaitingScreen({
     };
 
     useEffect(() => {
-        if (!lobbyCode || !playerId) {
+        const effectivePlayerId = playerId || localStorage.getItem('playerId');
+
+        if (!lobbyCode || !effectivePlayerId) {
             return;
         }
 
         const ws = new GameWebSocket(
             lobbyCode,
-            playerId,
+            effectivePlayerId,
             (data: any) => {
+                if (data.type === 'lobby_update' && data.users) {
+                    setConnectedPlayers(data.users.length);
+                    setPlayersList(data.users.map((user: any) => user.name));
+                }
+
                 if (data.type === 'game_state_update' && data.game_state) {
                     setConnectedPlayers(data.game_state.players.length);
                     setPlayersList(data.game_state.players.map((player: any) => player.name));
@@ -70,39 +76,6 @@ export default function WaitingScreen({
             ws.disconnect();
         };
     }, [lobbyCode, playerId]);
-
-    useEffect(() => {
-        // Mock server polling for development
-        const interval = setInterval(() => {
-            setIsChecking(true);
-
-            // Simulate server response delay
-            setTimeout(() => {
-                setIsChecking(false);
-
-                // Mock: randomly add players for demo purposes
-                if (Math.random() > 0.7) {
-                    const newCount = connectedPlayers + 1;
-                    setConnectedPlayers(newCount);
-
-                    // Add mock player names
-                    const mockNames = [
-                        "Gracz2",
-                        "Gracz3",
-                        "Gracz4",
-                        "Gracz5",
-                        "Gracz6",
-                    ];
-                    setPlayersList((prev) => [
-                        ...prev,
-                        mockNames[prev.length - 1] || `Gracz${prev.length + 1}`,
-                    ]);
-                }
-            }, 500);
-        }, 3000);
-
-        return () => clearInterval(interval);
-    }, [connectedPlayers]);
 
     return (
         <div className="waiting-container">
@@ -173,7 +146,6 @@ export default function WaitingScreen({
                             ? "Możesz rozpocząć grę z obecnymi graczami. Kliknij 'Rozpocznij'."
                             : "Czekaj, aż gospodarz rozpocznie grę."}
                     </p>
-                    {isChecking && <p className="checking-status">Sprawdzanie...</p>}
                 </div>
                 <div className="action-buttons">
                     {isCreator && (
