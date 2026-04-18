@@ -34,7 +34,7 @@ MAX_REBOUND = 0.18
 MAX_PRICE = 1e6
 MIN_PRICE = 0.01
 
-def next_regime(rng):
+def update_regime(rng):
     global STOCK_REGIME, CRYPTO_REGIME
     STOCK_REGIME = rng.choice(REGIME_STATES, p=stock_regime_transition[STOCK_REGIME])
     CRYPTO_REGIME = rng.choice(REGIME_STATES, p=crypto_regime_transition[CRYPTO_REGIME])
