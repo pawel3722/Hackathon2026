@@ -1,8 +1,8 @@
 import asyncio
 from typing import List
 
-from backend.contract import Move
-from backend.game_state import GameState
+from contract import Move
+from game_state import GameState
 
 class User:
     def __init__(self, id : str, name : str):

@@ -1,4 +1,4 @@
-from backend.models import Crypto, Player, Stock
+from models import Crypto, Player, Stock
 
 class Action:
     def __init__(self, action_type : str, assets_type : str, assets_id : int, amount : float):
