@@ -1,3 +1,5 @@
+import { useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useEffect } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
@@ -5,6 +7,35 @@ import PlayerStatus from "./PlayerStatus";
 import type { Player } from "./types";
 import "./Game.css";
 import Spline, { type SplineEvent } from '@splinetool/react-spline';
+import type { Application } from "@splinetool/runtime";
+
+type Field = {
+  f: string;
+  d: number;
+};
+
+const FIELD: Field[] = [
+  { f: "start_field", d: 0 },
+  { f: "stock_1_field", d: 1 },
+  { f: "bank_1_field", d: 2 },
+  { f: "crypto_1_field", d: 3 },
+  { f: "estate_1_field", d: 4 },
+  { f: "chance_1_field", d: 5 },
+  { f: "stock_2_field", d: 6 },
+  { f: "score_field", d: 7 },
+  { f: "crypto_2_field", d: 8 },
+  { f: "estate_2_field", d: 9 },
+  { f: "park_field", d: 10 },
+  { f: "stock_3_field", d: 11 },
+  { f: "bank_2_field", d: 12 },
+  { f: "crypto_3_field", d: 13 },
+  { f: "estate_3_field", d: 14 },
+  { f: "chance_2_field", d: 15 },
+  { f: "stock_4_field", d: 16 },
+  { f: "tax_field", d: 17 },
+  { f: "crypto_4_field", d: 18 },
+  { f: "estate_4_field", d: 19 }
+];
 import { getActiveGameWebSocket, getOrCreateGameWebSocket } from "./websocketBridge";
 
 type GameLocationState = {
@@ -19,6 +50,9 @@ export default function Game() {
   const routeState = location.state as GameLocationState | null;
   const playerId = routeState?.playerId ?? localStorage.getItem("playerId") ?? "";
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
+  const [selectedField, setSelectedField] = useState<Field>({ f: "start_field", d: 0 })
+  const spline = useRef<Application | null>(null)
+  const [showModal, setShowModal] = useState(false)
   const [lastWsMessage, setLastWsMessage] = useState<any>(null);
 
   useEffect(() => {
@@ -115,11 +149,37 @@ export default function Game() {
   };
 
   const onSplineMouseDown = (e: SplineEvent) => {
-    console.log(e.target.name)
-  }
+    console.log(e.target.name);
+
+    const obj = spline.current?.findObjectByName(e.target.name);
+    if (obj) obj.color = "#42f587";
+
+    const pawn = spline.current?.findObjectByName("p2-start")
+    console.log(pawn?.name)
+    if (pawn) {
+      const f = FIELD.find(f => f.f === e.target.name)!.d
+      const dist = f - selectedField.d
+
+      console.log("wybrany ", f)
+      console.log("aktyalny ", selectedField.d)
+
+      pawn.position.x -= dist * 370
+    } 
+
+    setSelectedField(prev => FIELD.find(f => f.f === e.target.name) ?? prev)
+    setShowModal(prev => !prev);
+  };
 
   return (
     <div className="game-container">
+
+      <div className="game-modal" style={{ transform: showModal ? "translateY(0)" : "translateY(100%)" }}>
+        <button onClick={() => { setShowModal(prev => !prev) }}>Close</button>
+        <div>
+          {selectedField.f}
+        </div>
+      </div>
+
       <div className="game-header">
         <h1 className="game-title">Moneypoly</h1>
         <button className="leave-button" onClick={handleLeaveGame}>
@@ -192,6 +252,7 @@ export default function Game() {
               <Spline
                 scene="https://prod.spline.design/RBNliUZGiPREVqU2/scene.splinecode"
                 onSplineMouseDown={onSplineMouseDown}
+                onLoad={(s) => spline.current = s}
               />
 
             </div>
