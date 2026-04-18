@@ -1,4 +1,4 @@
-from models import ChanceCardPlayer, Crypto, Player, Stock
+from models import ChanceCardPlayer, Crypto, Player, Property, Stock
 
 class Action:
     def __init__(self, action_type : str, assets_type : str, assets_id : int, amount : float):
@@ -16,10 +16,11 @@ class Move:
         self.actions : list[Action] = actions
 
 class TurnResult:
-    def __init__(self, turn : int, game_ended : bool, players : list[Player], stocks : list[Stock], cryptos : list[Crypto], cards : list[ChanceCardPlayer]):
+    def __init__(self, turn : int, game_ended : bool, players : list[Player], stocks : list[Stock], cryptos : list[Crypto], properties : list[Property], cards : list[ChanceCardPlayer]):
         self.turn : int = turn
         self.game_ended : bool = game_ended
         self.players : list[Player] = players
         self.stocks : list[Stock] = stocks
         self.cryptos : list[Crypto] = cryptos
+        self.properties : list[Property] = properties
         self.cards : list[ChanceCardPlayer] = cards
