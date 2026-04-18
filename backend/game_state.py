@@ -10,27 +10,27 @@ class GameState:
 
         self.stocks = [
             Stock(
-                id=1, ticker='PKO', name='PKO Bank', type='banking',
+                id=1, ticker='PKO', name='PKO Bank', industry='banking',
                 price=67.40, number_of_shares=125,
                 growth=0.0050, risk=0.020, market_sensitivity=1.00, book_value_floor=55
             ),
             Stock(
-                id=2, ticker='TPE', name='Tauron', type='utilities',
+                id=2, ticker='TPE', name='Tauron', industry='utilities',
                 price=7.20, number_of_shares=175,
                 growth=0.0020, risk=0.030, market_sensitivity=0.85, book_value_floor=5
             ),
             Stock(
-                id=3, ticker='PKN', name='PKN Orlen', type='energy',
+                id=3, ticker='PKN', name='PKN Orlen', industry='energy',
                 price=72.80, number_of_shares=145,
                 growth=0.0015, risk=0.035, market_sensitivity=1.20, book_value_floor=40
             ),
             Stock(
-                id=4, ticker='CDR', name='CD Projekt Red', type='gaming',
+                id=4, ticker='CDR', name='CD Projekt Red', industry='gaming',
                 price=152.00, number_of_shares=10,
                 growth=0.0040, risk=0.055, market_sensitivity=1.25, book_value_floor=10
             ),
             Stock(
-                id=5, ticker='PZU', name='PZU', type='insurance',
+                id=5, ticker='PZU', name='PZU', industry='insurance',
                 price=55.10, number_of_shares=9,
                 growth=0.0010, risk=0.015, market_sensitivity=0.30, book_value_floor=20
             ),
@@ -50,6 +50,7 @@ class GameState:
                 price=185.0, growth=0.008, risk=0.14, market_sensitivity=1.10
             ),
         ]
+
 
     def create_board(self):
         return [
