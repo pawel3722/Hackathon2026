@@ -15,7 +15,7 @@ class GameState:
 
     def __init__(self, players_ids : list[str]):
         self.turn : int = 1 
-        self.max_turns : int = 1
+        self.max_turns : int = 5
         self.game_ended : bool = False
         self.is_destroyed : bool = False
 
@@ -234,7 +234,9 @@ class GameState:
 
         if self.turn > self.max_turns:
             self.game_ended = True
-            return GameOver(players=[PlayerEndGame(player) for player in self.players.values()].sort(key=lambda p: p.all_money, reverse=True), turn = self.turn)
+            endgame_players = [PlayerEndGame(player) for player in self.players.values()]
+            endgame_players.sort(key=lambda p: p.all_money, reverse=True)
+            return GameOver(players=endgame_players, turn=self.turn)
 
         return TurnResult(
             turn=self.turn,
@@ -268,6 +270,10 @@ if __name__ == "__main__":
         print(f"Turn {result.turn} ended. Player states:")
         for player in result.players:
             print(f"  {player.id}: pos={player.position}, money={player.money:.2f}")
+
+        if result.game_ended:
+            print("Game ended.")
+            break
 
         print(f"Stock prices: ")
         for stock in result.stocks:
