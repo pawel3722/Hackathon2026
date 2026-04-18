@@ -1,8 +1,9 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
+from models import Property
 
 if TYPE_CHECKING:
-    from models import ChanceCardPlayer, Crypto, Player, Stock
+    from models import ChanceCardPlayer, Crypto, Player, Stock, Property
 
 class Action:
     def __init__(self, action_type : str, assets_type : str, assets_id : int, amount : float):
@@ -20,7 +21,7 @@ class Move:
         self.actions : list[Action] = actions
 
 class TurnResult:
-    def __init__(self, turn : int, game_ended : bool, players : list[Player], stocks : list[Stock], cryptos : list[Crypto], properties : list[Property], cards : list[ChanceCardPlayer]):
+    def __init__(self, turn : int, game_ended : bool, players : list[Player], stocks : list[Stock], cryptos : list[Crypto], properties : list[Property], cards : list[ChanceCardPlayer], board : list[dict[str, str]]):
         self.turn : int = turn
         self.game_ended : bool = game_ended
         self.players : list[Player] = players
@@ -28,3 +29,4 @@ class TurnResult:
         self.cryptos : list[Crypto] = cryptos
         self.properties : list[Property] = properties
         self.cards : list[ChanceCardPlayer] = cards
+        self.board : list[dict[str, str]] = board
