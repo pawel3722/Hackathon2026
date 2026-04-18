@@ -11,9 +11,9 @@ class GameState:
         
         self.board : list[dict[str, str]] = self.create_board()
 
-        self.stocks = self.init_stocks()
-        self.cryptos = self.init_crypto()
-        self.properties = self.init_properties()
+        self.stocks : list[Stock] = self.init_stocks()
+        self.cryptos : list[Crypto] = self.init_crypto()
+        self.properties : list[Property] = self.init_properties()
 
     def init_properties(self):
         return [
