@@ -1,5 +1,5 @@
+import numpy as np
 from shutil import move
-
 from contract import Move
 from models import Player, Stock, Crypto, Property, ChanceCard
 from update_market_prices import update_crypto_price, update_stock_price, update_regime
@@ -9,7 +9,9 @@ class GameState:
         self.turn : int = 1 
         self.max_turns : int = 100
         self.game_ended : bool = False
-        self.rng = np.random.default_rng()
+
+        self.rng = np.random.default_rng()  # wspólne źródło losowości dla całej gry
+
         self.players : dict[str, Player] = {player_id: Player(player_id) for player_id in players_ids}
         self.board : list[dict[str, str]] = self._create_board()
         self.stocks : list[Stock] = self._init_stocks()
@@ -166,38 +168,7 @@ class GameState:
         for player_id, move in moves.items():
             self._apply_player_move(player_id, move)
 
-
-
-        # 1. ruch wszystkich
-        for player_id, move in moves.items():
-            steps = move.get("steps") or self.roll_dice()
-            
-
-            
-
-            pos = self.positions[player_id]
-            field = self.board[pos]
-
-            if field["type"] == "property":
-                owner = self.properties.get(pos)
-
-                if not owner:
-                    if self.money[player_id] >= field["price"]:
-                        self.money[player_id] -= field["price"]
-                        self.properties[pos] = player_id
-                        results.append(f"{player_id} bought {field['name']}")
-
-                elif owner != player_id:
-                    rent = field["rent"]
-                    self.money[player_id] -= rent
-                    self.money[owner] += rent
-                    results.append(f"{player_id} paid {rent} to {owner}")
-
-            elif field["type"] == "tax":
-                self.money[player_id] -= field["amount"]
-                results.append(f"{player_id} paid tax {field['amount']}")
-
-
+        self._update_market()
 
         self.turn += 1
 
