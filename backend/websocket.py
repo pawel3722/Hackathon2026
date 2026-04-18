@@ -53,7 +53,7 @@ async def start_round_timer(lobby):
         await resolve_round(lobby)
 
 async def resolve_round(lobby):
-    moves = {p.id: p.move for p in lobby.players.values()}
+    moves = {p.id: p.current_move for p in lobby.users.values()}
     results = lobby.game_state.apply_moves(moves)
 
     # reset rundy
@@ -74,10 +74,10 @@ async def resolve_round(lobby):
         "turn": lobby.game_state.turn
     })
 
-async def handle_event(lobby, player, msg):
+async def handle_event(lobby, user, msg):
     async with lobby.lock:
         if msg["type"] == "start":
-            if player.id != lobby.host_id:
+            if user.id != lobby.host_id:
                 return
 
             lobby.started = True
@@ -86,8 +86,7 @@ async def handle_event(lobby, player, msg):
             await broadcast(lobby, {"type": "started"})
 
         elif msg["type"] == "move":
-            player.move = msg.get("move", {})
-            player.ready = True
+            user.current_move = msg.get("move", {})
 
             # jeśli to pierwszy ruch w rundzie → start timera
             if not getattr(lobby, "round_task", None):
