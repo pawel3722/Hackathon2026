@@ -13,6 +13,7 @@ class User:
         self.name : str = name
         self.current_move : Move = None
         self.ready : bool = False
+        self.ws = None
         
 class Player:
     def __init__(self, id: str):
