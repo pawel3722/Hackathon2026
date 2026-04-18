@@ -83,9 +83,10 @@ async def handle_connection(ws: WebSocket, lobby_id: str, user_id: str):
         # Calculate if all users are offline
         active_users = [u for u in lobby.users.values() if u.ws is not None]
         
-        if not active_users:
-            game_manager.remove_lobby(lobby.id)
-        else:
+        # if not active_users:
+        #     game_manager.remove_lobby(lobby.id)
+        # else:
+        if active_users:
             if lobby.host_id == user_id and user.ws is None:
                 # pass host to the next active user instead of first in key
                 lobby.host_id = active_users[0].id
