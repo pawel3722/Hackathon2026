@@ -98,8 +98,7 @@ async def handle_event(lobby, user, msg):
             return
         lobby.game_state = GameState(lobby.users.keys())
         lobby.started = True
-        broadcast(lobby, {"type": "game_started"})
-        broadcast(lobby, lobby.game_state.get_initial_state())
+        broadcast(lobby, {"type": "game_started", "game_state": lobby.game_state.get_initial_state()})
 
     # MOVE
     elif msg_type == "move":
