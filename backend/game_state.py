@@ -14,7 +14,7 @@ class GameState:
     FOOD_COST = 20.0
     ENERGY_COST = 0.15
 
-    def __init__(self, users : list[User]):
+    def __init__(self, users : dict[str, User] | list[User]):
         self.turn : int = 1 
         self.max_turns : int = 5
         self.game_ended : bool = False
@@ -22,7 +22,7 @@ class GameState:
 
         self.rng = np.random.default_rng()  # wspólne źródło losowości dla całej gry
 
-        self.players : dict[str, Player] = {id: Player(id, name) for (id, name) in users.values()}
+        self.players : dict[str, Player] = {id: Player(id, name) for (id, name) in users.items()}
         self.board : list[dict[str, str]] = game_init.board()
         self.stocks : list[Stock] = game_init.stocks()
         self.cryptos : list[Crypto] = game_init.crypto()
