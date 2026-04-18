@@ -1,12 +1,5 @@
 import "./PlayerStatus.css";
-
-interface Player {
-  id: string;
-  name: string;
-  money: number;
-  position: number;
-  properties: string[];
-}
+import type { Player } from "./types";
 
 interface PlayerStatusProps {
   player: Player;
@@ -43,7 +36,7 @@ export default function PlayerStatus({ player, isCurrentPlayer = false, onClose 
           <ul className="properties-list">
             {player.properties.map((property, index) => (
               <li key={index} className="property-item">
-                {property}
+                {property.name}
               </li>
             ))}
           </ul>
