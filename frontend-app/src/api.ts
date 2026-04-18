@@ -4,7 +4,7 @@ import type {
 } from './types';
 
 // API Configuration
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+const API_BASE_URL = import.meta.env.VITE_API_URL || `http://${window.location.hostname}:8000`;
 
 class ApiError extends Error {
   public status: number;
@@ -98,8 +98,8 @@ export class GameWebSocket {
   }
 
   connect(): void {
-    const wsUrl =
-      `${import.meta.env.VITE_WS_URL || 'ws://127.0.0.1:8000/ws/'}${this.gameId}?user_id=${this.userId}`;
+  const wsUrl =
+    `${import.meta.env.VITE_WS_URL || `ws://${window.location.hostname}:8000/ws/`}${this.gameId}?user_id=${this.userId}`;
 
     this.ws = new WebSocket(wsUrl);
 
