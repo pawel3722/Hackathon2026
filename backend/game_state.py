@@ -22,7 +22,7 @@ class GameState:
 
         self.rng = np.random.default_rng()  # wspólne źródło losowości dla całej gry
 
-        self.players : dict[str, Player] = {user.id: Player(user.id, user.name) for user in users}
+        self.players : dict[str, Player] = {id: Player(id, name) for (id, name) in users}
         self.board : list[dict[str, str]] = game_init.board()
         self.stocks : list[Stock] = game_init.stocks()
         self.cryptos : list[Crypto] = game_init.crypto()
