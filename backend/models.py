@@ -25,11 +25,11 @@ class Lobby:
 
 
 class Stock:
-    def __init__(self, id, ticker, name, type, price, number_of_shares, growth, risk, market_sensitivity, book_value_floor):
+    def __init__(self, id, ticker, name, industry, price, number_of_shares, growth, risk, market_sensitivity, book_value_floor):
         self.id = id
         self.ticker = ticker
         self.name = name
-        self.type = type #taki enum, np. fuel, food, media
+        self.industry = industry #taki enum, np. fuel, food, media
         self.price = price
         self.number_of_shares = number_of_shares
         self.growth = growth
