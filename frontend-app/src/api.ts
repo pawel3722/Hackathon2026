@@ -294,49 +294,29 @@ export class GameWebSocket {
   }
 
   connect(): void {
-    const token = localStorage.getItem('authToken');
-    const params = new URLSearchParams();
+  const wsUrl =
+    `${import.meta.env.VITE_WS_URL || 'ws://127.0.0.1:8000/ws/'}${this.gameId}?user_id=${this.userId}`;
 
-    if (token) {
-      params.set('token', token);
-    }
-    if (this.userId) {
-      params.set('user_id', this.userId);
-    }
+  this.ws = new WebSocket(wsUrl);
 
-    const wsUrl = `${import.meta.env.VITE_WS_URL || 'ws://localhost:8000'}/ws/${this.gameId}?${params.toString()}`;
+  this.ws.onopen = () => {
+    console.log('Connected to game WebSocket');
+  };
 
-    this.ws = new WebSocket(wsUrl);
+  this.ws.onmessage = (event) => {
+    const msg = JSON.parse(event.data);
+    console.log('Received WebSocket message:', msg);
+    this.onMessage(msg);
+  };
 
-    this.ws.onopen = () => {
-      console.log('WebSocket connected');
-      this.reconnectAttempts = 0;
-    };
+  this.ws.onerror = (err) => {
+    console.error('WS error', err);
+  };
 
-    this.ws.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        this.onMessage(data);
-      } catch (error) {
-        console.error('Failed to parse WebSocket message:', error);
-      }
-    };
-
-    this.ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
-      if (this.onError) {
-        this.onError(error);
-      }
-    };
-
-    this.ws.onclose = () => {
-      console.log('WebSocket closed');
-      if (this.onClose) {
-        this.onClose();
-      }
-      this.attemptReconnect();
-    };
-  }
+  this.ws.onclose = () => {
+    console.log('WebSocket closed');
+  };
+}
 
   private attemptReconnect(): void {
     if (this.reconnectAttempts < this.maxReconnectAttempts) {

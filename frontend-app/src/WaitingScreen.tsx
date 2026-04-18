@@ -47,6 +47,11 @@ export default function WaitingScreen({
             lobbyCode,
             effectivePlayerId,
             (data: any) => {
+                if (data.type === 'lobby_update' && data.users) {
+                    setConnectedPlayers(data.users.length);
+                    setPlayersList(data.users.map((user: any) => user.name));
+                }
+
                 if (data.type === 'game_state_update' && data.game_state) {
                     setConnectedPlayers(data.game_state.players.length);
                     setPlayersList(data.game_state.players.map((player: any) => player.name));

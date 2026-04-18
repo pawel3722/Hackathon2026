@@ -43,11 +43,11 @@ export default function Lobby() {
 
     try {
       const response = await gameApi.joinGame(localGameId, name);
-      const joinUserId = response.user_id;
+      const joinPlayerId = response.user_id;
 
-      if (joinUserId) {
-        setPlayerId(joinUserId);
-        localStorage.setItem('playerId', joinUserId);
+      if (joinPlayerId) {
+        setPlayerId(joinPlayerId);
+        localStorage.setItem('playerId', joinPlayerId);
       }
 
       if (response.success && response.data) {
@@ -82,12 +82,12 @@ export default function Lobby() {
 
       const response = await gameApi.joinGame(gameIdFromLink, name);
       console.log('joinGame response:', response.success, response.data, response.error);
-      const joinUserId = response.user_id;
+      const joinPlayerId = response.user_id;
 
-      if (joinUserId) {
-        setPlayerId(joinUserId);
-        localStorage.setItem('playerId', joinUserId);
-        console.log('User ID set:', joinUserId);
+      if (joinPlayerId) {
+        setPlayerId(joinPlayerId);
+        localStorage.setItem('playerId', joinPlayerId);
+        console.log('Player ID set:', joinPlayerId);
       } else {
         console.warn('No user_id in response');
       }
@@ -95,7 +95,7 @@ export default function Lobby() {
       setIsCreator(false);
         setIsWaiting(true);
         console.log('Setting isWaiting to true');
-
+        
     } catch (error) {
       console.error('Error in joinSession:', error);
       const errorMessage = apiUtils.handleApiError(error);

@@ -1,19 +1,41 @@
 from fastapi import WebSocket, WebSocketDisconnect
 import asyncio
+
 from game_manager import game_manager
-from models import User, Lobby
-from utils import broadcast
-from game_state import GameState
 
-ROUND_TIMEOUT = 10  # sekundy
 
-def render_lobby_state(lobby: Lobby):
+# -------------------------
+# Helpers
+# -------------------------
+
+def safe_send(ws, data):
+    try:
+        return asyncio.create_task(ws.send_json(data))
+    except:
+        return None
+
+
+def broadcast(lobby, message):
+    for user in lobby.users.values():
+        if user.ws:
+            safe_send(user.ws, message)
+
+
+def lobby_state(lobby):
     return {
-        "type": "update_lobby",
-        "id": lobby.id,
+        "type": "lobby_update",
+        "lobby_id": lobby.id,
         "host_id": lobby.host_id,
-        "users": [p.name for p in lobby.users.values()],
+        "users": [
+            {"id": u.id, "name": u.name}
+            for u in lobby.users.values()
+        ]
     }
+
+
+# -------------------------
+# MAIN WS HANDLER
+# -------------------------
 
 async def handle_connection(ws: WebSocket, lobby_id: str, user_id: str):
     await ws.accept()
@@ -29,94 +51,61 @@ async def handle_connection(ws: WebSocket, lobby_id: str, user_id: str):
     if not user:
         await ws.close()
         return
-    
+
     user.ws = ws
 
-    await broadcast(lobby, render_lobby_state(lobby))
+    print(f"WS CONNECTED: {user.name} ({user_id})")
 
-    while True:
-        try:
+    # initial state
+    broadcast(lobby, lobby_state(lobby))
+
+    try:
+        while True:
             msg = await ws.receive_json()
             await handle_event(lobby, user, msg)
-        except WebSocketDisconnect:
-            await handle_disconnect(lobby, user)
-            break
-        except Exception as e:
-            print(f"Error handling message: {e}")
-            break
-        finally:
-            user.ws = None
 
-async def start_round_timer(lobby):
-    # uruchamiany przy pierwszym ruchu w rundzie
-    await asyncio.sleep(ROUND_TIMEOUT)
+    except WebSocketDisconnect:
+        print("WS DISCONNECT")
 
-    async with lobby.lock:
-        # jeśli ktoś nie gotowy → auto-move (skip)
-        for p in lobby.players.values():
-            if not p.ready:
-                p.move = {"type": "skip"}
-                p.ready = True
+    except Exception as e:
+        print("WS ERROR:", e)
 
-        await resolve_round(lobby)
+    finally:
+        # cleanup
+        if user_id in lobby.users:
+            del lobby.users[user_id]
 
-async def resolve_round(lobby):
-    moves = {p.id: p.current_move for p in lobby.users.values()}
-    results = lobby.game_state.apply_moves(moves)
-
-    # reset rundy
-    for p in lobby.players.values():
-        p.ready = False
-        p.move = None
-
-    # anuluj timer jeśli jeszcze działa
-    if getattr(lobby, "round_task", None):
-        lobby.round_task.cancel()
-        lobby.round_task = None
-
-    await broadcast(lobby, {
-        "type": "turn_result",
-        "results": results,
-        "positions": lobby.game_state.positions,
-        "money": lobby.game_state.money,
-        "turn": lobby.game_state.turn
-    })
-
-async def handle_disconnect(lobby: Lobby, user: User):
-    del lobby.users[user.id]
-
-    if lobby.host_id == user.id:
         if lobby.users:
-            lobby.host_id = next(iter(lobby.users.keys()))
+            if lobby.host_id == user_id:
+                lobby.host_id = next(iter(lobby.users.keys()))
         else:
             lobby.host_id = None
 
-    await broadcast(lobby, render_lobby_state(lobby))
+        broadcast(lobby, lobby_state(lobby))
 
 
-async def handle_event(lobby: Lobby, user: User, msg: dict):
-    async with lobby.lock:
-        msg_type = msg.get("type")
+# -------------------------
+# EVENTS
+# -------------------------
 
-        if msg_type == "start":
-            if lobby.host_id != user.id:
-                print("Non-host tried to start the game, ignoring.")
-                return
+async def handle_event(lobby, user, msg):
+    msg_type = msg.get("type")
 
-            lobby.started = True
-            lobby.game_state = GameState(list(lobby.users.keys()))
+    # START GAME
+    if msg_type == "start":
+        if user.id != lobby.host_id:
+            return
 
-            await broadcast(lobby, {"type": "started"})
+        lobby.started = True
+        broadcast(lobby, {"type": "game_started"})
 
-        elif msg_type == "move":
-            user.current_move = msg.get("move", {})
+    # MOVE
+    elif msg_type == "move":
+        user.current_move = msg.get("move")
 
-            # jeśli to pierwszy ruch w rundzie → start timera
-            if not getattr(lobby, "round_task", None):
-                lobby.round_task = asyncio.create_task(start_round_timer(lobby))
-
-            # jeśli wszyscy gotowi → resolve natychmiast
-            if all(p.ready for p in lobby.users.values()):
-                await resolve_round(lobby)
-
-            
+        # simple broadcast update
+        broadcast(lobby, {
+            "type": "move_update",
+            "user_id": user.id,
+            "move": user.current_move
+        })
