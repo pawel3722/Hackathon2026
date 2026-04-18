@@ -14,10 +14,25 @@ class GameState:
     def create_board(self):
         return [
             {"type": "go"},
-            {"type": "property", "name": "A", "price": 60, "rent": 10},
-            {"type": "property", "name": "B", "price": 100, "rent": 20},
-            {"type": "tax", "amount": 100},
-            {"type": "property", "name": "C", "price": 120, "rent": 30},
+            {"type": "stock_market", "name": "WSE"},
+            {"type": "bank", "name": "Bank Pekao SA"},
+            {"type": "crypto_exchange", "name": "OKX"},
+            {"type": "real_estate", "name": "Garaże"},
+            {"type": "chance", "name": "chance"},
+            {"type": "stock_market", "name": "Euronext"},
+            {"type": "bookmaker", "name": "STS"},
+            {"type": "crypto_exchange", "name": "Bybit"},
+            {"type": "real_estate", "name": "Kawalerki"},
+            {"type": "park", "name": "Park Chrobrego"},
+            {"type": "stock_market", "name": "NASDAQ"},
+            {"type": "bank", "name": "PKO Bank Polski"},
+            {"type": "crypto_exchange", "name": "Coinbase"},
+            {"type": "real_estate", "name": "Mieszkania"},
+            {"type": "chance", "name": "chance"},
+            {"type": "stock_market", "name": "NYSE"},
+            {"type": "tax", "name": "Optymalizuj podatek"},
+            {"type": "crypto_exchange", "name": "Binance"},
+            {"type": "real_estate", "name": "Domki"},
         ]
 
     def roll_dice(self):
