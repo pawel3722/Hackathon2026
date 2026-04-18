@@ -26,7 +26,7 @@ async def handle_connection(ws: WebSocket, lobby_id: str, token: str):
     player = Player(player_id, f"P-{player_id[:4]}", ws)
     lobby.players[player_id] = player
 
-    await broadcast(lobby, {"type": "join", "player": player.name})
+    await broadcast(lobby, {"type": "update_lobby", "players": [p.name for p in lobby.players.values()]})
 
     try:
         while True:

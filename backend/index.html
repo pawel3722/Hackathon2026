@@ -62,29 +62,34 @@
                     console.log(`Join request sent for game ${gameId}`, data);
 
                     const wsUrl = `ws://${window.location.host}${data.ws}`;
-                    socket = new WebSocket(wsUrl);
+                    createSocket(wsUrl);
                     
-                    socket.onopen = () => {
-                        console.log('Connected to game WebSocket');
-                    };
-                    
-                    socket.onmessage = (event) => {
-                        console.log('Message from server:', event.data);
-                    };
-                    
-                    socket.onerror = (error) => {
-                        console.error('WebSocket error:', error);
-                    };
-                    
-                    socket.onclose = () => {
-                        console.log('WebSocket connection closed');
-                    };
                 })
                 .catch((err) => {
                     alert(err.message);
                 });
-            }
+        }
 
+
+        const createSocket = (url) => {
+            socket = new WebSocket(url);
+            
+            socket.onopen = () => {
+                console.log('Connected to game WebSocket');
+            };
+            
+            socket.onmessage = (event) => {
+                console.log('Message from server:', event.data);
+            };
+            
+            socket.onerror = (error) => {
+                console.error('WebSocket error:', error);
+            };
+            
+            socket.onclose = () => {
+                console.log('WebSocket connection closed');
+            };
+        }
 
     </script>
 </body>
