@@ -3,6 +3,8 @@ import type {
   CreateGameResponse,
 } from './types';
 
+import { saveGlobalGameStateFromMessage } from './gameStateStore';
+
 // API Configuration
 const API_BASE_URL = import.meta.env.VITE_API_URL || `http://${window.location.hostname}:8000`;
 
@@ -136,7 +138,17 @@ export class GameWebSocket {
     };
 
     this.ws.onmessage = (event) => {
-      const msg = JSON.parse(event.data);
+      let msg: any;
+      try {
+        msg = JSON.parse(event.data);
+      } catch (e) {
+        console.warn('Received non-JSON WebSocket message:', event.data);
+        return;
+      }
+
+      // Persist the latest server game state globally if present.
+      saveGlobalGameStateFromMessage(msg);
+
       console.log('Received WebSocket message:', msg);
       this.onMessage(msg);
     };
