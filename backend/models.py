@@ -148,7 +148,7 @@ class Mapper:
             id=crypto.id,
             ticker=crypto.ticker,
             name=crypto.name,
-            price=crypto.price
+            price=crypto.price,
             price_history=crypto.price_history
         )
 
