@@ -17,6 +17,8 @@
     <input type="text" id="game-id">
     <button id="join-btn" onclick="joinGame()">Join Game</button>
 
+    <input type="text" id="user-name" placeholder="User name">
+
     <script>
         let socket = null;
 
@@ -24,6 +26,7 @@
         const joinBtn = document.getElementById('join-btn');
         const createBtn = document.getElementById('create-button');
         const gameIdInput = document.getElementById('game-id');
+        const usernameInput = document.getElementById('user-name');
 
         const createGame = async () => {
             fetch('/create', {
@@ -51,7 +54,9 @@
                 return;
             }
 
-            fetch(`/join/${encodeURIComponent(gameId)}`, {
+            const username = usernameInput.value.trim();
+
+            fetch(`/join/${encodeURIComponent(gameId)}?name=${username}`, {
                 method: 'POST'
             })
                 .then((res) => {
