@@ -15,7 +15,7 @@ class GameState:
 
     def __init__(self, players_ids : list[str]):
         self.turn : int = 1 
-        self.max_turns : int = 100
+        self.max_turns : int = 1
         self.game_ended : bool = False
         self.is_destroyed : bool = False
 
@@ -152,9 +152,6 @@ class GameState:
         self.fuel_price_multiplier = multiplier
         self.fuel_price_turns_left = max(self.fuel_price_turns_left, turns)
 
-    def _apply_chance_card(self):
-        pass
-
     def _get_chance_card(self):
         if not self.chance_cards:
             return None
@@ -178,6 +175,13 @@ class GameState:
         for player_id, move in moves.items():
             self._apply_player_move(player_id, move, all_steps)
 
+        for player_id, move in moves.items():
+            for action in move.actions:
+                if action.action_type == "card":
+                    card = next((c for c in self.chance_cards if c.id == action.assets_id), None)
+                    if card:
+                        card.effect(self, player_id)
+
         current_card  = self._get_chance_card()
 
         current_card.effect(self, None)
@@ -200,16 +204,24 @@ class GameState:
             board=self.board
         )
 
+from contract import Action, Move, TurnResult
+
 if __name__ == "__main__":
     # prosta symulacja rozgrywki
     game_state = GameState(players_ids=["player1", "player2"])
     while not game_state.game_ended:
+        print(f"stock prices: {[f'{s.ticker}: {s.price:.2f}' for s in game_state.stocks]}")
+        
         moves = {
-            "player1": Move(steps=game_state.rng.integers(0, 3), actions=[]),
+            "player1": Move(steps=game_state.rng.integers(0, 3), actions=[
+                    Action(action_type="card", assets_type="", assets_id=1, amount=0)
+            ]),
             "player2": Move(steps=game_state.rng.integers(0, 3), actions=[]),
         }
 
+
         result = game_state.apply_moves(moves)
+        print(f"stock prices: {[f'{s.ticker}: {s.price:.2f}' for s in game_state.stocks]}")
         print(f"Turn {result.turn} ended. Player states:")
         for player in result.players:
             print(f"  {player.id}: pos={player.position}, money={player.money:.2f}")
