@@ -1,8 +1,11 @@
+from __future__ import annotations
 import asyncio
-from typing import List
+from typing import List, TYPE_CHECKING
 
-from backend.contract import Move
-from backend.game_state import GameState
+
+if TYPE_CHECKING:
+    from contract import Move
+    from game_state import GameState
 
 class User:
     def __init__(self, id : str, name : str):

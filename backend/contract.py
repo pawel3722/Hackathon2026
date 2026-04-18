@@ -1,4 +1,8 @@
-from backend.models import Crypto, Player, Stock
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from models import Crypto, Player, Stock
 
 class Action:
     def __init__(self, action_type : str, assets_type : str, assets_id : int, amount : float):
