@@ -141,11 +141,11 @@
 
                 const msg = JSON.parse(event.data);
 
-                if (msg.type === 'update_lobby') {
+                if (msg.type === 'lobby_update') {
                     userList.innerHTML = '';
                     msg.users.forEach((user) => {
                         const li = document.createElement('li');
-                        li.textContent = user;
+                        li.textContent = user.name;
                         userList.appendChild(li);
                     });
                 }
