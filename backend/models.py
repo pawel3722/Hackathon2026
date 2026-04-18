@@ -1,8 +1,7 @@
 import asyncio
-from typing import List
 
-from backend.contract import Move
-from backend.game_state import GameState
+from contract import Move
+from game_state import GameState
 
 class User:
     def __init__(self, id : str, name : str):
@@ -17,8 +16,8 @@ class Player:
         self.money : float = 5000.00
         self.is_bankrupt : bool = False
         self.position : int = 0
-        self.stocks : list[Stock] = []
-        self.cryptos : list[Crypto] = []
+        self.stocks : list[StockShare] = []
+        self.cryptos : list[CryptoShare] = []
         self.credits : list[Credit] = []
         self.deposits : list[Deposit] = []
         self.properties : list[Property] = []
@@ -47,6 +46,20 @@ class Stock:
         self.market_sensitivity : float = market_sensitivity
         self.book_value_floor : float = book_value_floor
 
+class StockDto:
+    def __init__(self, id : int, ticker : str, name : str, industry : str, price : float, number_of_shares : int):
+        self.id : int = id
+        self.ticker : str = ticker
+        self.name : str = name
+        self.industry : str = industry #taki enum, np. fuel, food, media
+        self.price : float = price
+        self.number_of_shares : int = number_of_shares
+
+class StockShare:
+    def __init__(self, stock: StockDto, quantity: int):
+        self.stock : StockDto = stock
+        self.quantity : int = quantity
+
 class Crypto:
     def __init__(self, id : int, ticker : str, name : str, price : float, growth : float, risk : float, market_sensitivity : float):
         self.id : int = id
@@ -56,6 +69,18 @@ class Crypto:
         self.growth  : float = growth
         self.risk : float = risk
         self.market_sensitivity : float = market_sensitivity
+
+class CryptoDto:
+    def __init__(self, id : int, ticker : str, name : str, price : float):
+        self.id : int = id
+        self.ticker : str = ticker
+        self.name : str = name
+        self.price : float = price
+
+class CryptoShare:
+    def __init__(self, crypto: CryptoDto, quantity: int):
+        self.crypto : CryptoDto = crypto
+        self.quantity : int = quantity
 
 class Property:
     def __init__(self, id : int, name : str, price : float, rent : float, energy_use : float):
@@ -83,3 +108,9 @@ class ChanceCard:
     def __init__(self, id : int, description : str):
         self.id : int = id
         self.description : str = description
+
+class ChanceCardPlayer:
+    def __init__(self, id : int, description : str, player_id : str):
+        self.id : int = id
+        self.description : str = description
+        self.player_id : str = player_id
