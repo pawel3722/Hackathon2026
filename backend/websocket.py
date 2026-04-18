@@ -110,10 +110,9 @@ async def handle_event(lobby, user, msg):
     # MOVE
     elif msg_type == "move":
         user.current_move = msg.get("move")
+        if all(hasattr(user, "current_move") and user.current_move is not None for user in lobby.users.values()):
+            result = lobby.game_state.apply_moves({u.id: u.current_move for u in lobby.users.values()})
+            for u in lobby.users.values():
+                del u.current_move
+            broadcast(lobby, {"type": "game_update", "result": result})
 
-        # simple broadcast update
-        broadcast(lobby, {
-            "type": "move_update",
-            "user_id": user.id,
-            "move": user.current_move
-        })
