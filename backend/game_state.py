@@ -9,10 +9,10 @@ class GameState:
         
         self.players : list[Player] = [Player() for i in range(num_of_players)]
         
-        self.board = self.create_board()
+        self.board : list[dict[str, str]] = self.create_board()
 
-        self.stocks = self.init_stocks
-        self.cryptos = self.init_crypto
+        self.stocks = self.init_stocks()
+        self.cryptos = self.init_crypto()
         self.properties = self.init_properties()
 
     def init_properties(self):
@@ -70,7 +70,7 @@ class GameState:
 
     def create_board(self):
         return [
-            {"type": "go"},
+            {"type": "go", "name": "Start"},
             {"type": "stock_market", "name": "WSE"},
             {"type": "bank", "name": "Bank Pekao SA"},
             {"type": "crypto_exchange", "name": "OKX"},
