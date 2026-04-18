@@ -1,18 +1,10 @@
 import { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import PlayerStatus from "./PlayerStatus";
+import type { Player } from "./types";
 import "./Game.css";
 
-interface Player {
-  id: string;
-  name: string;
-  money: number;
-  position: number;
-  properties: string[];
-}
-
 export default function Game() {
-  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
 
@@ -20,25 +12,48 @@ export default function Game() {
   const [currentPlayer] = useState<Player>({
     id: "1",
     name: "Ty",
-    money: 1500,
+    money: 1500.00,
+    is_bankrupt: false,
     position: 0,
-    properties: ["Ulica Marszałkowska", "Rynek Główny"]
+    stocks: [],
+    cryptos: [],
+    credits: [],
+    deposits: [],
+    properties: [
+      { id: 1, name: "Ulica Marszałkowska", price: 400, rent: 40, energy_use: 10 },
+      { id: 2, name: "Rynek Główny", price: 600, rent: 60, energy_use: 15 }
+    ]
   });
 
   const [otherPlayers] = useState<Player[]>([
     {
       id: "2",
       name: "Gracz 2",
-      money: 1200,
+      money: 1200.00,
+      is_bankrupt: false,
       position: 5,
-      properties: ["Plac Wilsona"]
+      stocks: [],
+      cryptos: [],
+      credits: [],
+      deposits: [],
+      properties: [
+        { id: 3, name: "Plac Wilsona", price: 350, rent: 35, energy_use: 8 }
+      ]
     },
     {
       id: "3",
       name: "Gracz 3",
-      money: 1800,
+      money: 1800.00,
+      is_bankrupt: false,
       position: 12,
-      properties: ["Ulica Floriańska", "Rynek Główny"]
+      stocks: [],
+      cryptos: [],
+      credits: [],
+      deposits: [],
+      properties: [
+        { id: 4, name: "Ulica Floriańska", price: 500, rent: 50, energy_use: 12 },
+        { id: 5, name: "Rynek Główny", price: 600, rent: 60, energy_use: 15 }
+      ]
     }
   ]);
 

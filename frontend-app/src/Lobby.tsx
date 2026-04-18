@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { gameApi, apiUtils } from "./api";
 import "./Lobby.css";
 import WaitingScreen from "./WaitingScreen";
 
@@ -7,25 +8,32 @@ export default function Lobby() {
   const navigate = useNavigate();
   const [name, setName] = useState<string>("");
   const [difficulty, setDifficulty] = useState<string>("medium");
-  const [numPlayers, setNumPlayers] = useState<string>("2");
   const [joinLink, setJoinLink] = useState<string>("");
   const [isWaiting, setIsWaiting] = useState<boolean>(false);
   const [gameId, setGameId] = useState<string>("");
   const [isCreator, setIsCreator] = useState<boolean>(false);
 
-  const createSession = () => {
+  const createSession = async () => {
     if (!name.trim()) {
       alert("Podaj imię!");
       return;
     }
 
-    const id = crypto.randomUUID();
-    setGameId(id);
-    setIsCreator(true);
-    setIsWaiting(true);
+    try {
+      const response = await gameApi.createGame(name, difficulty);
+
+      if (response.success && response.data) {
+        setGameId(response.data.game_id);
+        setIsCreator(true);
+        setIsWaiting(true);
+      }
+    } catch (error) {
+      const errorMessage = apiUtils.handleApiError(error);
+      alert(`Błąd podczas tworzenia gry: ${errorMessage}`);
+    }
   };
 
-  const joinSession = () => {
+  const joinSession = async () => {
     if (!name.trim()) {
       alert("Podaj imię!");
       return;
@@ -36,18 +44,36 @@ export default function Lobby() {
       return;
     }
 
-    // Extract game ID from link (format: http://localhost:5173/game/uuid)
-    const linkParts = joinLink.split("/");
-    const id = linkParts[linkParts.length - 1];
-    
-    setGameId(id);
-    setIsCreator(false);
-    setIsWaiting(true);
+    try {
+      // Extract game ID from link (format: http://localhost:5173/game/uuid)
+      const linkParts = joinLink.split("/");
+      const gameIdFromLink = linkParts[linkParts.length - 1];
+
+      const response = await gameApi.joinGame(gameIdFromLink, name);
+
+      if (response.success && response.data) {
+        setGameId(response.data.game_id);
+        setIsCreator(false);
+        setIsWaiting(true);
+      }
+    } catch (error) {
+      const errorMessage = apiUtils.handleApiError(error);
+      alert(`Błąd podczas dołączania do gry: ${errorMessage}`);
+    }
   };
 
-  const handleGameStart = () => {
-    // Navigate to the game screen using React Router
-    navigate(`/game/${gameId}`);
+  const handleGameStart = async () => {
+    try {
+      const response = await gameApi.startGame(gameId);
+
+      if (response.success && response.data) {
+        // Navigate to the game screen using React Router
+        navigate(`/game/${gameId}`);
+      }
+    } catch (error) {
+      const errorMessage = apiUtils.handleApiError(error);
+      alert(`Błąd podczas rozpoczynania gry: ${errorMessage}`);
+    }
   };
 
   const handleCancel = () => {
@@ -63,7 +89,6 @@ export default function Lobby() {
         playerName={name}
         gameId={gameId}
         difficulty={difficulty}
-        numPlayers={parseInt(numPlayers)}
         isCreator={isCreator}
         onGameStart={handleGameStart}
         onCancel={handleCancel}
@@ -104,23 +129,6 @@ export default function Lobby() {
                     <option value="easy">Łatwy</option>
                     <option value="medium">Średni</option>
                     <option value="hard">Trudny</option>
-                </select>
-                </div>
-
-                <div className="input-group">
-                <label className="input-label">Liczba graczy</label>
-                <select
-                    value={numPlayers}
-                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-                    setNumPlayers(e.target.value)
-                    }
-                    className="input-field"
-                >
-                    <option value="2">2 graczy</option>
-                    <option value="3">3 graczy</option>
-                    <option value="4">4 graczy</option>
-                    <option value="5">5 graczy</option>
-                    <option value="6">6 graczy</option>
                 </select>
                 </div>
 
