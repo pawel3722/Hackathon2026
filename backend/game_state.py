@@ -206,7 +206,9 @@ class GameState:
 
         for player_id, move in moves.items():
             for action in move.actions:
-                if action.action_type == "card":
+                player = self.players[player_id]
+                player_position_is_chance = self.board[player.position]["type"] == "chance"
+                if action.action_type == "card" and player_position_is_chance:
                     card = next((c for c in self.chance_cards if c.id == action.assets_id), None)
                     if card:
                         card.effect(self, player_id)
@@ -242,7 +244,7 @@ if __name__ == "__main__":
         print(f"stock prices: {[f'{s.ticker}: {s.price:.2f}' for s in game_state.stocks]}")
         
         moves = {
-            "player1": Move(steps=game_state.rng.integers(0, 3), actions=[
+            "player1": Move(steps=1, actions=[
                     Action(action_type="card", assets_type="", assets_id=1, amount=0)
             ]),
             "player2": Move(steps=game_state.rng.integers(0, 3), actions=[]),
