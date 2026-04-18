@@ -1,4 +1,6 @@
+import json
 import numpy as np
+from contract import TurnResult
 from collections import deque
 from shutil import move
 from contract import Move
@@ -156,7 +158,50 @@ class GameState:
             self._apply_player_move(player_id, move)
 
         self._update_market()
+        self._apply_turn_status_effects()
+        self._get_event()
 
         self.turn += 1        
 
         return results
+        self.turn += 1
+
+        if self.turn > self.max_turns:
+            self.game_ended = True
+
+        return TurnResult(
+            turn=self.turn,
+            game_ended=self.game_ended,
+            players=list(self.players.values()),
+            stocks=self.stocks,
+            cryptos=self.cryptos,
+            properties=self.properties,
+            cards=[],
+            board=self.board
+        )
+
+if __name__ == "__main__":
+    # prosta symulacja rozgrywki
+    game_state = GameState(players_ids=["player1", "player2"])
+    while not game_state.game_ended:
+        moves = {
+            "player1": Move(steps=game_state.rng.integers(0, 3), actions=[]),
+            "player2": Move(steps=game_state.rng.integers(0, 3), actions=[]),
+        }
+
+        result = game_state.apply_moves(moves)
+        print(f"Turn {result.turn} ended. Player states:")
+        for player in result.players:
+            print(f"  {player.id}: pos={player.position}, money={player.money:.2f}")
+
+        print(f"Stock prices: ")
+        for stock in result.stocks:
+            print(f"  {stock.ticker}: {stock.price:.2f} {stock.growth:.4f} {stock.risk:.4f}")
+
+        print(f"Crypto prices: ")
+        for crypto in result.cryptos:
+            print(f"  {crypto.ticker}: {crypto.price:.2f} {crypto.growth:.4f} {crypto.risk:.4f}")
+        
+        print(f"Cards drawn: {[card.description for card in result.cards]}")
+        
+        print("-" * 40)

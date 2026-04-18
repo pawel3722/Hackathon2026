@@ -118,3 +118,5 @@ async def handle_event(lobby: Lobby, user: User, msg: dict):
             # jeśli wszyscy gotowi → resolve natychmiast
             if all(p.ready for p in lobby.users.values()):
                 await resolve_round(lobby)
+
+            
