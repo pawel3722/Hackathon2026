@@ -52,13 +52,13 @@ def join(lobby_id: str, request: JoinRequest):
     
     lobby = game_manager.get_lobby(lobby_id)
 
-    player_id = str(uuid.uuid4())
-    token = create_token(player_id, lobby_id)
+    user_id = str(uuid.uuid4())
+    token = create_token(user_id, lobby_id)
 
-    player_name = request.name | "Unnamed player"
+    user_name = request.name | "Unnamed user"
 
-    player = models.Player(player_id, player_name)
-    lobby.players[player_id] = player
+    player = models.User(user_id, user_name)
+    lobby.players[user_id] = player
 
     return {
         "token": token,
