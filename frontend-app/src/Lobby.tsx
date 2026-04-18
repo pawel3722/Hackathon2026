@@ -1,11 +1,9 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { gameApi, apiUtils } from "./api";
 import "./Lobby.css";
 import WaitingScreen from "./WaitingScreen";
 
 export default function Lobby() {
-  const navigate = useNavigate();
   const [name, setName] = useState<string>("");
   const [difficulty, setDifficulty] = useState<string>("medium");
   const [joinGameId, setJoinLink] = useState<string>("");
@@ -103,21 +101,6 @@ export default function Lobby() {
     }
   };
 
-  const handleGameStart = async () => {
-    const lobbyKey = lobbyId || gameId;
-
-    try {
-      const response = await gameApi.startGame(lobbyKey);
-
-      if (response.success && response.data) {
-        navigate(`/game/${lobbyKey}`);
-      }
-    } catch (error) {
-      const errorMessage = apiUtils.handleApiError(error);
-      alert(`Error starting game: ${errorMessage}`);
-    }
-  };
-
   const handleCancel = () => {
     setIsWaiting(false);
     setGameId("");
@@ -135,7 +118,6 @@ export default function Lobby() {
         playerId={playerId}
         difficulty={difficulty}
         isCreator={isCreator}
-        onGameStart={handleGameStart}
         onCancel={handleCancel}
       />
     );

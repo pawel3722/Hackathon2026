@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import PlayerStatus from "./PlayerStatus";
 import type { Player } from "./types";
 import "./Game.css";
 import Spline, { type SplineEvent } from '@splinetool/react-spline';
+import { getActiveGameWebSocket, getOrCreateGameWebSocket } from "./websocketBridge";
 
 type GameLocationState = {
   gameReady?: boolean;
@@ -12,10 +14,33 @@ type GameLocationState = {
 
 export default function Game() {
   const navigate = useNavigate();
+  const { id: gameIdFromRoute } = useParams();
   const location = useLocation();
   const routeState = location.state as GameLocationState | null;
   const playerId = routeState?.playerId ?? localStorage.getItem("playerId") ?? "";
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
+  const [lastWsMessage, setLastWsMessage] = useState<any>(null);
+
+  useEffect(() => {
+    if (!gameIdFromRoute || !playerId) {
+      return;
+    }
+
+    getOrCreateGameWebSocket(
+      gameIdFromRoute,
+      playerId,
+      (data: any) => {
+        setLastWsMessage(data);
+        console.log("[Game WS]", data);
+      },
+      (error: Event) => {
+        console.error("[Game WS] error:", error);
+      },
+      () => {
+        console.log("[Game WS] disconnected");
+      }
+    );
+  }, [gameIdFromRoute, playerId]);
 
   // Mock player data - in real app this would come from server
   const [currentPlayer] = useState<Player>({
@@ -71,6 +96,22 @@ export default function Game() {
     navigate("/");
   };
 
+  const handleBuyProperty = () => {
+    const ws = getActiveGameWebSocket();
+    if (!ws) {
+      console.warn("Game WebSocket is missing");
+      return;
+    }
+
+    ws.send({
+      type: "move",
+      move: {
+        steps: 2,
+        action: []
+      },
+    });
+  };
+
   const onSplineMouseDown = (e: SplineEvent) => {
     console.log(e.target.name)
   }
@@ -117,10 +158,17 @@ export default function Game() {
 
           <div className="game-actions">
             <button className="action-button primary">Roll Dice</button>
-            <button className="action-button">Buy Property</button>
+            <button className="action-button" onClick={handleBuyProperty}>Buy Property</button>
             <button className="action-button">Sell Property</button>
             <button className="action-button">End Turn</button>
           </div>
+
+          {lastWsMessage && (
+            <div className="game-debug-panel">
+              <h3>Last WS message</h3>
+              <pre>{JSON.stringify(lastWsMessage, null, 2)}</pre>
+            </div>
+          )}
         </div>
 
         <div className="board-container">

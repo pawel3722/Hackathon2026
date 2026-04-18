@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { GameWebSocket } from "./api";
+import { getOrCreateGameWebSocket } from "./websocketBridge";
 import "./WaitingScreen.css";
 
 interface WaitingScreenProps {
@@ -45,7 +46,7 @@ export default function WaitingScreen({
             return;
         }
 
-        const ws = new GameWebSocket(
+        const ws = getOrCreateGameWebSocket(
             lobbyCode,
             effectivePlayerId,
             (data: any) => {
@@ -65,8 +66,6 @@ export default function WaitingScreen({
                 }
 
                 if (data.type === 'game_started') {
-                    // Navigate to game view and skip disconnecting WebSocket
-                    wsRef.current = null; // Detach before unmount so useEffect doesn't close it
                     navigate(`/game/${lobbyCode}`, {
                         state: {
                             gameReady: true,
@@ -84,12 +83,9 @@ export default function WaitingScreen({
         );
 
         wsRef.current = ws;
-        ws.connect();
 
         return () => {
-            // Check if we still want to disconnect
             if (wsRef.current === ws) {
-                ws.disconnect();
                 wsRef.current = null;
             }
         };

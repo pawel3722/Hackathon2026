@@ -103,9 +103,31 @@ export class GameWebSocket {
     this.onClose = onClose;
   }
 
+  setHandlers(
+    onMessage: (data: any) => void,
+    onError?: (error: Event) => void,
+    onClose?: () => void
+  ): void {
+    this.onMessage = onMessage;
+    this.onError = onError;
+    this.onClose = onClose;
+  }
+
+  isOpen(): boolean {
+    return this.ws?.readyState === WebSocket.OPEN;
+  }
+
+  isConnecting(): boolean {
+    return this.ws?.readyState === WebSocket.CONNECTING;
+  }
+
   connect(): void {
-  const wsUrl =
-    `${import.meta.env.VITE_WS_URL || `ws://${window.location.hostname}:8000/ws/`}${this.gameId}?user_id=${this.userId}`;
+    if (this.ws && (this.ws.readyState === WebSocket.OPEN || this.ws.readyState === WebSocket.CONNECTING)) {
+      return;
+    }
+
+    const wsUrl =
+      `${import.meta.env.VITE_WS_URL || `ws://${window.location.hostname}:8000/ws/`}${this.gameId}?user_id=${this.userId}`;
 
     this.ws = new WebSocket(wsUrl);
 
