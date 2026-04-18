@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
+import { GameWebSocket } from "./api";
 import "./WaitingScreen.css";
 
 interface WaitingScreenProps {
     playerName: string;
+    playerId: string;
     gameId: string;
     difficulty: string;
     isCreator: boolean;
@@ -12,6 +14,7 @@ interface WaitingScreenProps {
 
 export default function WaitingScreen({
     playerName,
+    playerId,
     gameId,
     difficulty,
     isCreator,
@@ -22,17 +25,51 @@ export default function WaitingScreen({
     const [playersList, setPlayersList] = useState<string[]>([playerName]);
     const [isChecking, setIsChecking] = useState<boolean>(false);
     const [copied, setCopied] = useState<boolean>(false);
-    const gameLink = `${window.location.origin}/game/${gameId}`;
+    const lobbyCode = gameId;
 
     const copyToClipboard = async () => {
         try {
-            await navigator.clipboard.writeText(gameLink);
+            await navigator.clipboard.writeText(lobbyCode);
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
         } catch (err) {
             console.error("Failed to copy: ", err);
         }
     };
+
+    useEffect(() => {
+        if (!lobbyCode || !playerId) {
+            return;
+        }
+
+        const ws = new GameWebSocket(
+            lobbyCode,
+            playerId,
+            (data: any) => {
+                if (data.type === 'game_state_update' && data.game_state) {
+                    setConnectedPlayers(data.game_state.players.length);
+                    setPlayersList(data.game_state.players.map((player: any) => player.name));
+                }
+
+                if (data.type === 'player_joined' && data.player) {
+                    setPlayersList((prev) => [...prev, data.player.name]);
+                    setConnectedPlayers((prev) => prev + 1);
+                }
+            },
+            (error: Event) => {
+                console.error('WebSocket error:', error);
+            },
+            () => {
+                console.log('Lobby WebSocket disconnected');
+            }
+        );
+
+        ws.connect();
+
+        return () => {
+            ws.disconnect();
+        };
+    }, [lobbyCode, playerId]);
 
     useEffect(() => {
         // Mock server polling for development
@@ -93,21 +130,22 @@ export default function WaitingScreen({
 
 
                         <div className="share-link-section">
-                            <p className="share-link-label">Podziel się linkiem:</p>
+                            <p className="share-link-label">Kod lobby:</p>
                             <div className="share-link-container">
                                 <input
                                     type="text"
-                                    value={gameLink}
+                                    value={lobbyCode}
                                     readOnly
                                     className="share-link-input"
                                 />
-                                <button onClick={copyToClipboard} className="copy-button" title="Kopiuj link">
+                                <button onClick={copyToClipboard} className="copy-button" title="Kopiuj kod">
                                     <svg className="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                                     </svg>
                                 </button>
                             </div>
-                            {copied && <p className="copied-message">Link skopiowany!</p>}
+                            {copied && <p className="copied-message">Kod skopiowany!</p>}
+                            <p className="share-link-hint">Przekaż ten kod innym graczom, aby mogli dołączyć.</p>
                         </div>
 
                     </div>

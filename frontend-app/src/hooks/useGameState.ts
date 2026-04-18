@@ -1,5 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
+<<<<<<< HEAD
 import type { GameState, Player, ApiResponse } from '../types';
+=======
+import type { GameState, Player } from '../types';
+>>>>>>> main
 import { gameApi, GameWebSocket, apiUtils } from '../api';
 
 interface UseGameStateReturn {
@@ -34,9 +38,18 @@ export function useGameState(gameId?: string): UseGameStateReturn {
 
   // Initialize WebSocket connection when gameId is available
   useEffect(() => {
+<<<<<<< HEAD
     if (gameId && gameState) {
       const ws = new GameWebSocket(
         gameId,
+=======
+    const userId = localStorage.getItem('playerId');
+
+    if (gameId && gameState && userId) {
+      const ws = new GameWebSocket(
+        gameId,
+        userId,
+>>>>>>> main
         (data: any) => {
           // Handle real-time updates
           if (data.type === 'game_state_update') {
@@ -69,8 +82,13 @@ export function useGameState(gameId?: string): UseGameStateReturn {
   }, [gameId, gameState]);
 
   const handleApiCall = useCallback(async <T,>(
+<<<<<<< HEAD
     apiCall: () => Promise<ApiResponse<T>>,
     successCallback?: (result: ApiResponse<T>) => void
+=======
+    apiCall: () => Promise<T>,
+    successCallback?: (result: T) => void
+>>>>>>> main
   ) => {
     setIsLoading(true);
     setError(null);
@@ -109,6 +127,7 @@ export function useGameState(gameId?: string): UseGameStateReturn {
     );
   }, [handleApiCall]);
 
+<<<<<<< HEAD
   const createGame = useCallback(async (playerName: string, difficulty: string, maxPlayers: number) => {
     await handleApiCall(
       () => gameApi.createGame(playerName, difficulty, maxPlayers),
@@ -121,6 +140,16 @@ export function useGameState(gameId?: string): UseGameStateReturn {
             setCurrentPlayer(player);
             localStorage.setItem('playerId', player.id);
           }
+=======
+  const createGame = useCallback(async () => {
+    await handleApiCall(
+      () => gameApi.createGame(),
+      (response) => {
+        if (response.lobby_id) {
+          // Lobby created, waiting for players to join.
+          // The actual game state will be available after the host starts the game.
+          localStorage.setItem('lobbyId', response.lobby_id);
+>>>>>>> main
         }
       }
     );
