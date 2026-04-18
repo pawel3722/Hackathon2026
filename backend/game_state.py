@@ -50,8 +50,8 @@ class GameState:
             for action in stock_actions:
                 if(action.action_type == "buy"):
                     stock = next((s for s in self.stocks if s.id == action.assets_id), None)
-                    if current_player.money >= stock.price * action.amount and stock.number_of_shares >= action.amount:
-                        current_player.money -= stock.price * action.amount
+                    if current_player.money >= 1.005 * stock.price * action.amount and stock.number_of_shares >= action.amount:
+                        current_player.money -= 1.005 * stock.price * action.amount
                         stock.number_of_shares -= action.amount
                         player_stock = next((ps for ps in current_player.stocks if ps.stock.id == stock.id), None)
                         if player_stock:
@@ -73,7 +73,7 @@ class GameState:
             for action in crypto_actions:
                 if(action.action_type == "buy"):
                     crypto = next((s for s in self.cryptos if s.id == action.assets_id), None)
-                    if crypto and current_player.money >= crypto.price * action.amount:
+                    if crypto and current_player.money >= 1.005 * crypto.price * action.amount:
                         current_player.money -= crypto.price * action.amount
                         player_crypto = next((pc for pc in current_player.cryptos if pc.crypto.id == crypto.id), None)
                         if player_crypto:
