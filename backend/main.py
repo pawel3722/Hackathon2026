@@ -26,6 +26,9 @@ def create():
 
 @app.post("/join/{lobby_id}")
 def join(lobby_id: str):
+    if lobby_id not in game_manager.lobbies:
+        return {"error": "Lobby not found"}
+
     player_id = str(uuid.uuid4())
     token = create_token(player_id, lobby_id)
 
