@@ -1,4 +1,4 @@
-from fastapi import WebSocket
+from fastapi import WebSocket, WebSocketDisconnect
 import asyncio
 from game_manager import game_manager
 from models import User, Lobby
@@ -6,6 +6,14 @@ from utils import broadcast
 from game_state import GameState
 
 ROUND_TIMEOUT = 10  # sekundy
+
+def render_lobby_state(lobby: Lobby):
+    return {
+        "type": "update_lobby",
+        "id": lobby.id,
+        "host_id": lobby.host_id,
+        "users": [p.name for p in lobby.users.values()],
+    }
 
 async def handle_connection(ws: WebSocket, lobby_id: str, user_id: str):
     await ws.accept()
@@ -24,16 +32,20 @@ async def handle_connection(ws: WebSocket, lobby_id: str, user_id: str):
     
     user.ws = ws
 
-    d = {"type": "update_lobby", "users": [u.name for u in lobby.users.values()]}
-    await broadcast(lobby, d)
+    await broadcast(lobby, render_lobby_state(lobby))
 
     while True:
         try:
             msg = await ws.receive_json()
             await handle_event(lobby, user, msg)
+        except WebSocketDisconnect:
+            await handle_disconnect(lobby, user)
+            break
         except Exception as e:
             print(f"Error handling message: {e}")
             break
+        finally:
+            user.ws = None
 
 async def start_round_timer(lobby):
     # uruchamiany przy pierwszym ruchu w rundzie
@@ -70,12 +82,25 @@ async def resolve_round(lobby):
         "turn": lobby.game_state.turn
     })
 
+async def handle_disconnect(lobby: Lobby, user: User):
+    del lobby.users[user.id]
+
+    if lobby.host_id == user.id:
+        if lobby.users:
+            lobby.host_id = next(iter(lobby.users.keys()))
+        else:
+            lobby.host_id = None
+
+    await broadcast(lobby, render_lobby_state(lobby))
+
+
 async def handle_event(lobby: Lobby, user: User, msg: dict):
     async with lobby.lock:
         msg_type = msg.get("type")
 
         if msg_type == "start":
             if lobby.host_id != user.id:
+                print("Non-host tried to start the game, ignoring.")
                 return
 
             lobby.started = True

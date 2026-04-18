@@ -5,20 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Multiplayer Sum Game</title>
     <style>
-        body { font-family: sans-serif; text-align: center; margin-top: 50px; }
+        body { font-family: sans-serif; margin-top: 50px; }
         input, button { padding: 10px; font-size: 16px; margin: 5px; cursor: pointer; }
         #identity-text { color: #0066cc; }
     </style>
 </head>
 <body>
 
-    <button id="create-button" onclick="createGame()">Create Game</button>
-    
-    <input type="text" id="game-id">
-    <button id="join-btn" onclick="joinGame()">Join Game</button>
+    <section>
+        <button id="create-button" onclick="createGame()">Create Game</button>
+        
+        <input type="text" id="game-id">
+        <button id="join-btn" onclick="joinGame()">Join Game</button>
+        
+        <input type="text" id="user-name" placeholder="User name">    
+    </section>
 
-    <input type="text" id="user-name" placeholder="User name">
-
+    <section id="users-section" style="display:none;">
+        <h2>Users in this lobby: </h2>
+        <ul id="user-list"></ul>
+    </section>
+        
     <script>
         let socket = null;
         let user_id = null;
@@ -28,6 +35,9 @@
         const createBtn = document.getElementById('create-button');
         const gameIdInput = document.getElementById('game-id');
         const usernameInput = document.getElementById('user-name');
+
+        const usersSection = document.getElementById('users-section');
+        const userList = document.getElementById('user-list');
 
         const createGame = async () => {
             fetch('/create', {
@@ -71,7 +81,7 @@
 
                     const wsUrl = `ws://${window.location.host}${data.ws}`;
                     createSocket(wsUrl, user_id);
-                    
+                    usersSection.style.display = 'block';
                 })
                 .catch((err) => {
                     alert(err.message);
@@ -88,6 +98,17 @@
             
             socket.onmessage = (event) => {
                 console.log('Message from server:', event.data);
+
+                const msg = JSON.parse(event.data);
+
+                if (msg.type === 'update_lobby') {
+                    userList.innerHTML = '';
+                    msg.users.forEach((user) => {
+                        const li = document.createElement('li');
+                        li.textContent = user;
+                        userList.appendChild(li);
+                    });
+                }
             };
             
             socket.onerror = (error) => {
