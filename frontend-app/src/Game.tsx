@@ -258,6 +258,9 @@ export default function Game() {
 
       <div className="game-header">
         <h1 className="game-title">Moneypoly</h1>
+          <button className="leave-button" onClick={handleLeaveGame}>
+            Leave Game
+         </button>
       </div>
 
       <div className="game-content">
