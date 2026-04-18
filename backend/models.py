@@ -1,13 +1,16 @@
 import asyncio
 
-class Player:
-    def __init__(self, id, name, websocket=None):
-        self.id = id
+class User:
+    def __init__(self, id : int, name : str):
         self.name = name
-        self.ws = websocket
         self.current_move = None
         self.ready = False
+        
+class Player:
+    def __init__(self):
         self.money = 5000.00
+        self.is_bankrupt = False
+        self.position = 0
         self.stocks = {}
         self.cryptos = {}
         self.credits = {}
@@ -25,11 +28,11 @@ class Lobby:
 
 
 class Stock:
-    def __init__(self, id, ticker, name, type, price, number_of_shares, growth, risk, market_sensitivity, book_value_floor):
+    def __init__(self, id, ticker, name, industry, price, number_of_shares, growth, risk, market_sensitivity, book_value_floor):
         self.id = id
         self.ticker = ticker
         self.name = name
-        self.type = type #taki enum, np. fuel, food, media
+        self.industry = industry #taki enum, np. fuel, food, media
         self.price = price
         self.number_of_shares = number_of_shares
         self.growth = growth

@@ -1,14 +1,12 @@
-import random
+from models import Player
 
 class GameState:
-    def __init__(self, players):
-        self.turn = 0
-        self.players = players
-
-        self.positions = {p: 0 for p in players}
-        self.money = {p: 1500 for p in players}
-
+    def __init__(self, num_of_players : int):
+        self.game_ended : bool = False
+        self.turn : int = 1 
+        self.players : list[Player] = [Player() for i in range(num_of_players)]
         self.board = self.create_board()
+        self.max_turns : int = 100
 
     def create_board(self):
         return [
@@ -34,9 +32,6 @@ class GameState:
             {"type": "real_estate", "name": "Domki"},
         ]
 
-    def roll_dice(self):
-        return random.randint(1, 6) + random.randint(1, 6)
-
     def apply_moves(self, moves):
         results = []
 
@@ -49,8 +44,6 @@ class GameState:
                 self.positions[player_id] %= len(self.board)
                 self.money[player_id] += 200
 
-        # 2. rozliczenie pól (po wszystkich ruchach)
-        for player_id in moves:
             pos = self.positions[player_id]
             field = self.board[pos]
 
@@ -73,7 +66,11 @@ class GameState:
                 self.money[player_id] -= field["amount"]
                 results.append(f"{player_id} paid tax {field['amount']}")
 
+
+
         self.turn += 1
+
+        
 
         return results
 
