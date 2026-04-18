@@ -34,10 +34,10 @@ MAX_REBOUND = 0.18
 MAX_PRICE = 1e6
 MIN_PRICE = 0.01
 
-def next_regime(current_regime, rng):
+def next_regime(rng):
     global STOCK_REGIME, CRYPTO_REGIME
-    STOCK_REGIME = rng.choice(REGIME_STATES, p=stock_regime_transition[current_regime])
-    CRYPTO_REGIME = rng.choice(REGIME_STATES, p=crypto_regime_transition[current_regime])
+    STOCK_REGIME = rng.choice(REGIME_STATES, p=stock_regime_transition[STOCK_REGIME])
+    CRYPTO_REGIME = rng.choice(REGIME_STATES, p=crypto_regime_transition[CRYPTO_REGIME])
 
 def bounded_t_shock(df, lower=-3.0, upper=3.0):
     shock = np.random.standard_t(df=df) * np.sqrt((df - 2) / df)
