@@ -14,6 +14,13 @@ type Field = {
   d: number;
 };
 
+type FieldData = {
+  f: string;
+  d: number;
+  name: string;
+
+};
+
 const FIELD: Field[] = [
   { f: "start_field", d: 0 },
   { f: "stock_1_field", d: 1 },
@@ -36,6 +43,30 @@ const FIELD: Field[] = [
   { f: "crypto_4_field", d: 18 },
   { f: "estate_4_field", d: 19 }
 ];
+
+const fieldsData: FieldData[] = [
+  { f: "start_field", d: 0, name: "Start" },
+  { f: "stock_1_field", d: 1, name: "Stockmarket" },
+  { f: "bank_1_field", d: 2, name: "Bank" },
+  { f: "crypto_1_field", d: 3, name: "Crypto" },
+  { f: "estate_1_field", d: 4, name: "Estate" },
+  { f: "chance_1_field", d: 5, name: "Chance" },
+  { f: "stock_2_field", d: 6, name: "Stockmarket" },
+  { f: "score_field", d: 7, name: "Bet" },
+  { f: "crypto_2_field", d: 8, name: "Crypto" },
+  { f: "estate_2_field", d: 9, name: "Estate" },
+  { f: "park_field", d: 10, name: "Park" },
+  { f: "stock_3_field", d: 11, name: "Stockmarket" },
+  { f: "bank_2_field", d: 12, name: "Bank" },
+  { f: "crypto_3_field", d: 13, name: "Crypto" },
+  { f: "estate_3_field", d: 14, name: "Estate" },
+  { f: "chance_2_field", d: 15, name: "Chance" },
+  { f: "stock_4_field", d: 16, name: "Stockmarket" },
+  { f: "tax_field", d: 17, name: "Tax" },
+  { f: "crypto_4_field", d: 18, name: "Crypto" },
+  { f: "estate_4_field", d: 19, name: "Estate" }
+];
+
 import { getActiveGameWebSocket, getOrCreateGameWebSocket } from "./websocketBridge";
 
 type GameLocationState = {
@@ -56,6 +87,7 @@ export default function Game() {
   const [lastWsMessage, setLastWsMessage] = useState<any>(null);
   const [showMarkets, setShowMarkets] = useState(false);
   const [marketState, setMarketState] = useState<any>(() => getGlobalGameState());
+  const [playerState, setPlayerState] = useState<any>(() => getGlobalGameState());
 
 
   useEffect(() => {
@@ -70,7 +102,10 @@ export default function Game() {
         setLastWsMessage(data);
         console.log("[Game WS]", data);
         const gs = getGlobalGameState();
-        if (gs) setMarketState(gs);
+        if (gs) {
+          setMarketState(gs);
+          setPlayerState(gs);
+        }
       },
       (error: Event) => {
         console.error("[Game WS] error:", error);
@@ -81,54 +116,23 @@ export default function Game() {
     );
   }, [gameIdFromRoute, playerId]);
 
-  // Mock player data - in real app this would come from server
-  const [currentPlayer] = useState<Player>({
+  // Get player data from player state
+  const allPlayers = Array.isArray(playerState?.players) ? playerState.players : [];
+  
+  const currentPlayer = allPlayers.find((p: Player) => p.id === playerId) || {
     id: playerId || "1",
     name: "Ty",
-    money: 1500.00,
+    money: 0,
     is_bankrupt: false,
     position: 0,
     stocks: [],
     cryptos: [],
     credits: [],
     deposits: [],
-    properties: [
-      { id: 1, name: "Ulica Marszałkowska", price: 400, rent: 40, energy_use: 10 },
-      { id: 2, name: "Rynek Główny", price: 600, rent: 60, energy_use: 15 }
-    ]
-  });
+    properties: []
+  };
 
-  const [otherPlayers] = useState<Player[]>([
-    {
-      id: "2",
-      name: "Player 2",
-      money: 1200.00,
-      is_bankrupt: false,
-      position: 5,
-      stocks: [],
-      cryptos: [],
-      credits: [],
-      deposits: [],
-      properties: [
-        { id: 3, name: "Plac Wilsona", price: 350, rent: 35, energy_use: 8 }
-      ]
-    },
-    {
-      id: "3",
-      name: "Player 3",
-      money: 1800.00,
-      is_bankrupt: false,
-      position: 12,
-      stocks: [],
-      cryptos: [],
-      credits: [],
-      deposits: [],
-      properties: [
-        { id: 4, name: "Ulica Floriańska", price: 500, rent: 50, energy_use: 12 },
-        { id: 5, name: "Rynek Główny", price: 600, rent: 60, energy_use: 15 }
-      ]
-    }
-  ]);
+  const otherPlayers = allPlayers.filter((p: Player) => p.id !== playerId);
 
   const stocks = Array.isArray(marketState?.stocks) ? marketState.stocks : [];
   const cryptos = Array.isArray(marketState?.cryptos) ? marketState.cryptos : [];
@@ -155,13 +159,82 @@ export default function Game() {
     setShowModal(prev => !prev);
   };
 
+
+  const handleLeaveGame = () => {
+    console.log(currentPlayer.id);
+    navigate("/");
+  };
+
+  const handleEndTurn = () => {
+    const ws = getActiveGameWebSocket();
+    if (!ws) {
+      console.warn("Game WebSocket is missing");
+      return;
+    }
+
+    console.log("handleEndTurn")
+
+    ws.send({
+      type: "move",
+      move: {
+        steps: 2,
+        actions: []
+      },
+    });
+  };
+
   return (
     <div className="game-container">
 
       <div className="game-modal" style={{ transform: showModal ? "translateY(0)" : "translateY(100%)" }}>
         <button onClick={() => { setShowModal(prev => !prev) }}>Close</button>
         <div>
-          {selectedField.f}
+          {fieldsData.find(f => f.f === selectedField.f)?.name == "Start" ?(
+            <div>
+              <h1>Start</h1>
+              <p>You receive 200 PLN for passing Start!</p>
+            </div>
+          ) : fieldsData.find(f => f.f === selectedField.f)?.name == "Stockmarket" ?(
+           <div>
+              <h1>Stock Market - {getGlobalGameState().board[selectedField.d].name}</h1>
+              <p>You can buy and sell stocks here.</p>
+            </div>
+          ) : fieldsData.find(f => f.f === selectedField.f)?.name == "Bank" ?(
+           <div>
+              <h1>Bank - {getGlobalGameState().board[selectedField.d].name}</h1>
+              <p>You can deposit and withdraw money here.</p>
+            </div>
+          ) : fieldsData.find(f => f.f === selectedField.f)?.name == "Crypto" ?(
+           <div>
+              <h1>Crypto Exchange - {getGlobalGameState().board[selectedField.d].name}</h1>
+              <p>You can buy and sell cryptocurrencies here.</p>
+            </div>
+          ) : fieldsData.find(f => f.f === selectedField.f)?.name == "Estate" ?(
+           <div>
+              <h1>Estate - {getGlobalGameState().board[selectedField.d].name}</h1>
+              <p>You can buy and sell properties here.</p>
+            </div>
+          ) : fieldsData.find(f => f.f === selectedField.f)?.name == "Chance" ?(
+           <div>
+              <h1>Chance</h1>
+              <p>You can draw a Chance card here.</p>
+            </div>
+          ) : fieldsData.find(f => f.f === selectedField.f)?.name == "Bet" ?(
+           <div>
+              <h1>Bookmaker</h1>
+              <p>You can place bets here.</p>
+            </div>
+          ) : fieldsData.find(f => f.f === selectedField.f)?.name == "Tax" ?(
+           <div>
+              <h1>Tax</h1>
+              <p>You must pay taxes here.</p>
+            </div>
+          ) : (
+            <div>
+              <h1>Parking</h1>
+              <p>You can rest here.</p>
+            </div>
+          )}
         </div>
       </div>
 
@@ -185,7 +258,7 @@ export default function Game() {
 
           <div className="other-players">
             <h3>Other Players</h3>
-            {otherPlayers.map((player) => (
+            {otherPlayers.map((player : Player) => (
               <div
                 key={player.id}
                 className="other-player-card"
@@ -206,7 +279,7 @@ export default function Game() {
               {showMarkets ? "Close Markets" : "Markets"}
             </button>
             <button className="action-button">Sell Property</button>
-            <button className="action-button">End Turn</button>
+            <button className="action-button" onClick={handleEndTurn}>End Turn</button>
           </div>
 
           {lastWsMessage && (

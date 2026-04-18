@@ -301,3 +301,9 @@
 .square-3 {
   background-color: #3b82f6;
 }
+
+h1{
+  font-size: 2rem;
+  font-weight: normal;
+  color: #000000;
+}
