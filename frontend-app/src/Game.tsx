@@ -1,17 +1,25 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import PlayerStatus from "./PlayerStatus";
 import type { Player } from "./types";
 import "./Game.css";
 import Spline, { type SplineEvent } from '@splinetool/react-spline';
 
+type GameLocationState = {
+  gameReady?: boolean;
+  playerId?: string;
+};
+
 export default function Game() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const routeState = location.state as GameLocationState | null;
+  const playerId = routeState?.playerId ?? localStorage.getItem("playerId") ?? "";
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
 
   // Mock player data - in real app this would come from server
   const [currentPlayer] = useState<Player>({
-    id: "1",
+    id: playerId || "1",
     name: "Ty",
     money: 1500.00,
     is_bankrupt: false,
@@ -59,6 +67,7 @@ export default function Game() {
   ]);
 
   const handleLeaveGame = () => {
+    console.log(currentPlayer.id);
     navigate("/");
   };
 

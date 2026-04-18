@@ -67,7 +67,12 @@ export default function WaitingScreen({
                 if (data.type === 'game_started') {
                     // Navigate to game view and skip disconnecting WebSocket
                     wsRef.current = null; // Detach before unmount so useEffect doesn't close it
-                    navigate(`/game/${lobbyCode}`, { state: { gameReady: true } });
+                    navigate(`/game/${lobbyCode}`, {
+                        state: {
+                            gameReady: true,
+                            playerId: effectivePlayerId,
+                        },
+                    });
                 }
             },
             (error: Event) => {
