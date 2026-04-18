@@ -25,25 +25,88 @@ def board():
         {"type": "real_estate", "name": "Domy"},
     ]
 
-
-def chance_cards():
+def chance_cards() -> list[ChanceCard]:
         return [
-            ChanceCard(id=1, description='CD Projekt Red wypuścił Cyberpunk 2077, ale premiera okazała się niewypałem. Cena akcji CDR spada o 20%.'),
-            ChanceCard(id=2, description='NBP obniża stopy procentowe. Oprocentowanie kredytów i lokat maleje o połowę.'),
-            ChanceCard(id=3, description='Awaria dużej sieci energetycznej w Europie. Akcje spółek energetycznych tracą 15%.'),
-            ChanceCard(id=4, description='Globalna panika na rynku krypto. Wszystkie kryptowaluty spadają o 25%.'),
-            ChanceCard(id=5, description='ETF na Bitcoin i ETH zatwierdzony. BTC i ETH rosną o 18%.'),
-            ChanceCard(id=6, description='Wyciek danych w dużym banku. Akcje banków spadają o 10%.'),
-            ChanceCard(id=7, description='Wiedźmin 4 okazuje się nowym hitem. CD Projekt Red zyskuje +25%.'),
-            ChanceCard(id=8, description='Globalny wzrost cen ropy! Paliwo drożeje dwukrotnie na 5 tur, a spółki paliwowe rosną o 20%.'),
-            ChanceCard(id=9, description='Cyberatak na dużą giełdę krypto. ETH i SOL spadają o 17%.'),
-            ChanceCard(id=10, description='Korekta na rynku akcji. Wszystkie akcje spadają o 15%.'),
-            ChanceCard(id=11, description='Zyski firm lepsze od oczekiwań. Szeroki rynek akcji rośnie o 9%.'),
-            ChanceCard(id=12, description='Rekordowe wydobycie ropy. Spółki paliwowe notują dodatkowe +12%.'),
-            ChanceCard(id=13, description='Powódź! Kursy ubezpieczycieli spadają o 8%.'),
-            ChanceCard(id=14, description='Altseason na rynku krypto. SOL +20%, ETH +10%.'),
-            ChanceCard(id=15, description='Silna zima i wysokie zużycie energii. Spółki energetyczne +14%.'),
-            ChanceCard(id=16, description='Kryzys na rynku nieruchomości! Ceny wszystkich nieruchomości spadają o 15% w kolejnej turze.'),
+            ChanceCard(
+                 id=1, 
+                 description='CD Projekt Red wypuścił Cyberpunk 2077, ale premiera okazała się niewypałem. Cena akcji CDR spada o 20%.',
+                 effect=lambda game, _: game.change_stock_prices(tickers={"CDR"}, change_pct=-0.20)
+                 ),  
+            ChanceCard(
+                 id=2, 
+                 description='NBP obniża stopy procentowe. Oprocentowanie kredytów i lokat maleje o połowę.',
+                 effect=lambda game, _: game.change_interest_rates(change_pct=-0.50)
+                 ),
+            ChanceCard(
+                 id=3, 
+                 description='Awaria dużej sieci energetycznej w Europie. Akcje spółek energetycznych tracą 15%.',
+                 effect=lambda game, _: game.change_stock_prices(industries={"energy", "utilities"}, change_pct=-0.15)
+                 ),
+            ChanceCard(
+                 id=4, 
+                 description='Globalna panika na rynku krypto. Wszystkie kryptowaluty spadają o 25%.',
+                 effect=lambda game, _: game.change_crypto_prices(change_pct=-0.25)
+                 ),
+            ChanceCard(
+                 id=5, 
+                 description='ETF na Bitcoin i ETH zatwierdzony. BTC i ETH rosną o 18%.',
+                 effect=lambda game, _: game.change_crypto_prices(tickers={"BTC", "ETH"}, change_pct=0.18)
+                 ),
+            ChanceCard(
+                 id=6, 
+                 description='Wyciek danych w dużym banku. Akcje banków spadają o 10%.',
+                 effect=lambda game, _: game.change_stock_prices(industries={"banking"}, change_pct=-0.10)
+                 ),
+            ChanceCard(
+                 id=7, 
+                 description='Wiedźmin 4 okazuje się nowym hitem. CD Projekt Red zyskuje +25%.',
+                 effect=lambda game, _: game.change_stock_prices(tickers={"CDR"}, change_pct=0.25)
+                 ),
+            ChanceCard(
+                 id=8, 
+                 description='Globalny wzrost cen ropy! Paliwo drożeje dwukrotnie na 5 tur, a spółki paliwowe rosną o 20%.',
+                 effect=lambda game, _: game.change_fuel_price_multiplier(2.0, 5) and game.change_stock_prices(industries={"energy"}, change_pct=0.20)
+                 ),
+            ChanceCard(
+                 id=9, 
+                 description='Cyberatak na dużą giełdę krypto. ETH i SOL spadają o 17%.',
+                 effect=lambda game, _: game.change_crypto_prices(tickers={"ETH", "SOL"}, change_pct=-0.17)
+                 ),
+            ChanceCard(
+                 id=10, 
+                 description='Korekta na rynku akcji. Wszystkie akcje spadają o 15%.',
+                 effect=lambda game, _: game.change_stock_prices(change_pct=-0.15)
+                 ),
+            ChanceCard(
+                 id=11, 
+                 description='Zyski firm lepsze od oczekiwań. Szeroki rynek akcji rośnie o 9%.',
+                 effect=lambda game, _: game.change_stock_prices(change_pct=0.09)
+                 ),
+            ChanceCard(
+                 id=12, 
+                 description='Rekordowe wydobycie ropy. Spółki paliwowe notują dodatkowe +12%.',
+                 effect=lambda game, _: game.change_stock_prices(industries={"energy"}, change_pct=0.12)
+                 ),
+            ChanceCard(
+                 id=13, 
+                 description='Powódź! Kursy ubezpieczycieli spadają o 8%.',
+                 effect=lambda game, _: game.change_stock_prices(industries={"insurance"}, change_pct=-0.08)
+                 ),
+            ChanceCard(
+                 id=14, 
+                 description='Altseason na rynku krypto. SOL +20%, ETH +10%.',
+                 effect=lambda game, _: game.change_crypto_prices(tickers={"SOL"}, change_pct=0.20) and game.change_crypto_prices(tickers={"ETH"}, change_pct=0.10)
+                 ),
+            ChanceCard(
+                 id=15, 
+                 description='Silna zima i wysokie zużycie energii. Spółki energetyczne +14%.',
+                 effect=lambda game, _: game.change_stock_prices(industries={"energy", "utilities"}, change_pct=0.14)
+                 ),
+            ChanceCard(
+                 id=16, 
+                 description='Kryzys na rynku nieruchomości! Ceny wszystkich nieruchomości spadają o 15% w kolejnej turze.',
+                 effect=lambda game, _: game.change_property_prices(change_pct=-0.15)
+                ),
         ]
 
 

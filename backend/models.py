@@ -52,6 +52,7 @@ class Stock:
         self.risk : float = risk
         self.market_sensitivity : float = market_sensitivity
         self.book_value_floor : float = book_value_floor
+        self.price_history : list[float] = [float(price)]
 
 class StockDto:
     def __init__(self, id : int, ticker : str, name : str, industry : str, price : float, number_of_shares : int, full_number_of_shares : int):
@@ -62,6 +63,7 @@ class StockDto:
         self.price : float = price
         self.full_number_of_shares : int = full_number_of_shares
         self.number_of_shares : int = number_of_shares
+        self.price_history : list[float] = [float(price)]
 
 class StockShare:
     def __init__(self, stock: StockDto, quantity: int):
@@ -77,6 +79,7 @@ class Crypto:
         self.growth  : float = growth
         self.risk : float = risk
         self.market_sensitivity : float = market_sensitivity
+        self.price_history : list[float] = [float(price)]
 
 class CryptoDto:
     def __init__(self, id : int, ticker : str, name : str, price : float):
@@ -84,6 +87,7 @@ class CryptoDto:
         self.ticker : str = ticker
         self.name : str = name
         self.price : float = price
+        self.price_history : list[float] = [float(price)]
 
 class CryptoShare:
     def __init__(self, crypto: CryptoDto, quantity: int):
@@ -113,9 +117,10 @@ class Deposit:
         self.lending_rate : float = lending_rate
 
 class ChanceCard:
-    def __init__(self, id : int, description : str):
+    def __init__(self, id : int, description : str, effect : callable[[GameState, str], None]):
         self.id : int = id
         self.description : str = description
+        self.effect : callable[[GameState, str], None] = effect
 
 class ChanceCardPlayer:
     def __init__(self, id : int, description : str, player_id : str):
@@ -133,6 +138,7 @@ class Mapper:
             industry=stock.industry,
             price=stock.price,
             number_of_shares=stock.number_of_shares,
+            price_history=stock.price_history,
             full_number_of_shares=stock.full_number_of_shares
         )
 
@@ -142,7 +148,8 @@ class Mapper:
             id=crypto.id,
             ticker=crypto.ticker,
             name=crypto.name,
-            price=crypto.price
+            price=crypto.price,
+            price_history=crypto.price_history
         )
 
     @staticmethod
