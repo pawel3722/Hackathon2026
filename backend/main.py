@@ -42,7 +42,6 @@ def join(lobby_id: str, name: str = None):
 
     if len(lobby.users) == 1:
         lobby.host_id = user_id
-        
 
     return {
         "ws": f"/ws/{lobby_id}",

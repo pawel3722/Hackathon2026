@@ -61,7 +61,7 @@ async def start_round_timer(lobby):
         await resolve_round(lobby)
 
 async def resolve_round(lobby):
-    moves = {p.id: p.current_move for p in lobby.users.values()}
+    moves = {u.id: u.current_move for u in lobby.users.values()}
     results = lobby.game_state.apply_moves(moves)
 
     # reset rundy
@@ -87,11 +87,11 @@ async def handle_disconnect(lobby: Lobby, user: User):
 
     if lobby.host_id == user.id:
         if lobby.users:
+            await broadcast(lobby, render_lobby_state(lobby))
             lobby.host_id = next(iter(lobby.users.keys()))
         else:
-            lobby.host_id = None
+            del game_manager.delete_lobby(lobby.id)
 
-    await broadcast(lobby, render_lobby_state(lobby))
 
 
 async def handle_event(lobby: Lobby, user: User, msg: dict):
