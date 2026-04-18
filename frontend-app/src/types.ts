@@ -4,7 +4,7 @@ export interface Stock {
   id: number;
   ticker: string;
   name: string;
-  industry: IndustryType;
+  industry: string; // enum-like: fuel, food, media, etc.
   price: number;
   number_of_shares: number;
 }
@@ -90,9 +90,9 @@ export interface ApiResponse<T> {
 }
 
 // Specific response types
-export type GameJoinResponse = ApiResponse<GameState>;
-export type GameMoveResponse = ApiResponse<GameState>;
-export type PlayerActionResponse = ApiResponse<{ player: Player; game_state: GameState }>;
+export interface GameJoinResponse extends ApiResponse<GameState> {}
+export interface GameMoveResponse extends ApiResponse<GameState> {}
+export interface PlayerActionResponse extends ApiResponse<{ player: Player; game_state: GameState }> {}
 
 // Enums for type safety
 export const Industry = {
@@ -116,27 +116,3 @@ export const GameStatus = {
 } as const;
 
 export type GameStatusType = typeof GameStatus[keyof typeof GameStatus];
-
-// WebSocket message types
-export interface WebSocketMessage {
-  type: string;
-  data?: Record<string, unknown>;
-  game_state?: GameState;
-  player?: Player;
-}
-
-export interface GameStateUpdateMessage extends WebSocketMessage {
-  type: 'game_state_update';
-  game_state: GameState;
-}
-
-export interface PlayerUpdateMessage extends WebSocketMessage {
-  type: 'player_update';
-  player: Player;
-  game_state: GameState;
-}
-
-export interface ErrorMessage extends WebSocketMessage {
-  type: 'error';
-  message: string;
-}
