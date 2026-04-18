@@ -7,7 +7,6 @@ class GameState:
 
         self.positions = {p: 0 for p in players}
         self.money = {p: 1500 for p in players}
-        self.properties = {}
 
         self.board = self.create_board()
 

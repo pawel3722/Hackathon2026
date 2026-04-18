@@ -1,10 +1,10 @@
 from fastapi import FastAPI, WebSocket
 import uuid
 
-from app.game_manager import game_manager
-from app.models import Lobby
-from app.auth import create_token
-from app.websocket import handle_connection
+from game_manager import game_manager
+from models import Lobby
+from auth import create_token
+from websocket import handle_connection
 
 app = FastAPI()
 

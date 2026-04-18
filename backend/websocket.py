@@ -1,10 +1,10 @@
 from fastapi import WebSocket
 import asyncio
-from app.game_manager import game_manager
-from app.models import Player
-from app.utils import broadcast
-from app.auth import verify_token
-from app.game_state import GameState
+from game_manager import game_manager
+from models import Player
+from utils import broadcast
+from auth import verify_token
+from game_state import GameState
 
 ROUND_TIMEOUT = 10  # sekundy
 
