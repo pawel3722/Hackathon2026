@@ -4,7 +4,7 @@ from contract import TurnResult
 from collections import deque
 from shutil import move
 from contract import Move
-from models import CryptoShare, Mapper, Player, Stock, Crypto, Property, ChanceCard, StockShare
+from models import Credit, CryptoShare, Deposit, Mapper, Player, Stock, Crypto, Property, ChanceCard, StockShare
 from update_market_prices import update_crypto_price, update_stock_price, update_regime
 import game_init
 
@@ -86,6 +86,26 @@ class GameState:
                     player_crypto.quantity -= action.amount
                     if player_crypto.quantity == 0:
                         current_player.cryptos.remove(player_crypto)
+
+        elif field["type"] == "bank" and action.action_type == "bank":
+            if action.actions_type == "credit" and action.assets_id in [1, 2, 3]:
+                if action.assets_id == 1:
+                    credit = Credit(amount=action.amount, instalment_rate=action.amount * 1.15 / 12 , number_of_instalments=12)
+                elif action.assets_id == 2:
+                    credit = Credit(amount=action.amount, instalment_rate=action.amount * 1.125 / 24, number_of_instalments=24)
+                elif action.assets_id == 3:
+                    credit = Credit(amount=action.amount, instalment_rate=action.amount * 1.1 / 36, number_of_instalments=36)
+                current_player.money += action.amount
+                current_player.credits.append(credit)
+            elif(action.action_type == "deposit" and action.assets_id in [4, 5, 6]):
+                if action.assets_id == 4:
+                    deposit = Deposit(amount=action.amount, lending_rate=action.amount * 1.06, number_of_instalments=12)
+                elif action.assets_id == 5:
+                    deposit = Deposit(amount=action.amount, lending_rate=action.amount * 1.065, number_of_instalments=24)
+                elif action.assets_id == 6:
+                    deposit = Deposit(amount=action.amount, lending_rate=action.amount * 1.07, number_of_instalments=36)
+                current_player.money -= action.amount
+                current_player.deposits.append(deposit)
 
         for deposit in current_player.deposits:
             deposit.number_of_instalments -= 1
