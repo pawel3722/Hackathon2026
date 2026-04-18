@@ -250,6 +250,18 @@ class GameState:
             board=self.board
         )
 
+    def get_initial_state(self):
+        return TurnResult(
+            turn=1,
+            game_ended=False,
+            players=list(self.players.values()),
+            stocks=self.stocks,
+            cryptos=self.cryptos,
+            properties=self.properties,
+            cards=[self._get_chance_card(), self._get_chance_card(), self._get_chance_card()],
+            board=self.board
+        )
+
 from contract import Action, Move, TurnResult
 
 if __name__ == "__main__":

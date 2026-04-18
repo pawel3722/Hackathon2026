@@ -1,3 +1,4 @@
+from backend.game_state import GameState
 from fastapi import WebSocket, WebSocketDisconnect
 import asyncio
 
@@ -95,9 +96,10 @@ async def handle_event(lobby, user, msg):
     if msg_type == "start":
         if user.id != lobby.host_id:
             return
-
+        lobby.game_state = GameState(lobby.users.keys())
         lobby.started = True
         broadcast(lobby, {"type": "game_started"})
+        broadcast(lobby, lobby.game_state.get_initial_state())
 
     # MOVE
     elif msg_type == "move":
