@@ -29,7 +29,7 @@ export default function Game() {
   const [otherPlayers] = useState<Player[]>([
     {
       id: "2",
-      name: "Gracz 2",
+      name: "Player 2",
       money: 1200.00,
       is_bankrupt: false,
       position: 5,
@@ -43,7 +43,7 @@ export default function Game() {
     },
     {
       id: "3",
-      name: "Gracz 3",
+      name: "Player 3",
       money: 1800.00,
       is_bankrupt: false,
       position: 12,
@@ -71,7 +71,7 @@ export default function Game() {
       <div className="game-header">
         <h1 className="game-title">Moneypoly</h1>
         <button className="leave-button" onClick={handleLeaveGame}>
-          Opuść grę
+          Leave Game
         </button>
       </div>
 
@@ -90,7 +90,7 @@ export default function Game() {
           )}
 
           <div className="other-players">
-            <h3>Inni gracze</h3>
+            <h3>Other Players</h3>
             {otherPlayers.map((player) => (
               <div
                 key={player.id}
@@ -100,17 +100,17 @@ export default function Game() {
                 <div className="player-name">{player.name}</div>
                 <div className="player-money">${player.money}</div>
                 <div className="player-properties">
-                  {player.properties.length} własności
+                  {player.properties.length} properties
                 </div>
               </div>
             ))}
           </div>
 
           <div className="game-actions">
-            <button className="action-button primary">Rzuć kostką</button>
-            <button className="action-button">Kup własność</button>
-            <button className="action-button">Sprzedaj</button>
-            <button className="action-button">Koniec tury</button>
+            <button className="action-button primary">Roll Dice</button>
+            <button className="action-button">Buy Property</button>
+            <button className="action-button">Sell Property</button>
+            <button className="action-button">End Turn</button>
           </div>
         </div>
 
