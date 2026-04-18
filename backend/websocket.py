@@ -1,5 +1,6 @@
 from game_state import GameState
 from fastapi import WebSocket, WebSocketDisconnect
+from fastapi.encoders import jsonable_encoder
 import asyncio
 
 from game_manager import game_manager
@@ -11,7 +12,7 @@ from game_manager import game_manager
 
 def safe_send(ws, data):
     try:
-        return asyncio.create_task(ws.send_json(data))
+        return asyncio.create_task(ws.send_json(jsonable_encoder(data)))
     except:
         return None
 
@@ -29,7 +30,7 @@ def lobby_state(lobby):
         "host_id": lobby.host_id,
         "users": [
             {"id": u.id, "name": u.name}
-            for u in lobby.users.values()
+            for u in lobby.users.values() if u.ws is not None
         ]
     }
 
@@ -72,17 +73,23 @@ async def handle_connection(ws: WebSocket, lobby_id: str, user_id: str):
         print("WS ERROR:", e)
 
     finally:
-        # cleanup
+        # cleanup (mark as offline instead of deleting)
         if user_id in lobby.users:
-            del lobby.users[user_id]
+            user = lobby.users[user_id]
+            if user.ws == ws:
+                user.ws = None
 
-        if lobby.users:
-            if lobby.host_id == user_id:
-                lobby.host_id = next(iter(lobby.users.keys()))
-        else:
+        # Calculate if all users are offline
+        active_users = [u for u in lobby.users.values() if u.ws is not None]
+        
+        if not active_users:
             game_manager.remove_lobby(lobby.id)
+        else:
+            if lobby.host_id == user_id and user.ws is None:
+                # pass host to the next active user instead of first in key
+                lobby.host_id = active_users[0].id
 
-        broadcast(lobby, lobby_state(lobby))
+            broadcast(lobby, lobby_state(lobby))
 
 
 # -------------------------

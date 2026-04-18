@@ -84,17 +84,23 @@ export class GameWebSocket {
   private ws: WebSocket | null = null;
 
   private gameId: string;
-  private userId: string;;
+  private userId: string;
   private onMessage: (data: any) => void;
+  private onError?: (error: Event) => void;
+  private onClose?: () => void;
 
   constructor(
     gameId: string,
     userId: string,
-    onMessage: (data: any) => void
+    onMessage: (data: any) => void,
+    onError?: (error: Event) => void,
+    onClose?: () => void
   ) {
     this.gameId = gameId;
     this.userId = userId;
     this.onMessage = onMessage;
+    this.onError = onError;
+    this.onClose = onClose;
   }
 
   connect(): void {
@@ -113,13 +119,34 @@ export class GameWebSocket {
       this.onMessage(msg);
     };
 
-    this.ws.onerror = (err) => {
+    this.ws.onerror = (err: Event) => {
       console.error('WS error', err);
+      if (this.onError) {
+        this.onError(err);
+      }
     };
 
     this.ws.onclose = () => {
       console.log('WebSocket closed');
+      if (this.onClose) {
+        this.onClose();
+      }
     };
+  }
+
+  disconnect(): void {
+    if (this.ws) {
+      this.ws.close();
+      this.ws = null;
+    }
+  }
+
+  send(data: any): void {
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify(data));
+    } else {
+      console.warn('WebSocket is not open, cannot send data');
+    }
   }
 }
 
