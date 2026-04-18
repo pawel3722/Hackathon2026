@@ -1,7 +1,7 @@
 from fastapi import WebSocket
 import asyncio
 from game_manager import game_manager
-from models import Player
+from models import User, Lobby
 from utils import broadcast
 # from auth import verify_token
 from game_state import GameState
@@ -74,7 +74,7 @@ async def resolve_round(lobby):
         "turn": lobby.game_state.turn
     })
 
-async def handle_event(lobby, player, msg):
+async def handle_event(lobby: Lobby, player: User, msg: dict):
     async with lobby.lock:
         if msg["type"] == "start":
             if player.id != lobby.host_id:
