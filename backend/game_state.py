@@ -1,4 +1,5 @@
-from models import Player, Stock, Crypto
+from models import Player, Stock, Crypto, Property
+import update_market_prices
 
 class GameState:
     def __init__(self, num_of_players : int):
@@ -10,7 +11,20 @@ class GameState:
         
         self.board = self.create_board()
 
-        self.stocks = [
+        self.stocks = self.init_stocks
+        self.cryptos = self.init_crypto
+        self.properties = self.init_properties()
+
+    def init_properties(self):
+        return [
+            Property(id=201, name='garaz', price=75_000.0, rent=500.0, energy_use=120.0),
+            Property(id=202, name='kawalerka', price=160_000.0, rent=1_500.0, energy_use=1_600.0),
+            Property(id=203, name='mieszkanie', price=260_000.0, rent=2_200.0, energy_use=2_900.0),
+            Property(id=204, name='dom', price=1_350_000.0, rent=6_500.0, energy_use=5_200.0),
+        ]
+    
+    def init_stocks(self):
+        return [
             Stock(
                 id=1, ticker='PKO', name='PKO Bank', industry='banking',
                 price=67.40, number_of_shares=125,
@@ -38,7 +52,8 @@ class GameState:
             ),
         ]
 
-        self.cryptos = [
+    def init_crypto(self):
+        return [
             Crypto(
                 id=101, ticker='BTC', name='Bitcoin',
                 price=84500.0, growth=0.006, risk=0.08, market_sensitivity=0.90
@@ -52,7 +67,6 @@ class GameState:
                 price=185.0, growth=0.008, risk=0.14, market_sensitivity=1.10
             ),
         ]
-
 
     def create_board(self):
         return [
