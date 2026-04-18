@@ -128,6 +128,30 @@ export default function Game() {
     setShowModal(prev => !prev);
   };
 
+
+  const handleLeaveGame = () => {
+    console.log(currentPlayer.id);
+    navigate("/");
+  };
+
+  const handleEndTurn = () => {
+    const ws = getActiveGameWebSocket();
+    if (!ws) {
+      console.warn("Game WebSocket is missing");
+      return;
+    }
+
+    console.log("handleEndTurn")
+
+    ws.send({
+      type: "move",
+      move: {
+        steps: 2,
+        actions: []
+      },
+    });
+  };
+
   return (
     <div className="game-container">
 
@@ -179,7 +203,7 @@ export default function Game() {
               {showMarkets ? "Close Markets" : "Markets"}
             </button>
             <button className="action-button">Sell Property</button>
-            <button className="action-button">End Turn</button>
+            <button className="action-button" onClick={handleEndTurn}>End Turn</button>
           </div>
 
           {lastWsMessage && (
