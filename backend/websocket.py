@@ -3,37 +3,41 @@ import asyncio
 from game_manager import game_manager
 from models import Player
 from utils import broadcast
-from auth import verify_token
+# from auth import verify_token
 from game_state import GameState
 
 ROUND_TIMEOUT = 10  # sekundy
 
-async def handle_connection(ws: WebSocket, lobby_id: str, token: str):
+async def handle_connection(ws: WebSocket, lobby_id: str, user_id: str):
     await ws.accept()
 
-    data = verify_token(token)
-    player_id = data["player_id"]
-
     lobby = game_manager.get_lobby(lobby_id)
+
     if not lobby:
         await ws.close()
         return
 
-    # pomocnicze pola runtime
-    if not hasattr(lobby, "round_task"):
-        lobby.round_task = None
+    user = lobby.users.get(user_id)
 
-    player = Player(player_id, f"P-{player_id[:4]}", ws)
-    lobby.players[player_id] = player
+    if not user:
+        await ws.close()
+        return
+    
+    user.ws = ws
 
-    await broadcast(lobby, {"type": "join", "player": player.name})
+    print("UPDATING USERS IN LOBBY")
+    d = {"type": "update_lobby", "users": [u.name for u in lobby.users.values()]}
+    print(d)
 
-    try:
-        while True:
+    await broadcast(lobby, d)
+
+    while True:
+        try:
             msg = await ws.receive_json()
-            await handle_event(lobby, player, msg)
-    except:
-        del lobby.players[player_id]
+            await handle_event(lobby, user, msg)
+        except Exception as e:
+            print(f"Error handling message: {e}")
+            break
 
 async def start_round_timer(lobby):
     # uruchamiany przy pierwszym ruchu w rundzie
@@ -77,7 +81,7 @@ async def handle_event(lobby, player, msg):
                 return
 
             lobby.started = True
-            lobby.game_state = GameState(list(lobby.players.keys()))
+            lobby.game_state = GameState(list(lobby.users.keys()))
 
             await broadcast(lobby, {"type": "started"})
 

@@ -1,69 +1,150 @@
+from __future__ import annotations
 import asyncio
+from typing import TYPE_CHECKING
 
+
+if TYPE_CHECKING:
+    from contract import Move
+    from game_state import GameState
+
+class User:
+    def __init__(self, id : str, name : str):
+        self.id : str = id
+        self.name : str = name
+        self.current_move : Move = None
+        self.ready : bool = False
+        self.ws = None
+        
 class Player:
-    def __init__(self, id, name, websocket=None):
-        self.id = id
-        self.name = name
-        self.ws = websocket
-        self.current_move = None
-        self.ready = False
-        self.money = 5000.00
-        self.stocks = {}
-        self.cryptos = {}
-        self.credits = {}
-        self.deposits = {}
-        self.properties = {}
+    def __init__(self, id: str):
+        self.id : str = id
+        self.money : float = 5000.00
+        self.is_bankrupt : bool = False
+        self.position : int = 0
+        self.stocks : list[StockShare] = []
+        self.cryptos : list[CryptoShare] = []
+        self.credits : list[Credit] = []
+        self.deposits : list[Deposit] = []
+        self.properties : list[Property] = []
 
 class Lobby:
-    def __init__(self, id, host_id):
-        self.id = id
-        self.host_id = host_id
-        self.players = {}
-        self.started = False
-        self.game_state = None
+    def __init__(self, id : str, host_id : str):
+        self.id : str = id
+        self.host_id : str = host_id
+        self.players : list[User] = {}
+        self.started : bool = False
+        self.game_state : GameState = None
         self.lock = asyncio.Lock()
+        self.users: dict[str, User] = {} # player_id -> User
+
 
 class Stock:
-    def __init__(self, id, ticker, name, type, price, number_of_shares, growth, risk, market_sensitivity, book_value_floor):
-        self.id = id
-        self.ticker = ticker
-        self.name = name
-        self.type = type #taki enum, np. fuel, food, media
-        self.price = price
-        self.number_of_shares = number_of_shares
-        self.growth = growth
-        self.risk = risk
-        self.market_sensitivity = market_sensitivity
-        self.book_value_floor = book_value_floor
+    def __init__(self, id : int, ticker : str, name : str, industry : str, price : float, number_of_shares : int, growth : float, risk : float, market_sensitivity : float, book_value_floor : float):
+        self.id : int = id
+        self.ticker : str = ticker
+        self.name : str = name
+        self.industry : str = industry #taki enum, np. fuel, food, media
+        self.price : float = price
+        self.number_of_shares : int = number_of_shares
+        self.growth : float = growth
+        self.risk : float = risk
+        self.market_sensitivity : float = market_sensitivity
+        self.book_value_floor : float = book_value_floor
+
+class StockDto:
+    def __init__(self, id : int, ticker : str, name : str, industry : str, price : float, number_of_shares : int):
+        self.id : int = id
+        self.ticker : str = ticker
+        self.name : str = name
+        self.industry : str = industry #taki enum, np. fuel, food, media
+        self.price : float = price
+        self.number_of_shares : int = number_of_shares
+
+class StockShare:
+    def __init__(self, stock: StockDto, quantity: int):
+        self.stock : StockDto = stock
+        self.quantity : int = quantity
 
 class Crypto:
-    def __init__(self, id, ticker, name, price, growth, risk, market_sensitivity):
-        self.id = id
-        self.ticker = ticker
-        self.name = name
-        self.price = price
-        self.growth = growth
-        self.risk = risk
-        self.market_sensitivity = market_sensitivity
+    def __init__(self, id : int, ticker : str, name : str, price : float, growth : float, risk : float, market_sensitivity : float):
+        self.id : int = id
+        self.ticker : str = ticker
+        self.name : str = name
+        self.price : float = price
+        self.growth  : float = growth
+        self.risk : float = risk
+        self.market_sensitivity : float = market_sensitivity
+
+class CryptoDto:
+    def __init__(self, id : int, ticker : str, name : str, price : float):
+        self.id : int = id
+        self.ticker : str = ticker
+        self.name : str = name
+        self.price : float = price
+
+class CryptoShare:
+    def __init__(self, crypto: CryptoDto, quantity: int):
+        self.crypto : CryptoDto = crypto
+        self.quantity : int = quantity
 
 class Property:
-    def __init__(self, id, name, price, rent, energy_use):
-        self.id = id
-        self.name = name
-        self.price = price
-        self.rent = rent
-        self.energy_use = energy_use
+    def __init__(self, id : int, name : str, price : float, rent : float, energy_use : float):
+        self.id : int = id
+        self.name : str = name
+        self.price : float = price
+        self.rent : float = rent
+        self.energy_use : float = energy_use
 
 class Credit:
-    def __init__(self, id, price, number_of_instalments):
-        self.id = id
-        self.price = price
-        self.number_of_instalments = number_of_instalments
-        self.instalment_rate = price / number_of_instalments
+    def __init__(self, id : int, price : float, number_of_instalments : int):
+        self.id : int = id
+        self.price : float = price
+        self.number_of_instalments : int = number_of_instalments
+        self.instalment_rate : float = price / number_of_instalments
 
 class Deposit:
-    def __init__(self, id, price, number_of_instalments, lending_rate):
-        self.id = id
-        self.price = price
-        self.number_of_instalments = number_of_instalments
-        self.lending_rate = lending_rate
+    def __init__(self, id : int, price : float, number_of_instalments : int, lending_rate : float):
+        self.id : int = id
+        self.price : float = price
+        self.number_of_instalments : int = number_of_instalments
+        self.lending_rate : float = lending_rate
+
+class ChanceCard:
+    def __init__(self, id : int, description : str):
+        self.id : int = id
+        self.description : str = description
+
+class ChanceCardPlayer:
+    def __init__(self, id : int, description : str, player_id : str):
+        self.id : int = id
+        self.description : str = description
+        self.player_id : str = player_id
+
+class Mapper:
+    @staticmethod
+    def map_stock(stock: Stock) -> StockDto:
+        return StockDto(
+            id=stock.id,
+            ticker=stock.ticker,
+            name=stock.name,
+            industry=stock.industry,
+            price=stock.price,
+            number_of_shares=stock.number_of_shares
+        )
+
+    @staticmethod
+    def map_crypto(crypto: Crypto) -> CryptoDto:
+        return CryptoDto(
+            id=crypto.id,
+            ticker=crypto.ticker,
+            name=crypto.name,
+            price=crypto.price
+        )
+
+    @staticmethod
+    def map_chance_card(chance_card: ChanceCard, player_id: str) -> ChanceCardPlayer:
+        return ChanceCardPlayer(
+            id=chance_card.id,
+            description=chance_card.description,
+            player_id=player_id
+        )
