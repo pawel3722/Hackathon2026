@@ -69,6 +69,7 @@ export interface Player {
   credits: Credit[];
   deposits: Deposit[];
   properties: Property[];
+  pawn_id: string;
 }
 
 // Game state interfaces

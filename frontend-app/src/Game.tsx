@@ -137,6 +137,9 @@ export default function Game() {
     properties: []
   };
 
+  allPlayers.forEach((p: Player, i: number) => {
+    p.pawn_id = `p${i + 1}-start`; });
+
   const otherPlayers = allPlayers.filter((p: Player) => p.id !== playerId);
 
   const stocks = Array.isArray(marketState?.stocks) ? marketState.stocks : [];
@@ -144,7 +147,7 @@ export default function Game() {
 
   const onSplineMouseDown = (e: SplineEvent) => {
     const nextField = FIELD.find(f => f.f === e.target.name);
-    const pawn = spline.current?.findObjectByName("p2-start");
+    const pawn = spline.current?.findObjectByName(currentPlayer.pawn_id);
 
     if (!nextField || !pawn) return;
 
