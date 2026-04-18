@@ -1,53 +1,54 @@
 from fastapi import FastAPI, WebSocket
 from fastapi.responses import FileResponse
+from fastapi.middleware.cors import CORSMiddleware
 import uuid
 
 from game_manager import game_manager
-from models import Lobby
+from models import Lobby, User
 from websocket import handle_connection
-
-import models
 
 app = FastAPI()
 
-from fastapi.middleware.cors import CORSMiddleware
-
+# CORS (DEV)
 app.add_middleware(
-     CORSMiddleware,
-     allow_origins=["*"],  # Allows all origins
-     allow_credentials=True,
-     allow_methods=["*"],  # Allows all methods
-     allow_headers=["*"],  # Allows all headers
- )
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/")
-def serve_index():
+def root():
     return FileResponse("index.html")
 
+
+# CREATE LOBBY
 @app.post("/create")
 def create():
-    lobby_id = str(uuid.uuid4())
+    lobby_id = str(uuid.uuid4())[:8]
 
     lobby = Lobby(lobby_id)
     game_manager.add_lobby(lobby)
 
-    return {
-        "lobby_id": lobby_id
-    }
+    return {"lobby_id": lobby_id}
 
 
-
+# JOIN LOBBY
 @app.post("/join/{lobby_id}")
 def join(lobby_id: str, name: str = None):
-    if lobby_id not in game_manager.lobbies:
-        return {"error": "Lobby not found"}
-    
     lobby = game_manager.get_lobby(lobby_id)
 
-    user_id = str(uuid.uuid4())
-    user_name = name or "Unnamed user"
+    if not lobby:
+        return {"error": "Lobby not found"}
 
-    user = models.User(user_id, user_name)
+    user_id = str(uuid.uuid4())
+
+    user = User(
+        id=user_id,
+        name=name or "Unnamed user"
+    )
+
     lobby.users[user_id] = user
 
     if len(lobby.users) == 1:
@@ -59,6 +60,7 @@ def join(lobby_id: str, name: str = None):
     }
 
 
+# WEBSOCKET ENTRY
 @app.websocket("/ws/{lobby_id}")
-async def ws(ws: WebSocket, lobby_id: str, user_id: str):
+async def ws_endpoint(ws: WebSocket, lobby_id: str, user_id: str):
     await handle_connection(ws, lobby_id, user_id)

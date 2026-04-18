@@ -91,7 +91,7 @@ export interface ApiResponse<T> {
 
 // Specific response types
 export interface GameJoinResponse extends ApiResponse<GameState> {
-  player_id?: string;
+  user_id?: string;
 }
 export interface GameMoveResponse extends ApiResponse<GameState> {}
 export interface PlayerActionResponse extends ApiResponse<{ player: Player; game_state: GameState }> {}

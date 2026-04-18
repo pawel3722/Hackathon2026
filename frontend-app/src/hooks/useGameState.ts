@@ -8,7 +8,7 @@ interface UseGameStateReturn {
   isLoading: boolean;
   error: string | null;
   joinGame: (gameId: string, playerName: string) => Promise<void>;
-  createGame: (playerName: string, difficulty: string, maxPlayers: number) => Promise<void>;
+  createGame: () => Promise<void>;
   startGame: () => Promise<void>;
   makeMove: (action: string, data?: any) => Promise<void>;
   rollDice: () => Promise<void>;
@@ -36,15 +36,13 @@ export function useGameState(gameId?: string): UseGameStateReturn {
   useEffect(() => {
     const userId = localStorage.getItem('playerId');
 
-    if (gameId && gameState && userId) {
+    if (gameId && userId) {
       const ws = new GameWebSocket(
         gameId,
         userId,
         (data: any) => {
-          // Handle real-time updates
           if (data.type === 'game_state_update') {
             setGameState(data.game_state);
-            // Update current player if it's in the update
             const player = data.game_state.players.find((p: Player) =>
               p.id === localStorage.getItem('playerId')
             );
@@ -69,7 +67,7 @@ export function useGameState(gameId?: string): UseGameStateReturn {
         ws.disconnect();
       };
     }
-  }, [gameId, gameState]);
+  }, [gameId]);
 
   const handleApiCall = useCallback(async <T,>(
     apiCall: () => Promise<T>,

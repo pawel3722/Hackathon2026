@@ -18,14 +18,32 @@ class User:
 class Player:
     def __init__(self, id: str):
         self.id : str = id
-        self.money : float = 5000.00
+        self.money : float = 50000.00
         self.is_bankrupt : bool = False
         self.position : int = 0
+        self.insurance : int = 0
         self.stocks : list[StockShare] = []
         self.cryptos : list[CryptoShare] = []
         self.credits : list[Credit] = []
         self.deposits : list[Deposit] = []
         self.properties : list[Property] = []
+
+    def count_all_money(self) -> float:
+        return self.money + sum(s.stock.price * s.quantity for s in self.stocks) + sum(c.crypto.price * c.quantity for c in self.cryptos) + sum(p.price for p in self.properties) - sum(cr.instalment_rate * cr.number_of_instalments for cr in self.credits) + sum(d.price for d in self.deposits)
+
+class PlayerEndGame:
+    def __init__(self, player: Player):
+        self.id : str = player.id
+        self.money : float = player.money
+        self.is_bankrupt : bool = player.is_bankrupt
+        self.position : int = player.position
+        self.insurance : int = player.insurance
+        self.stocks : list[StockShare] = player.stocks
+        self.cryptos : list[CryptoShare] = player.cryptos
+        self.credits : list[Credit] = player.credits
+        self.deposits : list[Deposit] = player.deposits
+        self.properties : list[Property] = player.properties
+        self.all_money : float = player.count_all_money()
 
 class Lobby:
     def __init__(self, id : str):
@@ -45,20 +63,24 @@ class Stock:
         self.name : str = name
         self.industry : str = industry #taki enum, np. fuel, food, media
         self.price : float = price
+        self.full_number_of_shares : int = number_of_shares
         self.number_of_shares : int = number_of_shares
         self.growth : float = growth
         self.risk : float = risk
         self.market_sensitivity : float = market_sensitivity
         self.book_value_floor : float = book_value_floor
+        self.price_history : list[float] = [float(price)]
 
 class StockDto:
-    def __init__(self, id : int, ticker : str, name : str, industry : str, price : float, number_of_shares : int):
+    def __init__(self, id : int, ticker : str, name : str, industry : str, price : float, number_of_shares : int, full_number_of_shares : int):
         self.id : int = id
         self.ticker : str = ticker
         self.name : str = name
         self.industry : str = industry #taki enum, np. fuel, food, media
         self.price : float = price
+        self.full_number_of_shares : int = full_number_of_shares
         self.number_of_shares : int = number_of_shares
+        self.price_history : list[float] = [float(price)]
 
 class StockShare:
     def __init__(self, stock: StockDto, quantity: int):
@@ -74,6 +96,7 @@ class Crypto:
         self.growth  : float = growth
         self.risk : float = risk
         self.market_sensitivity : float = market_sensitivity
+        self.price_history : list[float] = [float(price)]
 
 class CryptoDto:
     def __init__(self, id : int, ticker : str, name : str, price : float):
@@ -81,11 +104,12 @@ class CryptoDto:
         self.ticker : str = ticker
         self.name : str = name
         self.price : float = price
+        self.price_history : list[float] = [float(price)]
 
 class CryptoShare:
     def __init__(self, crypto: CryptoDto, quantity: int):
         self.crypto : CryptoDto = crypto
-        self.quantity : int = quantity
+        self.quantity : float = quantity
 
 class Property:
     def __init__(self, id : int, name : str, price : float, rent : float, energy_use : float):
@@ -110,9 +134,10 @@ class Deposit:
         self.lending_rate : float = lending_rate
 
 class ChanceCard:
-    def __init__(self, id : int, description : str):
+    def __init__(self, id : int, description : str, effect : callable[[GameState, str], None]):
         self.id : int = id
         self.description : str = description
+        self.effect : callable[[GameState, str], None] = effect
 
 class ChanceCardPlayer:
     def __init__(self, id : int, description : str, player_id : str):
@@ -129,7 +154,9 @@ class Mapper:
             name=stock.name,
             industry=stock.industry,
             price=stock.price,
-            number_of_shares=stock.number_of_shares
+            number_of_shares=stock.number_of_shares,
+            price_history=stock.price_history,
+            full_number_of_shares=stock.full_number_of_shares
         )
 
     @staticmethod
@@ -138,7 +165,8 @@ class Mapper:
             id=crypto.id,
             ticker=crypto.ticker,
             name=crypto.name,
-            price=crypto.price
+            price=crypto.price,
+            price_history=crypto.price_history
         )
 
     @staticmethod
