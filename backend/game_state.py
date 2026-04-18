@@ -7,12 +7,12 @@ class GameState:
         self.max_turns : int = 100
         self.game_ended : bool = False
         self.players : list[Player] = [Player() for i in range(num_of_players)]
-        self.board : list[dict[str, str]] = self.create_board()
-        self.stocks : list[Stock] = self.init_stocks()
-        self.cryptos : list[Crypto] = self.init_crypto()
-        self.properties : list[Property] = self.init_properties()
+        self.board : list[dict[str, str]] = self._create_board()
+        self.stocks : list[Stock] = self._init_stocks()
+        self.cryptos : list[Crypto] = self._init_crypto()
+        self.properties : list[Property] = self._init_properties()
 
-    def init_properties(self):
+    def _init_properties(self):
         return [
             Property(id=201, name='Garaże', price=75_000.0, rent=500.0, energy_use=120.0),
             Property(id=202, name='Kawalerki', price=160_000.0, rent=1_500.0, energy_use=1_600.0),
@@ -20,7 +20,7 @@ class GameState:
             Property(id=204, name='Domy', price=1_350_000.0, rent=6_500.0, energy_use=5_200.0),
         ]
     
-    def init_stocks(self):
+    def _init_stocks(self):
         return [
             Stock(
                 id=1, ticker='PKO', name='PKO Bank', industry='banking',
@@ -49,7 +49,7 @@ class GameState:
             ),
         ]
 
-    def init_crypto(self):
+    def _init_crypto(self):
         return [
             Crypto(
                 id=101, ticker='BTC', name='Bitcoin',
@@ -65,7 +65,7 @@ class GameState:
             ),
         ]
 
-    def create_board(self):
+    def _create_board(self):
         return [
             {"type": "go", "name": "Start"},
             {"type": "stock_market", "name": "WSE"},
