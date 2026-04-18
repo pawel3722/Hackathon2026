@@ -103,11 +103,13 @@ export default function Game() {
       return;
     }
 
+    console.warn("Sending buy property action via WebSocket");
+
     ws.send({
       type: "move",
       move: {
         steps: 2,
-        action: []
+        actions: []
       },
     });
   };
