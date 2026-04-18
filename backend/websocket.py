@@ -3,6 +3,7 @@ from contract import Move, Action
 from fastapi import WebSocket, WebSocketDisconnect
 from fastapi.encoders import jsonable_encoder
 import asyncio
+from models import Lobby, User, Player
 
 from game_manager import game_manager
 
@@ -98,7 +99,7 @@ async def handle_connection(ws: WebSocket, lobby_id: str, user_id: str):
 # EVENTS
 # -------------------------
 
-async def handle_event(lobby, user, msg):
+async def handle_event(lobby: Lobby, user: User, msg: dict):
     msg_type = msg.get("type")
 
     # START GAME
@@ -113,10 +114,14 @@ async def handle_event(lobby, user, msg):
     elif msg_type == "move":
         move_data = msg.get("move")
         actions = [Action(**a) for a in move_data.get("actions", [])]
-        user.current_move = Move(steps=move_data["steps"], actions=actions)
+        steps = move_data["steps"]
+        user.current_move = Move(steps=steps, actions=actions)
+
+        lobby.game_state.players[user.id].position += steps
+
         if all(user.current_move for user in lobby.users.values()):
             result = lobby.game_state.apply_moves({u.id: u.current_move for u in lobby.users.values()})
             for u in lobby.users.values():
-                del u.current_move
+                u.current_move = None
             broadcast(lobby, {"type": "game_update", "result": result})
 
