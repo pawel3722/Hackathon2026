@@ -92,7 +92,7 @@ class GameState:
         elif field["type"] == "bank" and any(a.action_type == "bank" for a in move.actions):
             bank_actions = [a for a in move.actions if a.action_type == "bank"]
             for action in bank_actions:
-                if action.assets_type == "credit" and action.assets_id in [1, 2, 3] and current_player.count_all_money():
+                if action.assets_type == "credit" and action.assets_id in [1, 2, 3] and current_player.count_all_money() * 0.5 >= action.amount:
                     if action.assets_id == 1:
                         credit = Credit(amount=action.amount, instalment_rate=action.amount * 1.15 / 12 , number_of_instalments=12)
                     elif action.assets_id == 2:
@@ -110,15 +110,16 @@ class GameState:
                         deposit = Deposit(amount=action.amount, lending_rate=action.amount * 1.07, number_of_instalments=36)
                     current_player.money -= action.amount
                     current_player.deposits.append(deposit)
-                elif action.assets_type == "deposit" and action.assets_id in [4, 5, 6]:
-                    if action.assets_id == 4:
-                        deposit = Deposit(amount=action.amount, lending_rate=action.amount * 1.06, number_of_instalments=12)
-                    elif action.assets_id == 5:
-                        deposit = Deposit(amount=action.amount, lending_rate=action.amount * 1.065, number_of_instalments=24)
-                    elif action.assets_id == 6:
-                        deposit = Deposit(amount=action.amount, lending_rate=action.amount * 1.07, number_of_instalments=36)
-                    current_player.money -= action.amount
-                    current_player.deposits.append(deposit)
+                elif action.assets_type == "insurance" and action.assets_id in [7, 8, 9]:
+                    if action.assets_id == 7 and current_player.money >= 20000:
+                        current_player.insurance += 12
+                        current_player.money -= 40000
+                    elif action.assets_id == 8 and current_player.money >= 40000:
+                        current_player.insurance += 24
+                        current_player.money -= 60000
+                    elif action.assets_id == 9 and current_player.money >= 60000:
+                        current_player.insurance += 36
+                        current_player.money -= 80000
 
         for deposit in current_player.deposits:
             deposit.number_of_instalments -= 1
