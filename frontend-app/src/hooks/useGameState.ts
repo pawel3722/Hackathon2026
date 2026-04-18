@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import type { GameState, Player, ApiResponse } from '../types';
+import type { GameState, Player } from '../types';
 import { gameApi, GameWebSocket, apiUtils } from '../api';
 
 interface UseGameStateReturn {
@@ -34,9 +34,12 @@ export function useGameState(gameId?: string): UseGameStateReturn {
 
   // Initialize WebSocket connection when gameId is available
   useEffect(() => {
-    if (gameId && gameState) {
+    const userId = localStorage.getItem('playerId');
+
+    if (gameId && gameState && userId) {
       const ws = new GameWebSocket(
         gameId,
+        userId,
         (data: any) => {
           // Handle real-time updates
           if (data.type === 'game_state_update') {
@@ -69,8 +72,8 @@ export function useGameState(gameId?: string): UseGameStateReturn {
   }, [gameId, gameState]);
 
   const handleApiCall = useCallback(async <T,>(
-    apiCall: () => Promise<ApiResponse<T>>,
-    successCallback?: (result: ApiResponse<T>) => void
+    apiCall: () => Promise<T>,
+    successCallback?: (result: T) => void
   ) => {
     setIsLoading(true);
     setError(null);
@@ -109,18 +112,14 @@ export function useGameState(gameId?: string): UseGameStateReturn {
     );
   }, [handleApiCall]);
 
-  const createGame = useCallback(async (playerName: string, difficulty: string, maxPlayers: number) => {
+  const createGame = useCallback(async () => {
     await handleApiCall(
-      () => gameApi.createGame(playerName, difficulty, maxPlayers),
+      () => gameApi.createGame(),
       (response) => {
-        if (response.success && response.data) {
-          setGameState(response.data);
-          // Creator is the first player
-          const player = response.data.players[0];
-          if (player) {
-            setCurrentPlayer(player);
-            localStorage.setItem('playerId', player.id);
-          }
+        if (response.lobby_id) {
+          // Lobby created, waiting for players to join.
+          // The actual game state will be available after the host starts the game.
+          localStorage.setItem('lobbyId', response.lobby_id);
         }
       }
     );

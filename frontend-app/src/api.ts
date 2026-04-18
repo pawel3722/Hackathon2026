@@ -5,6 +5,7 @@ import type {
   GameJoinResponse,
   GameMoveResponse,
   PlayerActionResponse,
+  CreateGameResponse,
   Stock,
   Crypto,
   Property,
@@ -12,7 +13,7 @@ import type {
 } from './types';
 
 // API Configuration
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'localhost:8000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
 
 class ApiError extends Error {
   public status: number;
@@ -68,24 +69,19 @@ async function apiRequest<T>(
 
 // Game API Service
 export const gameApi = {
-  // Create a new game session
-  createGame: async (playerName: string, difficulty: string, maxPlayers?: number): Promise<GameJoinResponse> => {
-    return apiRequest<GameJoinResponse>('/games', {
+  // Create a new game session using HTTP
+  createGame: async (): Promise<CreateGameResponse> => {
+    return apiRequest<CreateGameResponse>('/create', {
       method: 'POST',
-      body: JSON.stringify({
-        player_name: playerName,
-        difficulty,
-        ...(maxPlayers !== undefined && { max_players: maxPlayers }),
-      }),
+      body: JSON.stringify({}),
     });
   },
 
   // Join an existing game
   joinGame: async (gameId: string, playerName: string): Promise<GameJoinResponse> => {
-    return apiRequest<GameJoinResponse>(`/games/${gameId}/join`, {
+    return apiRequest<GameJoinResponse>(`/join/${gameId}?name=${playerName}`, {
       method: 'POST',
       body: JSON.stringify({
-        player_name: playerName,
       }),
     });
   },
@@ -278,17 +274,20 @@ export class GameWebSocket {
   private reconnectDelay = 1000;
 
   private gameId: string;
+  private userId: string;;
   private onMessage: (data: any) => void;
   private onError?: (error: Event) => void;
   private onClose?: () => void;
 
   constructor(
     gameId: string,
+    userId: string,
     onMessage: (data: any) => void,
     onError?: (error: Event) => void,
     onClose?: () => void
   ) {
     this.gameId = gameId;
+    this.userId = userId;
     this.onMessage = onMessage;
     this.onError = onError;
     this.onClose = onClose;
@@ -296,7 +295,16 @@ export class GameWebSocket {
 
   connect(): void {
     const token = localStorage.getItem('authToken');
-    const wsUrl = `${import.meta.env.VITE_WS_URL || 'ws://localhost:8000'}/ws/games/${this.gameId}?token=${token}`;
+    const params = new URLSearchParams();
+
+    if (token) {
+      params.set('token', token);
+    }
+    if (this.userId) {
+      params.set('user_id', this.userId);
+    }
+
+    const wsUrl = `${import.meta.env.VITE_WS_URL || 'ws://localhost:8000'}/ws/${this.gameId}?${params.toString()}`;
 
     this.ws = new WebSocket(wsUrl);
 
