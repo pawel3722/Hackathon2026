@@ -103,7 +103,7 @@ async def handle_event(lobby, user, msg):
     if msg_type == "start":
         if user.id != lobby.host_id:
             return
-        lobby.game_state = GameState(lobby.users.keys())
+        lobby.game_state = GameState(lobby.users)
         lobby.started = True
         broadcast(lobby, {"type": "game_started", "game_state": lobby.game_state.get_initial_state()})
 

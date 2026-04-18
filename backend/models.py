@@ -18,6 +18,7 @@ class User:
 class Player:
     def __init__(self, id: str):
         self.id : str = id
+        self.name : str = None
         self.money : float = 50000.00
         self.is_bankrupt : bool = False
         self.position : int = 0
