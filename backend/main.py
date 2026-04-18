@@ -26,7 +26,7 @@ def serve_index():
 
 @app.post("/create")
 def create():
-    lobby_id = str(uuid.uuid4())
+    lobby_id = str(uuid.uuid4())[:8]
 
     lobby = Lobby(lobby_id)
     game_manager.add_lobby(lobby)
