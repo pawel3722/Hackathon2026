@@ -1,0 +1,232 @@
+/* Lobby.css */
+
+.lobby-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f9fafb;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow: hidden;
+}
+
+.lobby-card {
+    background-color: #ffffff;
+    padding: 1.25rem;
+    border-radius: 0;
+    box-shadow: none;
+    width: 90%;
+    height: 100%;
+    border: none;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    max-height: 60%;
+    border-radius: 1.5rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.lobby-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 0.75rem;
+    text-align: center;
+    color: #111827;
+    flex-shrink: 0;
+}
+
+.input-group {
+    margin-bottom: 0.9rem;
+}
+
+.input-label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 0.35rem;
+}
+
+.input-field {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.75rem;
+    font-size: 0.9rem;
+    color: #111827;
+    background-color: #ffffff;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    font-family: inherit;
+}
+
+.input-field:focus {
+    outline: none;
+    border-color: #9ca3af;
+    box-shadow: 0 0 0 3px rgba(156, 163, 175, 0.1);
+}
+
+.lobby-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    margin-top: 0.9rem;
+    flex: 1;
+    min-height: 0;
+}
+
+.lobby-column {
+    display: flex;
+    flex-direction: column;
+}
+
+.left-column {
+    padding-right: 1rem;
+    border-right: 1px solid #d1d5db;
+}
+
+.right-column {
+    padding-left: 1rem;
+}
+
+.column-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e5e7eb;
+    flex-shrink: 0;
+}
+
+.button {
+    width: 100%;
+    padding: 0.6rem 0.75rem;
+    border: none;
+    border-radius: 0.75rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    flex-shrink: 0;
+}
+
+.button:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+}
+
+.button-create {
+    background-color: #1f2937;
+    color: #ffffff;
+}
+
+.button-create:hover {
+    background-color: #374151;
+}
+
+.button-join {
+    background-color: #4b5563;
+    color: #ffffff;
+}
+
+.button-join:hover {
+    background-color: #6b7280;
+}
+
+.session-link {
+    margin-top: 0.75rem;
+    background-color: #f3f4f6;
+    padding: 0.6rem;
+    border-radius: 0.75rem;
+    font-size: 0.75rem;
+    border: 1px solid #e5e7eb;
+}
+
+.session-link p {
+    color: #374151;
+    margin-bottom: 0.35rem;
+    font-weight: 500;
+    margin-top: 0;
+}
+
+.link-container {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.session-link a {
+    color: #111827;
+    word-break: break-all;
+    text-decoration: none;
+    flex: 1;
+    font-size: 0.7rem;
+}
+
+.session-link a:hover {
+    color: #374151;
+    text-decoration: underline;
+}
+
+.copy-button {
+    background-color: #6b7280;
+    color: #ffffff;
+    border: none;
+    border-radius: 0.5rem;
+    padding: 0.4rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.copy-button:hover {
+    background-color: #4b5563;
+}
+
+.copied-message {
+    margin-top: 0.35rem;
+    font-size: 0.65rem;
+    color: #059669;
+    font-weight: 500;
+}
+
+.icon {
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+    .lobby-columns {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .left-column {
+        padding-right: 0;
+        border-right: none;
+        border-bottom: 1px solid #d1d5db;
+        padding-bottom: 1rem;
+    }
+
+    .right-column {
+        padding-left: 0;
+        padding-top: 1rem;
+    }
+
+    .lobby-card {
+        max-width: 100%;
+        padding: 1rem;
+    }
+}
