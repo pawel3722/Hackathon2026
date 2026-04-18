@@ -60,6 +60,7 @@ class StockDto:
         self.industry : str = industry #taki enum, np. fuel, food, media
         self.price : float = price
         self.number_of_shares : int = number_of_shares
+        self.price_history : list[float] = [float(price)]
 
 class StockShare:
     def __init__(self, stock: StockDto, quantity: int):
@@ -83,6 +84,7 @@ class CryptoDto:
         self.ticker : str = ticker
         self.name : str = name
         self.price : float = price
+        self.price_history : list[float] = [float(price)]
 
 class CryptoShare:
     def __init__(self, crypto: CryptoDto, quantity: int):
@@ -131,7 +133,8 @@ class Mapper:
             name=stock.name,
             industry=stock.industry,
             price=stock.price,
-            number_of_shares=stock.number_of_shares
+            number_of_shares=stock.number_of_shares,
+            price_history=stock.price_history,
         )
 
     @staticmethod
@@ -141,6 +144,7 @@ class Mapper:
             ticker=crypto.ticker,
             name=crypto.name,
             price=crypto.price
+            price_history=crypto.price_history
         )
 
     @staticmethod
