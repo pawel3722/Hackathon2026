@@ -10,6 +10,16 @@ import models
 
 app = FastAPI()
 
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+     CORSMiddleware,
+     allow_origins=["*"],  # Allows all origins
+     allow_credentials=True,
+     allow_methods=["*"],  # Allows all methods
+     allow_headers=["*"],  # Allows all headers
+ )
+
 @app.get("/")
 def serve_index():
     return FileResponse("index.html")
@@ -42,7 +52,6 @@ def join(lobby_id: str, name: str = None):
 
     if len(lobby.users) == 1:
         lobby.host_id = user_id
-        
 
     return {
         "ws": f"/ws/{lobby_id}",

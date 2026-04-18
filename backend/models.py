@@ -18,9 +18,10 @@ class User:
 class Player:
     def __init__(self, id: str):
         self.id : str = id
-        self.money : float = 5000.00
+        self.money : float = 50000.00
         self.is_bankrupt : bool = False
         self.position : int = 0
+        self.insurance : int = 0
         self.stocks : list[StockShare] = []
         self.cryptos : list[CryptoShare] = []
         self.credits : list[Credit] = []
@@ -45,6 +46,7 @@ class Stock:
         self.name : str = name
         self.industry : str = industry #taki enum, np. fuel, food, media
         self.price : float = price
+        self.full_number_of_shares : int = number_of_shares
         self.number_of_shares : int = number_of_shares
         self.growth : float = growth
         self.risk : float = risk
@@ -53,12 +55,13 @@ class Stock:
         self.price_history : list[float] = [float(price)]
 
 class StockDto:
-    def __init__(self, id : int, ticker : str, name : str, industry : str, price : float, number_of_shares : int):
+    def __init__(self, id : int, ticker : str, name : str, industry : str, price : float, number_of_shares : int, full_number_of_shares : int):
         self.id : int = id
         self.ticker : str = ticker
         self.name : str = name
         self.industry : str = industry #taki enum, np. fuel, food, media
         self.price : float = price
+        self.full_number_of_shares : int = full_number_of_shares
         self.number_of_shares : int = number_of_shares
         self.price_history : list[float] = [float(price)]
 
@@ -89,7 +92,7 @@ class CryptoDto:
 class CryptoShare:
     def __init__(self, crypto: CryptoDto, quantity: int):
         self.crypto : CryptoDto = crypto
-        self.quantity : int = quantity
+        self.quantity : float = quantity
 
 class Property:
     def __init__(self, id : int, name : str, price : float, rent : float, energy_use : float):
@@ -114,9 +117,10 @@ class Deposit:
         self.lending_rate : float = lending_rate
 
 class ChanceCard:
-    def __init__(self, id : int, description : str):
+    def __init__(self, id : int, description : str, effect : callable[[GameState, str], None]):
         self.id : int = id
         self.description : str = description
+        self.effect : callable[[GameState, str], None] = effect
 
 class ChanceCardPlayer:
     def __init__(self, id : int, description : str, player_id : str):
@@ -135,6 +139,7 @@ class Mapper:
             price=stock.price,
             number_of_shares=stock.number_of_shares,
             price_history=stock.price_history,
+            full_number_of_shares=stock.full_number_of_shares
         )
 
     @staticmethod
