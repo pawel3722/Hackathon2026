@@ -1,11 +1,9 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { gameApi, apiUtils } from "./api";
 import "./Lobby.css";
 import WaitingScreen from "./WaitingScreen";
 
 export default function Lobby() {
-  const navigate = useNavigate();
   const [name, setName] = useState<string>("");
   const [difficulty, setDifficulty] = useState<string>("medium");
   const [joinGameId, setJoinLink] = useState<string>("");
@@ -17,7 +15,7 @@ export default function Lobby() {
 
   const createSession = async () => {
     if (!name.trim()) {
-      alert("Podaj imię!");
+      alert("Enter your name!");
       return;
     }
 
@@ -28,7 +26,7 @@ export default function Lobby() {
       localGameId = response.lobby_id;
 
       if (!localGameId) {
-        throw new Error('Nieprawidłowa odpowiedź serwera');
+        throw new Error('Invalid server response: missing lobby_id');
       }
 
       setLobbyId(localGameId);
@@ -37,7 +35,7 @@ export default function Lobby() {
       setIsWaiting(true);
     } catch (error) {
       const errorMessage = apiUtils.handleApiError(error);
-      alert(`Błąd podczas tworzenia gry: ${errorMessage}`);
+      alert(`Error creating game: ${errorMessage}`);
       return;
     }
 
@@ -55,19 +53,19 @@ export default function Lobby() {
       }
     } catch (error) {
       const errorMessage = apiUtils.handleApiError(error);
-      alert(`Błąd podczas dołączania do gry: ${errorMessage}`);
+      alert(`Error joining game: ${errorMessage}`);
     }
   };
 
   const joinSession = async () => {
     console.log('joinSession called');
     if (!name.trim()) {
-      alert("Podaj imię!");
+      alert("Enter your name!");
       return;
     }
 
     if (!joinGameId.trim()) {
-      alert("Wklej id gry!");
+      alert("Paste the game ID!");
       return;
     }
 
@@ -99,22 +97,7 @@ export default function Lobby() {
     } catch (error) {
       console.error('Error in joinSession:', error);
       const errorMessage = apiUtils.handleApiError(error);
-      alert(`Błąd podczas dołączania do gry: ${errorMessage}`);
-    }
-  };
-
-  const handleGameStart = async () => {
-    const lobbyKey = lobbyId || gameId;
-
-    try {
-      const response = await gameApi.startGame(lobbyKey);
-
-      if (response.success && response.data) {
-        navigate(`/game/${lobbyKey}`);
-      }
-    } catch (error) {
-      const errorMessage = apiUtils.handleApiError(error);
-      alert(`Błąd podczas rozpoczynania gry: ${errorMessage}`);
+      alert(`Error joining game: ${errorMessage}`);
     }
   };
 
@@ -135,7 +118,6 @@ export default function Lobby() {
         playerId={playerId}
         difficulty={difficulty}
         isCreator={isCreator}
-        onGameStart={handleGameStart}
         onCancel={handleCancel}
       />
     );
@@ -149,7 +131,7 @@ export default function Lobby() {
             <div className="input-group">
             <input
                 type="text"
-                placeholder="Wpisz swoje imię"
+                placeholder="Enter your name"
                 value={name}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setName(e.target.value)
@@ -160,10 +142,10 @@ export default function Lobby() {
 
             <div className="lobby-columns">
             <div className="lobby-column left-column">
-                <h2 className="column-title">Utwórz grę</h2>
+                <h2 className="column-title">Create game</h2>
                 
                 <div className="input-group">
-                <label className="input-label">Poziom trudności</label>
+                <label className="input-label">Difficulty level</label>
                 <select
                     value={difficulty}
                     onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
@@ -171,9 +153,9 @@ export default function Lobby() {
                     }
                     className="input-field"
                 >
-                    <option value="easy">Łatwy</option>
-                    <option value="medium">Średni</option>
-                    <option value="hard">Trudny</option>
+                    <option value="easy">Easy</option>
+                    <option value="medium">Medium</option>
+                    <option value="hard">Hard</option>
                 </select>
                 </div>
 
@@ -182,19 +164,19 @@ export default function Lobby() {
                     <svg className="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                     </svg>
-                    Utwórz grę
+                    Create Game
                 </button>
                 </div>
             </div>
 
             <div className="lobby-column right-column">
-                <h2 className="column-title">Dołącz do gry</h2>
+                <h2 className="column-title">Join game</h2>
                 
                 <div className="input-group">
-                <label className="input-label">Link do gry</label>
+                <label className="input-label">Game link</label>
                 <input
                     type="text"
-                    placeholder="Wklej link do dołączenia"
+                    placeholder="Paste game link"
                     value={joinGameId}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                     setJoinLink(e.target.value)
@@ -208,7 +190,7 @@ export default function Lobby() {
                     <svg className="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
                     </svg>
-                    Dołącz do gry
+                    Join game
                 </button>
                 </div>
             </div>

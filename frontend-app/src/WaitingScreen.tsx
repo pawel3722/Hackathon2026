@@ -1,5 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { GameWebSocket } from "./api";
+import { getOrCreateGameWebSocket } from "./websocketBridge";
 import "./WaitingScreen.css";
 
 interface WaitingScreenProps {
@@ -8,7 +10,6 @@ interface WaitingScreenProps {
     gameId: string;
     difficulty: string;
     isCreator: boolean;
-    onGameStart: () => void;
     onCancel: () => void;
 }
 
@@ -18,12 +19,14 @@ export default function WaitingScreen({
     gameId,
     difficulty,
     isCreator,
-    onGameStart,
     onCancel,
 }: WaitingScreenProps) {
+    const navigate = useNavigate();
+    const wsRef = useRef<GameWebSocket | null>(null);
     const [connectedPlayers, setConnectedPlayers] = useState<number>(1);
     const [playersList, setPlayersList] = useState<string[]>([playerName]);
     const [copied, setCopied] = useState<boolean>(false);
+    const [isStarting, setIsStarting] = useState<boolean>(false);
     const lobbyCode = gameId;
 
     const copyToClipboard = async () => {
@@ -43,7 +46,7 @@ export default function WaitingScreen({
             return;
         }
 
-        const ws = new GameWebSocket(
+        const ws = getOrCreateGameWebSocket(
             lobbyCode,
             effectivePlayerId,
             (data: any) => {
@@ -61,6 +64,15 @@ export default function WaitingScreen({
                     setPlayersList((prev) => [...prev, data.player.name]);
                     setConnectedPlayers((prev) => prev + 1);
                 }
+
+                if (data.type === 'game_started') {
+                    navigate(`/game/${lobbyCode}`, {
+                        state: {
+                            gameReady: true,
+                            playerId: effectivePlayerId,
+                        },
+                    });
+                }
             },
             (error: Event) => {
                 console.error('WebSocket error:', error);
@@ -70,12 +82,14 @@ export default function WaitingScreen({
             }
         );
 
-        ws.connect();
+        wsRef.current = ws;
 
         return () => {
-            ws.disconnect();
+            if (wsRef.current === ws) {
+                wsRef.current = null;
+            }
         };
-    }, [lobbyCode, playerId]);
+    }, [lobbyCode, playerId, navigate]);
 
     return (
         <div className="waiting-container">
@@ -151,10 +165,18 @@ export default function WaitingScreen({
                     {isCreator && (
                         <button
                             className="button button-start"
-                            onClick={onGameStart}
-                            disabled={connectedPlayers < 1}
+                            onClick={() => {
+                                if (!wsRef.current) {
+                                    console.warn('WebSocket is not ready yet');
+                                    return;
+                                }
+
+                                setIsStarting(true);
+                                wsRef.current.send({ type: 'start' });
+                            }}
+                            disabled={connectedPlayers < 1 || isStarting}
                         >
-                            Rozpocznij
+                            {isStarting ? 'Rozpoczynanie...' : 'Rozpocznij'}
                         </button>
                     )}
 

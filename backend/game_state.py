@@ -1,10 +1,11 @@
 import json
+from unicodedata import name
 import numpy as np
 from contract import GameOver, TurnResult
 # from collections import deque
 from shutil import move
 from contract import Move
-from models import Credit, CryptoShare, Deposit, Mapper, Player, PlayerEndGame, Stock, Crypto, Property, ChanceCard, StockShare
+from models import Credit, CryptoShare, Deposit, Mapper, Player, PlayerEndGame, Stock, Crypto, Property, ChanceCard, StockShare, User
 from update_market_prices import update_crypto_price, update_stock_price, update_regime, init_stock_history, update_market
 import game_init
 
@@ -13,7 +14,7 @@ class GameState:
     FOOD_COST = 20.0
     ENERGY_COST = 0.15
 
-    def __init__(self, players_ids : list[str]):
+    def __init__(self, users : dict[str, User] | list[User]):
         self.turn : int = 1 
         self.max_turns : int = 5
         self.game_ended : bool = False
@@ -21,7 +22,7 @@ class GameState:
 
         self.rng = np.random.default_rng()  # wspólne źródło losowości dla całej gry
 
-        self.players : dict[str, Player] = {player_id: Player(player_id) for player_id in players_ids}
+        self.players : dict[str, Player] = {id: Player(id, name) for (id, name) in users.items()}
         self.board : list[dict[str, str]] = game_init.board()
         self.stocks : list[Stock] = game_init.stocks()
         self.cryptos : list[Crypto] = game_init.crypto()
@@ -242,6 +243,18 @@ class GameState:
         return TurnResult(
             turn=self.turn,
             game_ended=self.game_ended,
+            players=list(self.players.values()),
+            stocks=self.stocks,
+            cryptos=self.cryptos,
+            properties=self.properties,
+            cards=[self._get_chance_card(), self._get_chance_card(), self._get_chance_card()],
+            board=self.board
+        )
+
+    def get_initial_state(self):
+        return TurnResult(
+            turn=1,
+            game_ended=False,
             players=list(self.players.values()),
             stocks=self.stocks,
             cryptos=self.cryptos,

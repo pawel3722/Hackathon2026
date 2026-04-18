@@ -1,4 +1,7 @@
+from game_state import GameState
+from contract import Move, Action
 from fastapi import WebSocket, WebSocketDisconnect
+from fastapi.encoders import jsonable_encoder
 import asyncio
 
 from game_manager import game_manager
@@ -10,7 +13,7 @@ from game_manager import game_manager
 
 def safe_send(ws, data):
     try:
-        return asyncio.create_task(ws.send_json(data))
+        return asyncio.create_task(ws.send_json(jsonable_encoder(data)))
     except:
         return None
 
@@ -28,7 +31,7 @@ def lobby_state(lobby):
         "host_id": lobby.host_id,
         "users": [
             {"id": u.id, "name": u.name}
-            for u in lobby.users.values()
+            for u in lobby.users.values() if u.ws is not None
         ]
     }
 
@@ -71,17 +74,24 @@ async def handle_connection(ws: WebSocket, lobby_id: str, user_id: str):
         print("WS ERROR:", e)
 
     finally:
-        # cleanup
+        # cleanup (mark as offline instead of deleting)
         if user_id in lobby.users:
-            del lobby.users[user_id]
+            user = lobby.users[user_id]
+            if user.ws == ws:
+                user.ws = None
 
-        if lobby.users:
-            if lobby.host_id == user_id:
-                lobby.host_id = next(iter(lobby.users.keys()))
-        else:
-            game_manager.remove_lobby(lobby.id)
+        # Calculate if all users are offline
+        active_users = [u for u in lobby.users.values() if u.ws is not None]
+        
+        # if not active_users:
+        #     game_manager.remove_lobby(lobby.id)
+        # else:
+        if active_users:
+            if lobby.host_id == user_id and user.ws is None:
+                # pass host to the next active user instead of first in key
+                lobby.host_id = active_users[0].id
 
-        broadcast(lobby, lobby_state(lobby))
+            broadcast(lobby, lobby_state(lobby))
 
 
 # -------------------------
@@ -95,17 +105,18 @@ async def handle_event(lobby, user, msg):
     if msg_type == "start":
         if user.id != lobby.host_id:
             return
-
+        lobby.game_state = GameState(lobby.users)
         lobby.started = True
-        broadcast(lobby, {"type": "game_started"})
+        broadcast(lobby, {"type": "game_started", "game_state": lobby.game_state.get_initial_state()})
 
     # MOVE
     elif msg_type == "move":
-        user.current_move = msg.get("move")
+        move_data = msg.get("move")
+        actions = [Action(**a) for a in move_data.get("actions", [])]
+        user.current_move = Move(steps=move_data["steps"], actions=actions)
+        if all(hasattr(user, "current_move") and user.current_move is not None for user in lobby.users.items()):
+            result = lobby.game_state.apply_moves({u.id: u.current_move for u in lobby.users.values()})
+            for u in lobby.users.values():
+                del u.current_move
+            broadcast(lobby, {"type": "game_update", "result": result})
 
-        # simple broadcast update
-        broadcast(lobby, {
-            "type": "move_update",
-            "user_id": user.id,
-            "move": user.current_move
-        })

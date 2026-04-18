@@ -1,5 +1,8 @@
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { useEffect } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import PlayerStatus from "./PlayerStatus";
 import type { Player } from "./types";
 import "./Game.css";
@@ -33,17 +36,49 @@ const FIELD: Field[] = [
   { f: "crypto_4_field", d: 18 },
   { f: "estate_4_field", d: 19 }
 ];
+import { getActiveGameWebSocket, getOrCreateGameWebSocket } from "./websocketBridge";
+
+type GameLocationState = {
+  gameReady?: boolean;
+  playerId?: string;
+};
 
 export default function Game() {
   const navigate = useNavigate();
+  const { id: gameIdFromRoute } = useParams();
+  const location = useLocation();
+  const routeState = location.state as GameLocationState | null;
+  const playerId = routeState?.playerId ?? localStorage.getItem("playerId") ?? "";
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [selectedField, setSelectedField] = useState<Field>({ f: "start_field", d: 0 })
   const spline = useRef<Application | null>(null)
   const [showModal, setShowModal] = useState(false)
+  const [lastWsMessage, setLastWsMessage] = useState<any>(null);
+
+  useEffect(() => {
+    if (!gameIdFromRoute || !playerId) {
+      return;
+    }
+
+    getOrCreateGameWebSocket(
+      gameIdFromRoute,
+      playerId,
+      (data: any) => {
+        setLastWsMessage(data);
+        console.log("[Game WS]", data);
+      },
+      (error: Event) => {
+        console.error("[Game WS] error:", error);
+      },
+      () => {
+        console.log("[Game WS] disconnected");
+      }
+    );
+  }, [gameIdFromRoute, playerId]);
 
   // Mock player data - in real app this would come from server
   const [currentPlayer] = useState<Player>({
-    id: "1",
+    id: playerId || "1",
     name: "Ty",
     money: 1500.00,
     is_bankrupt: false,
@@ -61,7 +96,7 @@ export default function Game() {
   const [otherPlayers] = useState<Player[]>([
     {
       id: "2",
-      name: "Gracz 2",
+      name: "Player 2",
       money: 1200.00,
       is_bankrupt: false,
       position: 5,
@@ -75,7 +110,7 @@ export default function Game() {
     },
     {
       id: "3",
-      name: "Gracz 3",
+      name: "Player 3",
       money: 1800.00,
       is_bankrupt: false,
       position: 12,
@@ -91,7 +126,26 @@ export default function Game() {
   ]);
 
   const handleLeaveGame = () => {
+    console.log(currentPlayer.id);
     navigate("/");
+  };
+
+  const handleBuyProperty = () => {
+    const ws = getActiveGameWebSocket();
+    if (!ws) {
+      console.warn("Game WebSocket is missing");
+      return;
+    }
+
+    console.warn("Sending buy property action via WebSocket");
+
+    ws.send({
+      type: "move",
+      move: {
+        steps: 2,
+        actions: []
+      },
+    });
   };
 
   const onSplineMouseDown = (e: SplineEvent) => {
@@ -129,7 +183,7 @@ export default function Game() {
       <div className="game-header">
         <h1 className="game-title">Moneypoly</h1>
         <button className="leave-button" onClick={handleLeaveGame}>
-          Opuść grę
+          Leave Game
         </button>
       </div>
 
@@ -148,7 +202,7 @@ export default function Game() {
           )}
 
           <div className="other-players">
-            <h3>Inni gracze</h3>
+            <h3>Other Players</h3>
             {otherPlayers.map((player) => (
               <div
                 key={player.id}
@@ -158,18 +212,25 @@ export default function Game() {
                 <div className="player-name">{player.name}</div>
                 <div className="player-money">${player.money}</div>
                 <div className="player-properties">
-                  {player.properties.length} własności
+                  {player.properties.length} properties
                 </div>
               </div>
             ))}
           </div>
 
           <div className="game-actions">
-            <button className="action-button primary">Rzuć kostką</button>
-            <button className="action-button">Kup własność</button>
-            <button className="action-button">Sprzedaj</button>
-            <button className="action-button">Koniec tury</button>
+            <button className="action-button primary">Roll Dice</button>
+            <button className="action-button" onClick={handleBuyProperty}>Buy Property</button>
+            <button className="action-button">Sell Property</button>
+            <button className="action-button">End Turn</button>
           </div>
+
+          {lastWsMessage && (
+            <div className="game-debug-panel">
+              <h3>Last WS message</h3>
+              <pre>{JSON.stringify(lastWsMessage, null, 2)}</pre>
+            </div>
+          )}
         </div>
 
         <div className="board-container">
