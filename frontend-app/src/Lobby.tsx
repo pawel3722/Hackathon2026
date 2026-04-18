@@ -11,6 +11,8 @@ export default function Lobby() {
   const [joinLink, setJoinLink] = useState<string>("");
   const [isWaiting, setIsWaiting] = useState<boolean>(false);
   const [gameId, setGameId] = useState<string>("");
+  const [lobbyId, setLobbyId] = useState<string>("");
+  const [playerId, setPlayerId] = useState<string>("");
   const [isCreator, setIsCreator] = useState<boolean>(false);
 
   const createSession = async () => {
@@ -19,17 +21,41 @@ export default function Lobby() {
       return;
     }
 
-    try {
-      const response = await gameApi.createGame(name, difficulty);
+    let localGameId = "";
 
-      if (response.success && response.data) {
-        setGameId(response.data.game_id);
-        setIsCreator(true);
-        setIsWaiting(true);
+    try {
+      const response = await gameApi.createGame();
+      localGameId = response.lobby_id;
+
+      if (!localGameId) {
+        throw new Error('Nieprawidłowa odpowiedź serwera');
       }
+
+      setLobbyId(localGameId);
+      setGameId(localGameId);
+      setIsCreator(true);
+      setIsWaiting(true);
     } catch (error) {
       const errorMessage = apiUtils.handleApiError(error);
       alert(`Błąd podczas tworzenia gry: ${errorMessage}`);
+      return;
+    }
+
+    try {
+      const response = await gameApi.joinGame(localGameId, name);
+      const joinPlayerId = response.player_id;
+
+      if (joinPlayerId) {
+        setPlayerId(joinPlayerId);
+        localStorage.setItem('playerId', joinPlayerId);
+      }
+
+      if (response.success && response.data) {
+        setGameId(response.data.game_id || localGameId);
+      }
+    } catch (error) {
+      const errorMessage = apiUtils.handleApiError(error);
+      alert(`Błąd podczas dołączania do gry: ${errorMessage}`);
     }
   };
 
@@ -45,14 +71,20 @@ export default function Lobby() {
     }
 
     try {
-      // Extract game ID from link (format: http://localhost:5173/game/uuid)
       const linkParts = joinLink.split("/");
       const gameIdFromLink = linkParts[linkParts.length - 1];
+      setLobbyId(gameIdFromLink);
 
       const response = await gameApi.joinGame(gameIdFromLink, name);
+      const joinPlayerId = response.player_id;
+
+      if (joinPlayerId) {
+        setPlayerId(joinPlayerId);
+        localStorage.setItem('playerId', joinPlayerId);
+      }
 
       if (response.success && response.data) {
-        setGameId(response.data.game_id);
+        setGameId(response.data.game_id || gameIdFromLink);
         setIsCreator(false);
         setIsWaiting(true);
       }
@@ -63,12 +95,13 @@ export default function Lobby() {
   };
 
   const handleGameStart = async () => {
+    const lobbyKey = lobbyId || gameId;
+
     try {
-      const response = await gameApi.startGame(gameId);
+      const response = await gameApi.startGame(lobbyKey);
 
       if (response.success && response.data) {
-        // Navigate to the game screen using React Router
-        navigate(`/game/${gameId}`);
+        navigate(`/game/${lobbyKey}`);
       }
     } catch (error) {
       const errorMessage = apiUtils.handleApiError(error);
@@ -79,6 +112,8 @@ export default function Lobby() {
   const handleCancel = () => {
     setIsWaiting(false);
     setGameId("");
+    setLobbyId("");
+    setPlayerId("");
     setIsCreator(false);
     setJoinLink("");
   };
@@ -87,7 +122,8 @@ export default function Lobby() {
     return (
       <WaitingScreen
         playerName={name}
-        gameId={gameId}
+        gameId={lobbyId || gameId}
+        playerId={playerId}
         difficulty={difficulty}
         isCreator={isCreator}
         onGameStart={handleGameStart}
