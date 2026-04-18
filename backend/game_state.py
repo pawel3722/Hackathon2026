@@ -1,5 +1,5 @@
 import numpy as np
-from models import Player, Stock, Crypto, Property
+from models import Player, Stock, Crypto, Property, ChanceCard
 from update_market_prices import update_stock_price, update_crypto_price, next_regime, STOCK_REGIME
 
 class GameState:
@@ -18,6 +18,7 @@ class GameState:
         self.stocks : list[Stock] = self.init_stocks()
         self.cryptos : list[Crypto] = self.init_crypto()
         self.properties : list[Property] = self.init_properties()
+        self.chance_cards : list[ChanceCard] = self._init_chance_cards()
 
     def create_board(self):
         return [
@@ -59,7 +60,11 @@ class GameState:
         pass
 
     def _get_chance_card(self):
-        pass
+        if not self.chance_cards:
+            return None
+
+        card_idx = int(self.rng.integers(0, len(self.chance_cards)))
+        return self.chance_cards[card_idx]
 
     def _get_event(self):
         pass
@@ -140,6 +145,26 @@ class GameState:
                 id=103, ticker='SOL', name='Solana',
                 price=185.0, growth=0.008, risk=0.14, market_sensitivity=1.10
             ),
+        ]
+
+    def _init_chance_cards(self):
+        return [
+            ChanceCard(id=1, description='CD Projekt Red wypuścił Cyberpunk 2077, ale premiera okazała się niewypałem. Cena akcji CDR spada o 20%.'),
+            ChanceCard(id=2, description='NBP obniża stopy procentowe. Oprocentowanie kredytów i lokat maleje o połowę.'),
+            ChanceCard(id=3, description='Awaria dużej sieci energetycznej w Europie. Akcje spółek energetycznych tracą 15%.'),
+            ChanceCard(id=4, description='Globalna panika na rynku krypto. Wszystkie kryptowaluty spadają o 25%.'),
+            ChanceCard(id=5, description='ETF na Bitcoin i ETH zatwierdzony. BTC i ETH rosną o 18%.'),
+            ChanceCard(id=6, description='Wyciek danych w dużym banku. Akcje banków spadają o 10%.'),
+            ChanceCard(id=7, description='Wiedźmin 4 okazuje się nowym hitem. CD Projekt Red zyskuje +25%.'),
+            ChanceCard(id=8, description='Globalny wzrost cen ropy! Paliwo drożeje dwukrotnie na 5 tur, a spółki paliwowe rosną o 20%.'),
+            ChanceCard(id=9, description='Cyberatak na dużą giełdę krypto. ETH i SOL spadają o 17%.'),
+            ChanceCard(id=10, description='Korekta na rynku akcji. Wszystkie akcje spadają o 15%.'),
+            ChanceCard(id=11, description='Zyski firm lepsze od oczekiwań. Szeroki rynek akcji rośnie o 9%.'),
+            ChanceCard(id=12, description='Rekordowe wydobycie ropy. Spółki paliwowe notują dodatkowe +12%.'),
+            ChanceCard(id=13, description='Powódź! Kursy ubezpieczycieli spadają o 8%.'),
+            ChanceCard(id=14, description='Altseason na rynku krypto. SOL +20%, ETH +10%.'),
+            ChanceCard(id=15, description='Silna zima i wysokie zużycie energii. Spółki energetyczne +14%.'),
+            ChanceCard(id=16, description='Kryzys na rynku nieruchomości! Ceny wszystkich nieruchomości spadają o 15% w kolejnej turze.'),
         ]
 
 
