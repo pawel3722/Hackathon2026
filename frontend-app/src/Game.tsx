@@ -89,7 +89,6 @@ export default function Game() {
   const [lastWsMessage, setLastWsMessage] = useState<any>(null);
   const [showMarkets, setShowMarkets] = useState(false);
   const [showStockMarketModal, setShowStockMarketModal] = useState(false);
-  const [stockModalMode, setStockModalMode] = useState<'buy' | 'sell'>('buy');
   const [pendingActions, setPendingActions] = useState<Action[]>([]);
   const [marketState, setMarketState] = useState<any>(() => getGlobalGameState());
   const [playerState, setPlayerState] = useState<any>(() => getGlobalGameState());
@@ -293,13 +292,8 @@ export default function Game() {
                   <p>Trade stocks and watch your wealth grow!</p>
                   <div>
                     <button onClick={() => {
-                      setStockModalMode('buy');
                       setShowStockMarketModal(true);
-                    }}>💰 Buy Stocks</button>
-                    <button onClick={() => {
-                      setStockModalMode('sell');
-                      setShowStockMarketModal(true);
-                    }}>📊 Sell Stocks</button>
+                    }}>💰 Open Stock Market</button>
                   </div>
                 </div>
               ) : fieldsData.find(f => f.f === selectedField.f)?.name == "Bank" ? (
@@ -504,7 +498,6 @@ export default function Game() {
           onClose={() => setShowStockMarketModal(false)}
           stocks={stocks}
           currentPlayer={currentPlayer}
-          initialMode={stockModalMode}
           onAction={handleAddAction}
         />
       </div>

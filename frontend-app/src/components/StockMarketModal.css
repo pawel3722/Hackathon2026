@@ -1,231 +1,121 @@
-.stock-market-modal-overlay {
-  position: fixed;
+.stock-market-overlay {
+  position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(2px);
+  z-index: 1000;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  padding: 20px;
 }
 
-.stock-market-modal-content {
-  background: white;
+.stock-market-content {
+  position: relative;
+  background-color: #f9fafb;
   border-radius: 12px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-  max-width: 500px;
-  width: 90%;
-  max-height: 80vh;
+  width: 100%;
+  max-width: 1300px;
+  max-height: 85vh;
+  padding: 2rem;
   overflow-y: auto;
-  animation: slideUp 0.3s ease-out;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 }
 
-@keyframes slideUp {
-  from {
-    transform: translateY(20px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-.stock-market-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 24px;
-  border-bottom: 2px solid #f0f0f0;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border-radius: 12px 12px 0 0;
-}
-
-.stock-market-header h2 {
-  margin: 0;
-  font-size: 24px;
-  font-weight: 600;
-}
-
-.stock-market-close {
+.stock-market-close-icon {
+  position: absolute;
+  top: 15px;
+  right: 15px;
   background: none;
   border: none;
-  font-size: 28px;
+  font-size: 20px;
+  color: #4b5563;
   cursor: pointer;
-  color: white;
-  padding: 0;
+  opacity: 0.7;
+  transition: all 0.2s;
+  z-index: 1001;
   width: 32px;
   height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 4px;
-  transition: background-color 0.2s;
+  border-radius: 50%;
 }
 
-.stock-market-close:hover {
-  background-color: rgba(255, 255, 255, 0.2);
+.stock-market-close-icon:hover {
+  opacity: 1;
+  background-color: #e5e7eb;
 }
 
-.stock-market-tabs {
+.trade-controls {
   display: flex;
-  border-bottom: 1px solid #e0e0e0;
-  padding: 0 24px;
-  gap: 0;
-}
-
-.tab {
-  flex: 1;
-  padding: 16px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 16px;
-  font-weight: 500;
-  color: #999;
-  border-bottom: 3px solid transparent;
-  transition: all 0.3s;
-}
-
-.tab:hover {
-  color: #667eea;
-}
-
-.tab.active {
-  color: #667eea;
-  border-bottom-color: #667eea;
-}
-
-.stock-market-section {
-  padding: 24px;
-}
-
-.stock-market-form-group {
-  margin-bottom: 20px;
-}
-
-.stock-market-form-group label {
-  display: block;
-  margin-bottom: 8px;
-  font-weight: 600;
-  color: #333;
-  font-size: 14px;
-}
-
-.stock-market-form-group select,
-.stock-market-form-group input {
-  width: 100%;
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 14px;
-  font-family: inherit;
-  transition: border-color 0.2s;
-}
-
-.stock-market-form-group select:focus,
-.stock-market-form-group input:focus {
-  outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-}
-
-.stock-market-details {
-  background: #f8f9fa;
-  border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 20px;
-}
-
-.detail-row {
-  display: flex;
+  flex-direction: row;
+  align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
-  font-size: 14px;
-  color: #666;
+  gap: 10px;
+  padding-top: 15px;
+  margin-top: 15px;
+  border-top: 1px solid #e5e7eb;
 }
 
-.detail-row:last-child {
-  margin-bottom: 0;
+.qty-row {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 8px;
 }
 
-.detail-row.total {
-  padding-top: 12px;
-  border-top: 1px solid #ddd;
-  font-weight: 600;
-  color: #333;
-  margin-top: 12px;
+.qty-row label {
+  color: #111827;
+  font-size: 0.9rem;
+  font-weight: 500;
 }
 
-.detail-value {
-  font-weight: 600;
-  color: #333;
+.qty-row input {
+  width: 50px;
+  padding: 6px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #111827;
+  text-align: center;
+  font-size: 0.95rem;
 }
 
-.detail-value.insufficient {
-  color: #e74c3c;
+.action-buttons {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  gap: 8px;
+  flex: 1;
 }
 
-.detail-value.profit {
-  color: #27ae60;
-}
-
-.stock-market-confirm {
-  width: 100%;
-  padding: 14px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+.buy-button, .sell-button {
+  flex: 1;
+  padding: 6px 10px;
   border: none;
   border-radius: 6px;
-  font-size: 16px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  color: white;
+  transition: background-color 0.2s;
+  font-size: 0.85rem;
+  white-space: nowrap;
 }
 
-.stock-market-confirm:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+.buy-button {
+  background-color: #10b981;
+}
+.buy-button:hover {
+  background-color: #059669;
 }
 
-.stock-market-confirm:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+.sell-button {
+  background-color: #ef4444;
 }
-
-.stock-market-error {
-  background-color: #f8d7da;
-  border: 1px solid #f5c6cb;
-  color: #721c24;
-  padding: 12px;
-  border-radius: 6px;
-  margin-bottom: 16px;
-  font-size: 14px;
-}
-
-.no-stocks {
-  text-align: center;
-  color: #999;
-  padding: 40px 20px;
-  font-size: 16px;
-}
-
-/* Responsive design */
-@media (max-width: 640px) {
-  .stock-market-modal-content {
-    width: 95%;
-    max-height: 90vh;
-  }
-
-  .stock-market-header h2 {
-    font-size: 20px;
-  }
-
-  .tab {
-    font-size: 14px;
-    padding: 12px;
-  }
+.sell-button:hover {
+  background-color: #dc2626;
 }

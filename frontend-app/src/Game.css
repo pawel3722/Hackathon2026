@@ -170,7 +170,7 @@
 .game-modal {
   position: absolute;
   width: 100vw;
-  height: 60vh;
+  height: 30vh;
   background-color: white;
   opacity: 0.99;
   bottom: 0;
