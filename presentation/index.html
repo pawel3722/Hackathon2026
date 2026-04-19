@@ -117,7 +117,7 @@
             max-width: 100%;
             max-height: 60vh;
             border-radius: 12px;
-            box-shadow: 8px 8px 0px rgba(15, 23, 42, 0.2);
+            box-shadow: 8px 8px 10px rgba(15, 23, 42, 0.2);
             border: 4px solid #94a3b8;
             object-fit: cover;
         }
@@ -161,9 +161,30 @@
 
         .footer-nav { right: 2rem; }
         .footer-counter { left: 2rem; }
+
+        .progress-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background-color: #e2e8f0;
+            z-index: 1000;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background-color: #2563eb;
+            width: 0%;
+            transition: width 0.3s ease-in-out;
+        }
     </style>
 </head>
 <body>
+
+    <div class="progress-container">
+        <div class="progress-bar" id="progress-bar"></div>
+    </div>
 
     <!-- Slide 1: Title -->
     <div class="slide active">
@@ -200,8 +221,8 @@
                 <ul>
                     <li>Gamifying Financial Decisions</li>
                     <li>Experiential learning through engaging multiplayer strategy</li>
-                    <li>A risk-free environment to test financial strategies</li>
-                    <li>No random dice rolls – every move is intentional</li>
+                    <li>A risk-free environment to test<br>financial strategies</li>
+                    <li>No random dice rolls – every move<br>is intentional</li>
                     <li>Every turn is a money decision: invest, borrow, and react to market news.</li>
                 </ul>
             </div>
@@ -218,15 +239,9 @@
             <div class="text-col">
                 <ul>
                     <li>Learn to navigate simulated price histories and market regimes</li>
-<<<<<<< HEAD
                     <li>Trade traditional stocks to build slow, stable wealth and receive dividends</li>
-                    <li>Explore cryptocurrencies for high-risk rewards</li>
+                    <li>Explore cryptocurrencies for <br> high-risk rewards</li>
                     <li>Hands-on experience managing market volatility</li>
-=======
-                    <li>Trade traditional stocks to build slow, stable wealth</li>
-                    <li>Explore real-world crypto proxies for<br>high-risk rewards</li>
-                    <li>Hands-on experience managing<br>market volatility</li>
->>>>>>> bdae36a3d722fe27912ef0e90077902f1c507673
                 </ul>
             </div>
             <div class="img-col dual-img-row">
@@ -243,13 +258,13 @@
             <div class="text-col">
                 <ul>
                     <li>Take credits to strategically leverage lucrative trades</li>
-                    <li>Use deposits to build guaranteed steady yields</li>
+                    <li>Use deposits to build guaranteed<br>steady yields</li>
                     <li>Buy insurance against potential personal financial disasters</li>
-                    <li>Understand the compound impact of term lengths</li>
+                    <li>Understand the compound impact of<br>term lengths</li>
                 </ul>
             </div>
             <div class="img-col">
-                <img src="./bank_services.png" alt="Bank Services UI">
+                <img src="./bank_services.png" style="height: 60vh;" alt="Bank Services UI">
             </div>
         </div>
     </div>
@@ -267,8 +282,8 @@
                 </ul>
             </div>
             <div class="img-col dual-img">
-                <img src="./draw_a_chance_card.png" alt="Chance Card">
-                <img src="./chance_cards_selection.png" alt="Chance Consequences">
+                <img src="./draw_a_chance_card.png" style="height: 23vh;" alt="Chance Card">
+                <img src="./chance_cards_selection.png" style="height: 60vh;" alt="Chance Consequences">
             </div>
         </div>
     </div>
@@ -300,6 +315,7 @@
     <script>
         const slides = document.querySelectorAll('.slide');
         const counterText = document.getElementById('counter');
+        const progressBar = document.getElementById('progress-bar');
         let currentSlide = 0;
 
         function updateSlide() {
@@ -310,6 +326,8 @@
                 }
             });
             counterText.innerText = `${currentSlide + 1} / ${slides.length}`;
+            const progress = (currentSlide / (slides.length - 1)) * 100;
+            progressBar.style.width = `${progress}%`;
         }
 
         document.addEventListener('keydown', (e) => {
