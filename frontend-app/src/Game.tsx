@@ -129,7 +129,7 @@ export default function Game() {
 
   // Get player data from player state
   const allPlayers = useMemo(() => Array.isArray(playerState?.players) ? playerState.players : [], [playerState]);
-  
+
   const currentPlayer = allPlayers.find((p: Player) => p.id === playerId) || {
     id: playerId || "1",
     name: "Ty",
@@ -144,7 +144,8 @@ export default function Game() {
   };
 
   allPlayers.forEach((p: Player, i: number) => {
-    p.pawn_id = `p${i + 1}-start`; });
+    p.pawn_id = `p${i + 1}-start`;
+  });
 
   const otherPlayers = allPlayers.filter((p: Player) => p.id !== playerId);
 
@@ -153,8 +154,8 @@ export default function Game() {
 
   useEffect(() => {
     if (!spline.current) return;
-    
-    allPlayers.forEach(p => {
+
+    allPlayers.forEach((p: Player) => {
       const pawnId = p.pawn_id;
       const pawn = spline.current?.findObjectByName(pawnId);
       if (pawn && initPositions.current[pawnId] !== undefined) {
@@ -215,25 +216,21 @@ export default function Game() {
     console.log("handleEndTurn")
     setIsWaitingForState(true);
 
-      let stepsTravelled = selectedField.d - (currentPlayer.position || 0);
-      if (stepsTravelled < 0) {
-        // Assume wraparound
-        stepsTravelled = (selectedField.d + FIELD.length) - (currentPlayer.position || 0);
-      }
+    let stepsTravelled = selectedField.d - (currentPlayer.position || 0);
+    if (stepsTravelled < 0) {
+      // Assume wraparound
+      stepsTravelled = (selectedField.d + FIELD.length) - (currentPlayer.position || 0);
+    }
 
-      ws.send({
-        type: "move",
-        move: {
-          steps: stepsTravelled > 0 ? stepsTravelled : 0,
-          actions: []
-        },
-      });
-    };
+    ws.send({
+      type: "move",
+      move: {
+        steps: stepsTravelled > 0 ? stepsTravelled : 0,
+        actions: []
+      },
+    });
+  };
 
-    return (
-      <div className="game-container">
-        <div className="game-modal" style={{ transform: showModal ? "translateY(0)" : "translateY(100%)" }}>
-          <button onClick={() => { setShowModal(prev => !prev) }}>Close</button>
   return (
     <div className="game-container">
       {isWaitingForState && (
@@ -247,191 +244,191 @@ export default function Game() {
 
       <div className="game-modal" style={{ transform: showModal ? "translateY(0)" : "translateY(100%)" }}>
         <button onClick={() => { setShowModal(prev => !prev) }}>Close</button>
-        <div>
-          {fieldsData.find(f => f.f === selectedField.f)?.name == "Start" ?(
             <div>
-              <h1>Start</h1>
-              <p>You receive 200 PLN for passing Start!</p>
-            </div>
-          ) : fieldsData.find(f => f.f === selectedField.f)?.name == "Stockmarket" ?(
-           <div>
-              <h1>Stock Market - {getGlobalGameState().board[selectedField.d].name}</h1>
-              <p>You can buy and sell stocks here.</p>
-            </div>
-          ) : fieldsData.find(f => f.f === selectedField.f)?.name == "Bank" ?(
-           <div>
-              <h1>Bank - {getGlobalGameState().board[selectedField.d].name}</h1>
-              <p>You can deposit and withdraw money here.</p>
-            </div>
-          ) : fieldsData.find(f => f.f === selectedField.f)?.name == "Crypto" ?(
-           <div>
-              <h1>Crypto Exchange - {getGlobalGameState().board[selectedField.d].name}</h1>
-              <p>You can buy and sell cryptocurrencies here.</p>
-            </div>
-          ) : fieldsData.find(f => f.f === selectedField.f)?.name == "Estate" ?(
-           <div>
-              <h1>Estate - {getGlobalGameState().board[selectedField.d].name}</h1>
-              <p>You can buy and sell properties here.</p>
-            </div>
-          ) : fieldsData.find(f => f.f === selectedField.f)?.name == "Chance" ?(
-           <div>
-              <h1>Chance</h1>
-              <p>You can draw a Chance card here.</p>
-            </div>
-          ) : fieldsData.find(f => f.f === selectedField.f)?.name == "Bet" ?(
-           <div>
-              <h1>Bookmaker</h1>
-              <p>You can place bets here.</p>
-            </div>
-          ) : fieldsData.find(f => f.f === selectedField.f)?.name == "Tax" ?(
-           <div>
-              <h1>Tax</h1>
-              <p>You must pay taxes here.</p>
-            </div>
-          ) : (
-            <div>
-              <h1>Parking</h1>
-              <p>You can rest here.</p>
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div className="game-header">
-        <h1 className="game-title">Moneypoly</h1>
-          <button className="leave-button" onClick={handleLeaveGame}>
-            Leave Game
-         </button>
-      </div>
-
-      <div className="game-content">
-        <div className="left-panel">
-          {selectedPlayer ? (
-            <PlayerStatus
-              player={selectedPlayer}
-              onClose={() => setSelectedPlayer(null)}
-            />
-          ) : (
-            <PlayerStatus
-              player={currentPlayer}
-              isCurrentPlayer={true}
-            />
-          )}
-
-          <div className="other-players">
-            <h3>Other Players</h3>
-            {otherPlayers.map((player : Player) => (
-              <div
-                key={player.id}
-                className="other-player-card"
-                onClick={() => setSelectedPlayer(player)}
-              >
-                <div className="player-name">{player.name}</div>
-                <div className="player-money">${player.money}</div>
-                <div className="player-properties">
-                  {player.properties.length} properties
+              {fieldsData.find(f => f.f === selectedField.f)?.name == "Start" ? (
+                <div>
+                  <h1>Start</h1>
+                  <p>You receive 200 PLN for passing Start!</p>
                 </div>
-              </div>
-            ))}
+              ) : fieldsData.find(f => f.f === selectedField.f)?.name == "Stockmarket" ? (
+                <div>
+                  <h1>Stock Market - {getGlobalGameState().board[selectedField.d].name}</h1>
+                  <p>You can buy and sell stocks here.</p>
+                </div>
+              ) : fieldsData.find(f => f.f === selectedField.f)?.name == "Bank" ? (
+                <div>
+                  <h1>Bank - {getGlobalGameState().board[selectedField.d].name}</h1>
+                  <p>You can deposit and withdraw money here.</p>
+                </div>
+              ) : fieldsData.find(f => f.f === selectedField.f)?.name == "Crypto" ? (
+                <div>
+                  <h1>Crypto Exchange - {getGlobalGameState().board[selectedField.d].name}</h1>
+                  <p>You can buy and sell cryptocurrencies here.</p>
+                </div>
+              ) : fieldsData.find(f => f.f === selectedField.f)?.name == "Estate" ? (
+                <div>
+                  <h1>Estate - {getGlobalGameState().board[selectedField.d].name}</h1>
+                  <p>You can buy and sell properties here.</p>
+                </div>
+              ) : fieldsData.find(f => f.f === selectedField.f)?.name == "Chance" ? (
+                <div>
+                  <h1>Chance</h1>
+                  <p>You can draw a Chance card here.</p>
+                </div>
+              ) : fieldsData.find(f => f.f === selectedField.f)?.name == "Bet" ? (
+                <div>
+                  <h1>Bookmaker</h1>
+                  <p>You can place bets here.</p>
+                </div>
+              ) : fieldsData.find(f => f.f === selectedField.f)?.name == "Tax" ? (
+                <div>
+                  <h1>Tax</h1>
+                  <p>You must pay taxes here.</p>
+                </div>
+              ) : (
+                <div>
+                  <h1>Parking</h1>
+                  <p>You can rest here.</p>
+                </div>
+              )}
+            </div>
           </div>
 
-          <div className="game-actions">
-            <button className="action-button primary" disabled={isWaitingForState || hasMovedThisTurn}>Roll Dice</button>
-            <button className="action-button" disabled={isWaitingForState} onClick={() => setShowMarkets((v) => !v)}>
-              {showMarkets ? "Close Markets" : "Markets"}
-            </button>
-            <button className="action-button" disabled={isWaitingForState}>Sell Property</button>
-            <button className="action-button" disabled={isWaitingForState} onClick={handleEndTurn}>
-              {isWaitingForState ? "Waiting…" : "End Turn"}
+          <div className="game-header">
+            <h1 className="game-title">Moneypoly</h1>
+            <button className="leave-button" onClick={handleLeaveGame}>
+              Leave Game
             </button>
           </div>
-          {hasMovedThisTurn && !isWaitingForState && (
-            <div className="move-info-banner">
-              Move completed. Perform actions for this field, then end your turn.
-            </div>
-          )}
 
-          {lastWsMessage && (
-            <div className="game-debug-panel">
-              <h3>Last WS message</h3>
-              <pre>{JSON.stringify(lastWsMessage, null, 2)}</pre>
-            </div>
-          )}
-        </div>
-
-        <div className="board-container">
-          <div className="board">
-            {showMarkets ? (
-              <div className="markets-view">
-                {stocks.length === 0 && cryptos.length === 0 ? (
-                  <div className="markets-empty">No market data yet (start the game first).</div>
-                ) : (
-                  <>
-                    {stocks.length > 0 && (
-                      <div className="markets-section">
-                        <h2 className="markets-title" style={{ textAlign: "center", fontSize: "1.5rem" }}>Stocks</h2>
-                        <div className="markets-grid">
-                          {stocks.map((s: any) => (
-                            <div key={`stock-${s.id}`} className="market-card">
-                              <div className="market-card-title" style={{ textAlign: "center" }}>{s.name} - {Number(s.price).toFixed(2)} PLN</div>
-                              <PriceChart priceHistory={Array.isArray(s.price_history) ? s.price_history : [s.price]} />
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {cryptos.length > 0 && (
-                      <div className="markets-section">
-                        <h2 className="markets-title" style={{ textAlign: "center", fontSize: "1.5rem" }}>Crypto</h2>
-                        <div className="markets-grid">
-                          {cryptos.map((c: any) => (
-                            <div key={`crypto-${c.id}`} className="market-card">
-                              <div className="market-card-title" style={{ textAlign: "center" }}>{c.name} - ${Number(c.price).toFixed(2)}</div>
-                              <PriceChart priceHistory={Array.isArray(c.price_history) ? c.price_history : [c.price]} />
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </>
-                )}
-              </div>
-            ) : (
-              <div className="board-placeholder">
-                <Spline
-                  scene="https://prod.spline.design/RBNliUZGiPREVqU2/scene.splinecode"
-                  onSplineMouseDown={onSplineMouseDown}
-                  onLoad={(s) => {
-                    spline.current = s;
-                    for (let i = 1; i <= 6; i++) {
-                      const pawnId = `p${i}-start`;
-                      const pawn = s.findObjectByName(pawnId);
-                      if (pawn) {
-                        initPositions.current[pawnId] = pawn.position.x;
-                      }
-                    }
-                    allPlayers.forEach(p => {
-                      const pawnId = p.pawn_id;
-                      const pawn = s.findObjectByName(pawnId);
-                      if (pawn && initPositions.current[pawnId] !== undefined) {
-                        pawn.position.x = initPositions.current[pawnId] - (p.position || 0) * 370;
-                      }
-                    });
-                  }}
+          <div className="game-content">
+            <div className="left-panel">
+              {selectedPlayer ? (
+                <PlayerStatus
+                  player={selectedPlayer}
+                  onClose={() => setSelectedPlayer(null)}
                 />
-                {isWaitingForState && (
-                  <div className="board-blocker">
-                    <div className="board-blocker-text">
-                      Waiting for turn to end...
+              ) : (
+                <PlayerStatus
+                  player={currentPlayer}
+                  isCurrentPlayer={true}
+                />
+              )}
+
+              <div className="other-players">
+                <h3>Other Players</h3>
+                {otherPlayers.map((player: Player) => (
+                  <div
+                    key={player.id}
+                    className="other-player-card"
+                    onClick={() => setSelectedPlayer(player)}
+                  >
+                    <div className="player-name">{player.name}</div>
+                    <div className="player-money">${player.money}</div>
+                    <div className="player-properties">
+                      {player.properties.length} properties
                     </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="game-actions">
+                <button className="action-button primary" disabled={isWaitingForState || hasMovedThisTurn}>Roll Dice</button>
+                <button className="action-button" disabled={isWaitingForState} onClick={() => setShowMarkets((v) => !v)}>
+                  {showMarkets ? "Close Markets" : "Markets"}
+                </button>
+                <button className="action-button" disabled={isWaitingForState}>Sell Property</button>
+                <button className="action-button" disabled={isWaitingForState} onClick={handleEndTurn}>
+                  {isWaitingForState ? "Waiting…" : "End Turn"}
+                </button>
+              </div>
+              {hasMovedThisTurn && !isWaitingForState && (
+                <div className="move-info-banner">
+                  Move completed. Perform actions for this field, then end your turn.
+                </div>
+              )}
+
+              {lastWsMessage && (
+                <div className="game-debug-panel">
+                  <h3>Last WS message</h3>
+                  <pre>{JSON.stringify(lastWsMessage, null, 2)}</pre>
+                </div>
+              )}
+            </div>
+
+            <div className="board-container">
+              <div className="board">
+                {showMarkets ? (
+                  <div className="markets-view">
+                    {stocks.length === 0 && cryptos.length === 0 ? (
+                      <div className="markets-empty">No market data yet (start the game first).</div>
+                    ) : (
+                      <>
+                        {stocks.length > 0 && (
+                          <div className="markets-section">
+                            <h2 className="markets-title" style={{ textAlign: "center", fontSize: "1.5rem" }}>Stocks</h2>
+                            <div className="markets-grid">
+                              {stocks.map((s: any) => (
+                                <div key={`stock-${s.id}`} className="market-card">
+                                  <div className="market-card-title" style={{ textAlign: "center" }}>{s.name} - {Number(s.price).toFixed(2)} PLN</div>
+                                  <PriceChart priceHistory={Array.isArray(s.price_history) ? s.price_history : [s.price]} />
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {cryptos.length > 0 && (
+                          <div className="markets-section">
+                            <h2 className="markets-title" style={{ textAlign: "center", fontSize: "1.5rem" }}>Crypto</h2>
+                            <div className="markets-grid">
+                              {cryptos.map((c: any) => (
+                                <div key={`crypto-${c.id}`} className="market-card">
+                                  <div className="market-card-title" style={{ textAlign: "center" }}>{c.name} - ${Number(c.price).toFixed(2)}</div>
+                                  <PriceChart priceHistory={Array.isArray(c.price_history) ? c.price_history : [c.price]} />
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+                ) : (
+                  <div className="board-placeholder">
+                    <Spline
+                      scene="https://prod.spline.design/RBNliUZGiPREVqU2/scene.splinecode"
+                      onSplineMouseDown={onSplineMouseDown}
+                      onLoad={(s) => {
+                        spline.current = s;
+                        for (let i = 1; i <= 6; i++) {
+                          const pawnId = `p${i}-start`;
+                          const pawn = s.findObjectByName(pawnId);
+                          if (pawn) {
+                            initPositions.current[pawnId] = pawn.position.x;
+                          }
+                        }
+                        allPlayers.forEach(p => {
+                          const pawnId = p.pawn_id;
+                          const pawn = s.findObjectByName(pawnId);
+                          if (pawn && initPositions.current[pawnId] !== undefined) {
+                            pawn.position.x = initPositions.current[pawnId] - (p.position || 0) * 370;
+                          }
+                        });
+                      }}
+                    />
+                    {isWaitingForState && (
+                      <div className="board-blocker">
+                        <div className="board-blocker-text">
+                          Waiting for turn to end...
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
-            )}
+            </div>
           </div>
         </div>
-      </div>
-    </div>
-  );
+        );
 }
