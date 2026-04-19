@@ -82,13 +82,20 @@ export default function Game() {
   const playerId = routeState?.playerId ?? localStorage.getItem("playerId") ?? "";
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [selectedField, setSelectedField] = useState<Field>(FIELD[0])
+  const [selectedObserveField, setSelectedObserveField] = useState<Field>(FIELD[0])
   const selectedFieldRef = useRef(FIELD[0]);
   const spline = useRef<Application | null>(null)
   const [showModal, setShowModal] = useState(false)
+  const [observe, setObserve] = useState(false)
   const [lastWsMessage, setLastWsMessage] = useState<any>(null);
   const [showMarkets, setShowMarkets] = useState(false);
   const [marketState, setMarketState] = useState<any>(() => getGlobalGameState());
   const [playerState, setPlayerState] = useState<any>(() => getGlobalGameState());
+  const observeRef = useRef(observe);
+
+  useEffect(() => {
+    observeRef.current = observe;
+  }, [observe]);
 
 
   useEffect(() => {
@@ -123,7 +130,7 @@ export default function Game() {
 
   // Get player data from player state
   const allPlayers = Array.isArray(playerState?.players) ? playerState.players : [];
-  
+
   const currentPlayer = allPlayers.find((p: Player) => p.id === playerId) || {
     id: playerId || "1",
     name: "Ty",
@@ -138,7 +145,8 @@ export default function Game() {
   };
 
   allPlayers.forEach((p: Player, i: number) => {
-    p.pawn_id = `p${i + 1}-start`; });
+    p.pawn_id = `p${i + 1}-start`;
+  });
 
   const otherPlayers = allPlayers.filter((p: Player) => p.id !== playerId);
 
@@ -151,29 +159,26 @@ export default function Game() {
 
     if (!nextField || !pawn) return;
 
-    const currentField = selectedFieldRef.current;
-    const dist = nextField.d - currentField.d;
+    if (!observeRef.current) {
+      const currentField = selectedFieldRef.current;
+      const dist = nextField.d - currentField.d;
 
-    // ❌ blokady
-    if (dist <= 0) {
-      console.log("Nie możesz się cofać ani stać w miejscu");
-      return;
+      if (dist <= 0) return;
+      if (dist > 3) return;
+
+      const obj = spline.current?.findObjectByName(e.target.name);
+      const prevObj = spline.current?.findObjectByName(currentField.f);
+
+      if (obj) obj.state = "selected";
+      if (prevObj) prevObj.state = "Base State";
+
+      pawn.position.x -= dist * 370;
+      setSelectedField(nextField);
+      setSelectedObserveField(nextField);
+    } else {
+      setSelectedObserveField(nextField);
     }
 
-    if (dist > 3) {
-      console.log("Możesz przesunąć się maksymalnie o 3 pola");
-      return;
-    }
-
-    const obj = spline.current?.findObjectByName(e.target.name);
-    const prevObj = spline.current?.findObjectByName(currentField.f);
-
-    if (obj) obj.state = "selected";
-    if (prevObj) prevObj.state = "Base State";
-
-    pawn.position.x -= dist * 370;
-
-    setSelectedField(nextField);
     setShowModal(prev => !prev);
   };
 
@@ -204,58 +209,6 @@ export default function Game() {
   return (
     <div className="game-container">
 
-      <div className="game-modal" style={{ transform: showModal ? "translateY(0)" : "translateY(100%)" }}>
-        <button onClick={() => { setShowModal(prev => !prev) }}>Close</button>
-        <div>
-          {fieldsData.find(f => f.f === selectedField.f)?.name == "Start" ?(
-            <div>
-              <h1>Start</h1>
-              <p>You receive 200 PLN for passing Start!</p>
-            </div>
-          ) : fieldsData.find(f => f.f === selectedField.f)?.name == "Stockmarket" ?(
-           <div>
-              <h1>Stock Market - {getGlobalGameState().board[selectedField.d].name}</h1>
-              <p>You can buy and sell stocks here.</p>
-            </div>
-          ) : fieldsData.find(f => f.f === selectedField.f)?.name == "Bank" ?(
-           <div>
-              <h1>Bank - {getGlobalGameState().board[selectedField.d].name}</h1>
-              <p>You can deposit and withdraw money here.</p>
-            </div>
-          ) : fieldsData.find(f => f.f === selectedField.f)?.name == "Crypto" ?(
-           <div>
-              <h1>Crypto Exchange - {getGlobalGameState().board[selectedField.d].name}</h1>
-              <p>You can buy and sell cryptocurrencies here.</p>
-            </div>
-          ) : fieldsData.find(f => f.f === selectedField.f)?.name == "Estate" ?(
-           <div>
-              <h1>Estate - {getGlobalGameState().board[selectedField.d].name}</h1>
-              <p>You can buy and sell properties here.</p>
-            </div>
-          ) : fieldsData.find(f => f.f === selectedField.f)?.name == "Chance" ?(
-           <div>
-              <h1>Chance</h1>
-              <p>You can draw a Chance card here.</p>
-            </div>
-          ) : fieldsData.find(f => f.f === selectedField.f)?.name == "Bet" ?(
-           <div>
-              <h1>Bookmaker</h1>
-              <p>You can place bets here.</p>
-            </div>
-          ) : fieldsData.find(f => f.f === selectedField.f)?.name == "Tax" ?(
-           <div>
-              <h1>Tax</h1>
-              <p>You must pay taxes here.</p>
-            </div>
-          ) : (
-            <div>
-              <h1>Parking</h1>
-              <p>You can rest here.</p>
-            </div>
-          )}
-        </div>
-      </div>
-
       <div className="game-header">
         <h1 className="game-title">Moneypoly</h1>
       </div>
@@ -276,7 +229,7 @@ export default function Game() {
 
           <div className="other-players">
             <h3>Other Players</h3>
-            {otherPlayers.map((player : Player) => (
+            {otherPlayers.map((player: Player) => (
               <div
                 key={player.id}
                 className="other-player-card"
@@ -300,15 +253,72 @@ export default function Game() {
             <button className="action-button" onClick={handleEndTurn}>End Turn</button>
           </div>
 
-          {lastWsMessage && (
-            <div className="game-debug-panel">
-              <h3>Last WS message</h3>
-              <pre>{JSON.stringify(lastWsMessage, null, 2)}</pre>
+
+          <div className="switch-container">
+            <p>Move</p>
+            <div className="switch">
+              <div style={{ transform: !observe ? "translateX(0)" : "translateX(200%)" }} onClick={() => setObserve(prev => !prev)} />
             </div>
-          )}
+            <p>Preview</p>
+          </div>
+
+
         </div>
 
         <div className="board-container">
+
+          <div className="game-modal" style={{ transform: showModal ? "translateY(0)" : "translateY(100%)" }}>
+            <button onClick={() => { setShowModal(prev => !prev) }}>Close</button>
+            <div>
+              {fieldsData.find(f => f.f === selectedObserveField.f)?.name == "Start" ? (
+                <div>
+                  <h1>Start</h1>
+                  <p>You receive 200 PLN for passing Start!</p>
+                </div>
+              ) : fieldsData.find(f => f.f === selectedObserveField.f)?.name == "Stockmarket" ? (
+                <div>
+                  <h1>Stock Market - {getGlobalGameState().board[selectedObserveField.d].name}</h1>
+                  <p>You can buy and sell stocks here.</p>
+                </div>
+              ) : fieldsData.find(f => f.f === selectedObserveField.f)?.name == "Bank" ? (
+                <div>
+                  <h1>Bank - {getGlobalGameState().board[selectedObserveField.d].name}</h1>
+                  <p>You can deposit and withdraw money here.</p>
+                </div>
+              ) : fieldsData.find(f => f.f === selectedObserveField.f)?.name == "Crypto" ? (
+                <div>
+                  <h1>Crypto Exchange - {getGlobalGameState().board[selectedObserveField.d].name}</h1>
+                  <p>You can buy and sell cryptocurrencies here.</p>
+                </div>
+              ) : fieldsData.find(f => f.f === selectedObserveField.f)?.name == "Estate" ? (
+                <div>
+                  <h1>Estate - {getGlobalGameState().board[selectedObserveField.d].name}</h1>
+                  <p>You can buy and sell properties here.</p>
+                </div>
+              ) : fieldsData.find(f => f.f === selectedObserveField.f)?.name == "Chance" ? (
+                <div>
+                  <h1>Chance</h1>
+                  <p>You can draw a Chance card here.</p>
+                </div>
+              ) : fieldsData.find(f => f.f === selectedObserveField.f)?.name == "Bet" ? (
+                <div>
+                  <h1>Bookmaker</h1>
+                  <p>You can place bets here.</p>
+                </div>
+              ) : fieldsData.find(f => f.f === selectedObserveField.f)?.name == "Tax" ? (
+                <div>
+                  <h1>Tax</h1>
+                  <p>You must pay taxes here.</p>
+                </div>
+              ) : (
+                <div>
+                  <h1>Parking</h1>
+                  <p>You can rest here.</p>
+                </div>
+              )}
+            </div>
+          </div>
+
           <div className="board">
             {showMarkets ? (
               <div className="markets-view">
