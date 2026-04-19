@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moneypoly Presentation</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700;900&display=swap');
+        
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #f8fafc; /* Light theme background */
+            color: #0f172a; /* Dark text */
+            font-family: 'Space Grotesk', system-ui, sans-serif;
+            overflow: hidden;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 4rem;
+            box-sizing: border-box;
+            background: radial-gradient(circle at center, #ffffff 0%, #f1f5f9 100%);
+        }
+
+        .slide.active {
+            display: flex;
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        h1 {
+            font-size: 6rem;
+            color: #059669; /* Energetic Green */
+            margin: 0 0 1rem 0;
+            font-weight: 900;
+            text-transform: uppercase;
+            text-shadow: 4px 4px 0px #cbd5e1;
+            text-align: center;
+        }
+
+        h2 {
+            font-size: 4.5rem;
+            color: #2563eb; /* Energetic Blue */
+            margin: 0 0 3rem 0;
+            font-weight: 700;
+            text-shadow: 3px 3px 0px #e2e8f0;
+            width: 100%;
+            border-bottom: 4px solid #cbd5e1;
+            padding-bottom: 1rem;
+        }
+
+        ul {
+            font-size: 2.5rem;
+            line-height: 1.6;
+            width: 100%;
+            margin: 0;
+            padding-left: 2rem;
+            color: #334155;
+        }
+
+        li {
+            margin-bottom: 1.5rem;
+        }
+        
+        li::marker {
+            color: #ea580c; /* Accent Orange */
+        }
+
+        .tagline {
+            font-size: 3rem;
+            color: #475569;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .content-split {
+            display: flex;
+            flex-direction: row;
+            width: 100%;
+            height: 70vh;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .text-col {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .img-col {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+        }
+
+        .img-col img {
+            max-width: 100%;
+            max-height: 60vh;
+            border-radius: 12px;
+            box-shadow: 8px 8px 0px rgba(15, 23, 42, 0.2);
+            border: 4px solid #94a3b8;
+            object-fit: cover;
+        }
+
+        .dual-img {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            width: 100%;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .dual-img img {
+            max-height: 28vh;
+            width: auto;
+        }
+
+        .dual-img-row {
+            display: flex;
+            flex-direction: row;
+            gap: 2rem;
+            width: 100%;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .dual-img-row img {
+            max-height: 60vh;
+            max-width: 48%;
+            width: auto;
+        }
+
+        .footer-nav, .footer-counter {
+            position: absolute;
+            bottom: 2rem;
+            font-size: 1.5rem;
+            color: #64748b;
+            font-weight: bold;
+        }
+
+        .footer-nav { right: 2rem; }
+        .footer-counter { left: 2rem; }
+    </style>
+</head>
+<body>
+
+    <!-- Slide 1: Title -->
+    <div class="slide active">
+        <h1>Moneypoly</h1>
+        <div class="tagline">Financial Decisions As Gameplay</div>
+        <div style="margin-top: 4rem;">
+            <img src="./game_board.png" alt="Game Board" style="max-height: 45vh; border-radius: 12px; border: 4px solid #94a3b8; box-shadow: 8px 8px 0px rgba(15, 23, 42, 0.2);">
+        </div>
+    </div>
+
+    <!-- Slide 2: The Problem -->
+    <div class="slide">
+        <h2>The Financial Literacy Gap</h2>
+        <div class="content-split">
+            <div class="text-col">
+                <ul>
+                    <li><strong>Target Audience:</strong> Young adults starting to manage their own finances</li>
+                    <li>Finance is often intimidating, complex, and full of jargon</li>
+                    <li>Real-world mistakes carry heavy and stressful consequences</li>
+                    <li>Traditional learning methods lack practical engagement</li>
+                </ul>
+            </div>
+            <div class="img-col">
+                <img src="./gameplay_overview.png" alt="Gameplay Overview">
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 3: The Solution -->
+    <div class="slide">
+        <h2>Our Solution: A Financial Sandbox</h2>
+        <div class="content-split">
+            <div class="text-col">
+                <ul>
+                    <li>Experiential learning through engaging multiplayer strategy</li>
+                    <li>A risk-free environment to test financial strategies</li>
+                    <li>No random dice rolls – every move is intentional</li>
+                    <li>Interactive simulations of a real-world economy</li>
+                </ul>
+            </div>
+            <div class="img-col">
+                <img src="./another_gameplay_fragment.png" alt="Gameplay strategy">
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 4: Real-time Markets -->
+    <div class="slide">
+        <h2>Mastering the Markets</h2>
+        <div class="content-split">
+            <div class="text-col">
+                <ul>
+                    <li>Learn to navigate simulated price histories and market regimes</li>
+                    <li>Trade traditional stocks to build slow, stable wealth</li>
+                    <li>Explore real-world crypto proxies for high-risk rewards</li>
+                    <li>Hands-on experience managing market volatility</li>
+                </ul>
+            </div>
+            <div class="img-col dual-img-row">
+                <img src="./stock_market.png" alt="Stock Market">
+                <img src="./buying_crypto.png" alt="Crypto Exchange">
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 5: Strategic Banking -->
+    <div class="slide">
+        <h2>Strategic Banking Tools</h2>
+        <div class="content-split">
+            <div class="text-col">
+                <ul>
+                    <li>Take credits to strategically leverage lucrative trades</li>
+                    <li>Use deposits to build guaranteed steady yields</li>
+                    <li>Buy insurance against potential personal financial disasters</li>
+                    <li>Understand the compound impact of term lengths</li>
+                </ul>
+            </div>
+            <div class="img-col">
+                <img src="./bank_services.png" alt="Bank Services UI">
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 6: Managing Risk -->
+    <div class="slide">
+        <h2>Adapting to Unpredictability</h2>
+        <div class="content-split">
+            <div class="text-col">
+                <ul>
+                    <li>Face macro-economic shocks like random fuel price spikes</li>
+                    <li>Navigate sector crashes and unexpected tax burdens</li>
+                    <li>Learn to maintain healthy liquidity for emergencies</li>
+                    <li>Test and adapt long-term strategies under pressure</li>
+                </ul>
+            </div>
+            <div class="img-col dual-img">
+                <img src="./draw_a_chance_card.png" alt="Chance Card">
+                <img src="./chance_cards_selection.png" alt="Chance Consequences">
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 7: The Vision -->
+    <div class="slide">
+        <h2>The Vision & Impact</h2>
+        <div class="content-split">
+            <div class="text-col">
+                <ul>
+                    <li>Empower young people with a strong wealth-building mindset</li>
+                    <li>Translate abstract finance concepts into actionable insights</li>
+                    <li>Make financial literacy an engaging, social group experience</li>
+                    <li>Prepare players for their independent financial futures</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 8: Thank You -->
+    <div class="slide">
+        <h1>Thank You!</h1>
+        <div class="tagline">Are there any questions?</div>
+    </div>
+
+    <div class="footer-counter" id="counter">1 / 8</div>
+    <!-- <div class="footer-nav">PRESS N (NEXT) / P (PREVIOUS)</div> -->
+
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        const counterText = document.getElementById('counter');
+        let currentSlide = 0;
+
+        function updateSlide() {
+            slides.forEach((slide, index) => {
+                slide.classList.remove('active');
+                if (index === currentSlide) {
+                    slide.classList.add('active');
+                }
+            });
+            counterText.innerText = `${currentSlide + 1} / ${slides.length}`;
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key.toLowerCase() === 'n' || e.key === 'ArrowRight') {
+                if (currentSlide < slides.length - 1) {
+                    currentSlide++;
+                    updateSlide();
+                }
+            } else if (e.key.toLowerCase() === 'p' || e.key === 'ArrowLeft') {
+                if (currentSlide > 0) {
+                    currentSlide--;
+                    updateSlide();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
