@@ -1,4 +1,4 @@
-.stock-market-modal-overlay {
+.crypto-exchange-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -11,7 +11,7 @@
   z-index: 1000;
 }
 
-.stock-market-modal-content {
+.crypto-exchange-modal-content {
   background: white;
   border-radius: 12px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
@@ -33,25 +33,25 @@
   }
 }
 
-.stock-market-header {
+.crypto-exchange-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 24px;
-  border-bottom: 2px solid  f0f0f0;
-  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+  border-bottom: 2px solid #f0f0f0;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
   color: white;
   border-radius: 12px 12px 0 0;
 }
 
-.stock-market-header h2 {
+.crypto-exchange-header h2 {
   margin: 0;
   font-size: 24px;
   font-weight: 600;
   color: white;
 }
 
-.stock-market-close {
+.crypto-exchange-close {
   background: none;
   border: none;
   font-size: 28px;
@@ -67,18 +67,18 @@
   transition: background-color 0.2s;
 }
 
-.stock-market-close:hover {
+.crypto-exchange-close:hover {
   color: #fff;
 }
 
-.stock-market-tabs {
+.crypto-exchange-tabs {
   display: flex;
   border-bottom: 1px solid #e0e0e0;
   padding: 0 24px;
   gap: 0;
 }
 
-.tab {
+.crypto-exchange-tabs .tab {
   flex: 1;
   padding: 16px;
   background: none;
@@ -91,38 +91,27 @@
   transition: all 0.3s;
 }
 
-.tab:hover {
-  color: #667eea;
+.crypto-exchange-tabs .tab:hover {
+  color: #c55e00;
 }
 
-.tab.active {
-  color: #667eea;
-  border-bottom-color: #667eea;
+.crypto-exchange-tabs .tab.active {
+  color: #c55e00;
+  border-bottom-color: #f59e0b;
 }
 
-.stock-market-section {
+.crypto-exchange-section {
   padding: 24px;
 }
 
-.stock-market-form-group {
+.crypto-exchange-form-group {
   margin-bottom: 20px;
   height: 100%;
   width: 100%;
   box-sizing: border-box;
 }
 
-.inputbrzydki{
-  height: 100%;
-  width: 100%;
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 14px;
-  font-family: inherit;
-  transition: border-color 0.2s;
-}
-
-.stock-market-form-group label {
+.crypto-exchange-form-group label {
   display: block;
   margin-bottom: 8px;
   font-weight: 600;
@@ -130,8 +119,8 @@
   font-size: 14px;
 }
 
-.stock-market-form-group select,
-.stock-market-form-group input {
+.crypto-exchange-form-group select,
+.crypto-exchange-form-group input {
   width: 80%;
   padding: 12px;
   border: 1px solid #ddd;
@@ -141,21 +130,21 @@
   transition: border-color 0.2s;
 }
 
-.stock-market-form-group select:focus,
-.stock-market-form-group input:focus {
+.crypto-exchange-form-group select:focus,
+.crypto-exchange-form-group input:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
 }
 
-.stock-market-details {
+.crypto-exchange-details {
   background: #f8f9fa;
   border-radius: 8px;
   padding: 16px;
   margin-bottom: 20px;
 }
 
-.detail-row {
+.crypto-exchange-details .detail-row {
   display: flex;
   justify-content: space-between;
   margin-bottom: 12px;
@@ -163,11 +152,11 @@
   color: #666;
 }
 
-.detail-row:last-child {
+.crypto-exchange-details .detail-row:last-child {
   margin-bottom: 0;
 }
 
-.detail-row.total {
+.crypto-exchange-details .detail-row.total {
   padding-top: 12px;
   border-top: 1px solid #ddd;
   font-weight: 600;
@@ -175,23 +164,23 @@
   margin-top: 12px;
 }
 
-.detail-value {
+.crypto-exchange-details .detail-value {
   font-weight: 600;
   color: #333;
 }
 
-.detail-value.insufficient {
+.crypto-exchange-details .detail-value.insufficient {
   color: #e74c3c;
 }
 
-.detail-value.profit {
+.crypto-exchange-details .detail-value.profit {
   color: #27ae60;
 }
 
-.stock-market-confirm {
+.crypto-exchange-confirm {
   width: 100%;
   padding: 14px;
-  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
   color: white;
   border: none;
   border-radius: 6px;
@@ -201,17 +190,17 @@
   transition: all 0.2s;
 }
 
-.stock-market-confirm:hover:not(:disabled) {
+.crypto-exchange-confirm:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
 }
 
-.stock-market-confirm:disabled {
+.crypto-exchange-confirm:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.stock-market-error {
+.crypto-exchange-error {
   background-color: #f8d7da;
   border: 1px solid #f5c6cb;
   color: #721c24;
@@ -221,7 +210,7 @@
   font-size: 14px;
 }
 
-.no-stocks {
+.crypto-exchange-no-crypto {
   text-align: center;
   color: #444;
   padding: 40px 20px;
@@ -230,16 +219,16 @@
 
 /* Responsive design */
 @media (max-width: 640px) {
-  .stock-market-modal-content {
+  .crypto-exchange-modal-content {
     width: 95%;
     height: 90%;
   }
 
-  .stock-market-header h2 {
+  .crypto-exchange-header h2 {
     font-size: 20px;
   }
 
-  .tab {
+  .crypto-exchange-tabs .tab {
     font-size: 14px;
     padding: 12px;
   }

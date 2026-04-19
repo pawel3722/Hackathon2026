@@ -39,7 +39,7 @@ export interface StockShare {
 }
 
 export interface CryptoShare {
-  crypto_id: number;
+  crypto: Crypto;
   quantity: number;
   purchase_price: number;
 }

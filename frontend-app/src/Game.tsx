@@ -8,6 +8,7 @@ import type { Application } from "@splinetool/runtime";
 import { getGlobalGameState } from "./gameStateStore";
 import { PriceChart } from "./components/PriceChart";
 import { StockMarketModal } from "./components/StockMarketModal";
+import { CryptoExchangeModal } from "./components/CryptoExchangeModal";
 import { BankModal } from "./components/BankModal";
 import { ChanceModal } from "./components/ChanceModal";
 
@@ -90,6 +91,7 @@ export default function Game() {
   const [showModal, setShowModal] = useState(false)
   const [showMarkets, setShowMarkets] = useState(false);
   const [showStockMarketModal, setShowStockMarketModal] = useState(false);
+  const [showCryptoModal, setShowCryptoModal] = useState(false);
   const [showBankModal, setShowBankModal] = useState(false);
   const [showChanceModal, setShowChanceModal] = useState(false);
   const [pendingActions, setPendingActions] = useState<Action[]>([]);
@@ -384,7 +386,7 @@ export default function Game() {
                   <h1>📈 Stock Market</h1>
                   <p>Trade stocks and watch your wealth grow!</p>
                   <div>
-                    <button className="action-button" style={{ marginTop: "1.5em" }} onClick={() => {
+                    <button className="action-button" style={{ marginTop: "1.5em", fontSize: "1em"  }} onClick={() => {
                       setShowStockMarketModal(true);
                     }}>💰 Open Stock Market</button>
                   </div>
@@ -395,6 +397,7 @@ export default function Game() {
                   <p>Manage your finances with our banking services.</p>
                   <div className="game-bank-services">
                     <button
+                      style = {{ fontSize: "1em" }}
                       className="game-bank-service-btn credit-btn"
                       onClick={() => {
                         setShowBankModal(true);
@@ -408,6 +411,11 @@ export default function Game() {
                 <div>
                   <h1>Crypto Exchange - {getGlobalGameState().board[selectedObserveField.d].name}</h1>
                   <p>You can buy and sell cryptocurrencies here.</p>
+                  <div>
+                    <button className="game-crypto-btn" style={{ marginTop: "1.5em" }} onClick={() => {
+                      setShowCryptoModal(true);
+                    }}>₿ Open Crypto Exchange</button>
+                  </div>
                 </div>
               ) : fieldsData.find(f => f.f === selectedObserveField.f)?.name == "Estate" ? (
                 <div>
@@ -528,6 +536,14 @@ export default function Game() {
         isOpen={showStockMarketModal}
         onClose={() => setShowStockMarketModal(false)}
         stocks={stocks}
+        currentPlayer={currentPlayer}
+        onAction={handleAddAction}
+      />
+
+      <CryptoExchangeModal
+        isOpen={showCryptoModal}
+        onClose={() => setShowCryptoModal(false)}
+        cryptos={cryptos}
         currentPlayer={currentPlayer}
         onAction={handleAddAction}
       />
