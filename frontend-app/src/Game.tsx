@@ -90,14 +90,13 @@ export default function Game() {
   const [showModal, setShowModal] = useState(false)
   const [showMarkets, setShowMarkets] = useState(false);
   const [showStockMarketModal, setShowStockMarketModal] = useState(false);
-  const [stockModalMode, setStockModalMode] = useState<'buy' | 'sell'>('buy');
   const [showBankModal, setShowBankModal] = useState(false);
   const [showChanceModal, setShowChanceModal] = useState(false);
   const [pendingActions, setPendingActions] = useState<Action[]>([]);
   const [marketState, setMarketState] = useState<any>(() => getGlobalGameState());
   const [playerState, setPlayerState] = useState<any>(() => getGlobalGameState());
   const [isWaitingForState, setIsWaitingForState] = useState(false);
-  const [hasMovedThisTurn, setHasMovedThisTurn] = useState(false);
+  const [, setHasMovedThisTurn] = useState(false);
   const hasMovedThisTurnRef = useRef(false);
 
   const [selectedObserveField, setSelectedObserveField] = useState<Field>(FIELD[0])
@@ -369,7 +368,11 @@ export default function Game() {
         <div className="board-container">
 
           <div className="game-modal" style={{ transform: showModal ? "translateY(0)" : "translateY(100%)" }}>
-            <button className="brzydal" onClick={() => { setShowModal(prev => !prev) }}>Close</button>
+            <button className="hide-modal-button" aria-label="Hide panel" onClick={() => { setShowModal(prev => !prev) }}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
             <div>
               {fieldsData.find(f => f.f === selectedObserveField.f)?.name == "Start" ? (
                 <div>
@@ -381,7 +384,7 @@ export default function Game() {
                   <h1>📈 Stock Market</h1>
                   <p>Trade stocks and watch your wealth grow!</p>
                   <div>
-                    <button onClick={() => {
+                    <button className="action-button" style={{ marginTop: "1.5em" }} onClick={() => {
                       setShowStockMarketModal(true);
                     }}>💰 Open Stock Market</button>
                   </div>

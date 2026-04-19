@@ -44,7 +44,7 @@ export function StockMarketModal({
   const ownedStocks = useMemo(() => {
     return currentPlayer.stocks
       .map(share => ({
-        ...stocks.find(s => s.id === share.stock_id),
+        ...stocks.find(s => s.id === share.stock.id),
         ownedQuantity: share.quantity,
         purchasePrice: share.purchase_price,
       }))
@@ -107,7 +107,7 @@ export function StockMarketModal({
       return;
     }
 
-    const ownedStock = currentPlayer.stocks.find(s => s.stock_id === selectedStock.id);
+    const ownedStock = currentPlayer.stocks.find(s => s.stock.id === selectedStock.id);
     if (!ownedStock || quantity > ownedStock.quantity) {
       setError('Niewystarczająca ilość akcji');
       return;
@@ -281,7 +281,7 @@ export function StockMarketModal({
                         id="sell-quantity"
                         type="number"
                         min="1"
-                        max={currentPlayer.stocks.find(s => s.stock_id === selectedStock.id)?.quantity || 1}
+                        max={currentPlayer.stocks.find(s => s.stock.id === selectedStock.id)?.quantity || 1}
                         value={quantity}
                         onChange={handleQuantityChange}
                       />
@@ -303,7 +303,7 @@ export function StockMarketModal({
                       <div className="detail-row">
                         <span>Posiadasz:</span>
                         <span className="detail-value">
-                          {currentPlayer.stocks.find(s => s.stock_id === selectedStock.id)?.quantity || 0}
+                          {currentPlayer.stocks.find(s => s.stock.id === selectedStock.id)?.quantity || 0}
                         </span>
                       </div>
                     </div>

@@ -58,6 +58,26 @@
   background-color: #b91c1c;
 }
 
+.hide-modal-button {
+  background-color: #f3f4f6;
+  color: #333;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.2rem 0;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0.5rem auto 0 auto;
+  width: 6rem;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.hide-modal-button:hover {
+  background-color: #e5e7eb;
+  color: #374151;
+}
+
 .game-content {
   display: flex;
   flex: 1;
@@ -542,21 +562,6 @@ h1 {
   letter-spacing: 1px;
   box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
   margin-top: 20px;
-}
-
-.brzydal{
-  padding: 0.25rem 0.5rem;
-  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
-  color: white;
-  border: none;
-  border-radius: 12px;
-  font-size: 1rem;
-  font-weight: normal;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
 }
 
 .game-chance-draw-btn:hover {
