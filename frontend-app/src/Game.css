@@ -189,6 +189,7 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  position: relative;
 }
 
 .waiting-overlay {
@@ -201,6 +202,37 @@
   align-items: center;
   justify-content: center;
   pointer-events: auto;
+}
+
+.board-blocker {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.65);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+}
+
+.board-blocker-text {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(107, 114, 128, 0.2);
+  border-radius: 0.75rem;
+  padding: 1rem 1.5rem;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.15);
+  color: #111827;
+  font-weight: 600;
+}
+
+.move-info-banner {
+  background-color: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.75rem;
+  padding: 0.9rem 1rem;
+  color: #334155;
+  font-size: 0.95rem;
+  margin-top: 1rem;
 }
 
 .waiting-message {
