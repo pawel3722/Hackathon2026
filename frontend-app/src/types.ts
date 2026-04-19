@@ -33,7 +33,7 @@ export interface ChanceCard {
 
 // Supporting interfaces for Player
 export interface StockShare {
-  stock_id: number;
+  stock: Stock;
   quantity: number;
   purchase_price: number;
 }

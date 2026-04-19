@@ -163,6 +163,15 @@ export default function Game() {
 
   const stocks = Array.isArray(marketState?.stocks) ? marketState.stocks : [];
   const cryptos = Array.isArray(marketState?.cryptos) ? marketState.cryptos : [];
+  const stockLookup = useMemo(
+    () => stocks.reduce((acc: Record<number, string>, stock: any) => {
+      if (stock?.id !== undefined && stock?.name) {
+        acc[stock.id] = stock.name;
+      }
+      return acc;
+    }, {}),
+    [stocks]
+  );
 
   const xoffsets = [
     0, -1, -2, -3, -4, -5,
@@ -298,11 +307,13 @@ export default function Game() {
           {selectedPlayer ? (
             <PlayerStatus
               player={selectedPlayer}
+              stockLookup={stockLookup}
               onClose={() => setSelectedPlayer(null)}
             />
           ) : (
             <PlayerStatus
               player={currentPlayer}
+              stockLookup={stockLookup}
               isCurrentPlayer={true}
             />
           )}
