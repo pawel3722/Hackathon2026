@@ -169,7 +169,7 @@
 
 .game-modal {
   position: absolute;
-  width: 100vw;
+  width: 100%;
   height: 30vh;
   background-color: white;
   opacity: 0.99;
@@ -194,17 +194,47 @@
   position: relative;
 }
 
-.waiting-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(15, 23, 42, 0.55);
-  backdrop-filter: blur(2px);
-  z-index: 50;
+.bank-services {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.bank-service-btn {
+  padding: 16px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
   display: flex;
   align-items: center;
-  justify-content: center;
-  pointer-events: auto;
+  gap: 12px;
 }
+
+.bank-service-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.credit-btn {
+  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+  color: white;
+}
+
+.deposit-btn {
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  color: white;
+}
+
+.insurance-btn {
+  background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+  color: white;
+}
+  
 
 .board-blocker {
   position: absolute;
@@ -304,6 +334,14 @@
   padding: 1.5rem;
   background-color: #f9fafb;
 }
+
+/* backdrop-filter: blur(2px);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+} */
 
 .markets-empty {
   color: #6b7280;
@@ -459,6 +497,50 @@ h1 {
 .action-details {
   color: #374151;
   font-weight: 500;
+}
+
+/* Bank Service Buttons */
+.game-bank-services {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.game-bank-service-btn {
+  padding: 16px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 10 rem;
+}
+
+.bank-service-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.game-bank-service-btn credit-btn {
+  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+  color: white;
+}
+
+.game-bank-service-btn deposit-btn {
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  color: white;
+}
+
+.game-bank-service-btn insurance-btn {
+  background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+  color: white;
 }
 
 .switch {

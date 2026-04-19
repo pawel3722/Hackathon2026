@@ -8,6 +8,7 @@ import type { Application } from "@splinetool/runtime";
 import { getGlobalGameState } from "./gameStateStore";
 import { PriceChart } from "./components/PriceChart";
 import { StockMarketModal } from "./components/StockMarketModal";
+import { BankModal } from "./components/BankModal";
 
 type Field = {
   f: string;
@@ -86,9 +87,10 @@ export default function Game() {
   const spline = useRef<Application | null>(null);
   const initPositions = useRef<Record<string, number>>({});
   const [showModal, setShowModal] = useState(false)
-  const [lastWsMessage, setLastWsMessage] = useState<any>(null);
   const [showMarkets, setShowMarkets] = useState(false);
   const [showStockMarketModal, setShowStockMarketModal] = useState(false);
+  const [stockModalMode, setStockModalMode] = useState<'buy' | 'sell'>('buy');
+  const [showBankModal, setShowBankModal] = useState(false);
   const [pendingActions, setPendingActions] = useState<Action[]>([]);
   const [marketState, setMarketState] = useState<any>(() => getGlobalGameState());
   const [playerState, setPlayerState] = useState<any>(() => getGlobalGameState());
@@ -118,7 +120,6 @@ export default function Game() {
       gameIdFromRoute,
       playerId,
       (data: any) => {
-        setLastWsMessage(data);
         console.log("[Game WS]", data);
         const gs = getGlobalGameState();
         if (gs) {
@@ -387,8 +388,34 @@ export default function Game() {
                 </div>
               ) : fieldsData.find(f => f.f === selectedObserveField.f)?.name == "Bank" ? (
                 <div>
-                  <h1>Bank - {getGlobalGameState().board[selectedObserveField.d].name}</h1>
-                  <p>You can deposit and withdraw money here.</p>
+                  <h1>🏦 Bank - {getGlobalGameState().board[selectedObserveField.d].name}</h1>
+                  <p>Manage your finances with our banking services.</p>
+                  <div className="game-bank-services">
+                    <button
+                      className="game-bank-service-btn credit-btn"
+                      onClick={() => {
+                        setShowBankModal(true);
+                      }}
+                    >
+                      💳 Bank Actions
+                    </button>
+                    {/* <button
+                      className="game-bank-service-btn deposit-btn"
+                      onClick={() => {
+                        setShowBankModal(true);
+                      }}
+                    >
+                      💰 Make Deposit
+                    </button>
+                    <button
+                      className="game-bank-service-btn insurance-btn"
+                      onClick={() => {
+                        setShowBankModal(true);
+                      }}
+                    >
+                      🛡️ Get Insurance
+                    </button> */}
+                  </div>
                 </div>
               ) : fieldsData.find(f => f.f === selectedObserveField.f)?.name == "Crypto" ? (
                 <div>
@@ -504,6 +531,13 @@ export default function Game() {
         isOpen={showStockMarketModal}
         onClose={() => setShowStockMarketModal(false)}
         stocks={stocks}
+        currentPlayer={currentPlayer}
+        onAction={handleAddAction}
+      />
+
+      <BankModal
+        isOpen={showBankModal}
+        onClose={() => setShowBankModal(false)}
         currentPlayer={currentPlayer}
         onAction={handleAddAction}
       />
