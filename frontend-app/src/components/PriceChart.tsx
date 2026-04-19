@@ -42,7 +42,6 @@ export const PriceChart: React.FC<PriceChartProps> = ({ priceHistory }) => {
           domain={['auto', 'auto']}
           stroke="#9ca3af"
           tick={{ fontSize: 12, fill: '#9ca3af' }}
-          tickFormatter={(value) => `${value} PLN`}
         />
 
         <Tooltip
@@ -55,7 +54,7 @@ export const PriceChart: React.FC<PriceChartProps> = ({ priceHistory }) => {
           itemStyle={{ color: lineColor }}
           labelStyle={{ color: '#9ca3af', marginBottom: '4px' }}
           labelFormatter={(label) => `Turn: ${label}`}
-          formatter={(value: any) => [`${Number(value).toFixed(2)} PLN`, 'Price']}
+          formatter={(value: any) => [`${Number(value).toFixed(2)}`, 'Price']}
         />
 
         <Line

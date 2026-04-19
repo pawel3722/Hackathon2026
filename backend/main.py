@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI, WebSocket
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -18,10 +19,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/")
-def root():
-    return FileResponse("index.html")
-
+# Serve static files from frontend
+frontend_dir = os.path.join(os.path.dirname(__file__), "..", "frontend-app", "dist")
 
 # CREATE LOBBY
 @app.post("/create")
@@ -64,3 +63,20 @@ def join(lobby_id: str, name: str = None):
 @app.websocket("/ws/{lobby_id}")
 async def ws_endpoint(ws: WebSocket, lobby_id: str, user_id: str):
     await handle_connection(ws, lobby_id, user_id)
+
+@app.get("/")
+def read_root():
+    index_path = os.path.join(frontend_dir, "index.html")
+    if os.path.exists(index_path):
+        return FileResponse(index_path)
+    return {"message": "Frontend not built. Please run 'npm run build' in the frontend-app directory."}
+
+@app.get("/{full_path:path}")
+def serve_spa(full_path: str):
+    file_path = os.path.join(frontend_dir, full_path)
+    if os.path.isfile(file_path):
+        return FileResponse(file_path)
+    index_path = os.path.join(frontend_dir, "index.html")
+    if os.path.exists(index_path):
+        return FileResponse(index_path)
+    return {"error": "Frontend not built or file not found."}

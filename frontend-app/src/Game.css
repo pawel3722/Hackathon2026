@@ -169,8 +169,13 @@
 
 .game-modal {
   position: absolute;
+<<<<<<< HEAD
   width: 100%;
   height: 60vh;
+=======
+  width: 100vw;
+  height: 30vh;
+>>>>>>> 970b82635ee94d7f5ff2ea6a6a9e6cde89ec9790
   background-color: white;
   opacity: 0.99;
   bottom: 0;
@@ -191,6 +196,72 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  position: relative;
+}
+
+.waiting-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(2px);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+}
+
+.board-blocker {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.65);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+}
+
+.board-blocker-text {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(107, 114, 128, 0.2);
+  border-radius: 0.75rem;
+  padding: 1rem 1.5rem;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.15);
+  color: #111827;
+  font-weight: 600;
+}
+
+.move-info-banner {
+  background-color: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.75rem;
+  padding: 0.9rem 1rem;
+  color: #334155;
+  font-size: 0.95rem;
+  margin-top: 1rem;
+}
+
+.waiting-message {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  border-radius: 1rem;
+  padding: 2rem 2.5rem;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.25);
+  text-align: center;
+  max-width: 420px;
+}
+
+.waiting-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 0.5rem;
+}
+
+.waiting-subtitle {
+  color: #4b5563;
+  font-size: 1rem;
 }
 
 .switch {
@@ -336,4 +407,61 @@ h1{
   font-size: 2rem;
   font-weight: normal;
   color: #000000;
+}
+
+/* Pending Actions Styling */
+.pending-actions {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.pending-actions h3 {
+  margin: 0 0 0.75rem 0;
+  color: #1f2937;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.pending-actions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.pending-action-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.action-type {
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.action-type.buy {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.action-type.sell {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.action-details {
+  color: #374151;
+  font-weight: 500;
 }

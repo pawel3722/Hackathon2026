@@ -123,7 +123,7 @@ export const GameStatus = {
 
 export type GameStatusType = typeof GameStatus[keyof typeof GameStatus];
 
-interface Action {
+export interface Action {
   action_type: string; // "buy", "sell", "bank", "stakeholder", "card"
   assets_type: string; // "stock", "crypto", "property", "credit", "deposit", "insurance"
   assets_id: number; // ID aktywa
