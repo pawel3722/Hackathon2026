@@ -224,10 +224,7 @@ export default function Game() {
       });
     };
 
-    return (
-      <div className="game-container">
-        <div className="game-modal" style={{ transform: showModal ? "translateY(0)" : "translateY(100%)" }}>
-          <button onClick={() => { setShowModal(prev => !prev) }}>Close</button>
+
   return (
     <div className="game-container">
       {isWaitingForState && (
