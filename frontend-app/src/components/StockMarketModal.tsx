@@ -206,6 +206,7 @@ export function StockMarketModal({
                   <label htmlFor="buy-quantity">Ilość:</label>
                   <input
                     id="buy-quantity"
+                    className="inputbrzydki"
                     type="number"
                     min="1"
                     value={quantity}

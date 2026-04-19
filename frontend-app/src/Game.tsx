@@ -9,6 +9,7 @@ import { getGlobalGameState } from "./gameStateStore";
 import { PriceChart } from "./components/PriceChart";
 import { StockMarketModal } from "./components/StockMarketModal";
 import { BankModal } from "./components/BankModal";
+import { ChanceModal } from "./components/ChanceModal";
 
 type Field = {
   f: string;
@@ -91,6 +92,7 @@ export default function Game() {
   const [showStockMarketModal, setShowStockMarketModal] = useState(false);
   const [stockModalMode, setStockModalMode] = useState<'buy' | 'sell'>('buy');
   const [showBankModal, setShowBankModal] = useState(false);
+  const [showChanceModal, setShowChanceModal] = useState(false);
   const [pendingActions, setPendingActions] = useState<Action[]>([]);
   const [marketState, setMarketState] = useState<any>(() => getGlobalGameState());
   const [playerState, setPlayerState] = useState<any>(() => getGlobalGameState());
@@ -277,14 +279,14 @@ export default function Game() {
 
   return (
     <div className="game-container">
-      {isWaitingForState && (
+      {/* {isWaitingForState && (
         <div className="waiting-overlay">
           <div className="waiting-message">
             <div className="waiting-title">Waiting for turn to end...</div>
             <div className="waiting-subtitle">Please wait for the updated game state.</div>
           </div>
         </div>
-      )}
+      )} */}
 
       <div className="game-header">
         <h1 className="game-title">Moneypoly</h1>
@@ -367,7 +369,7 @@ export default function Game() {
         <div className="board-container">
 
           <div className="game-modal" style={{ transform: showModal ? "translateY(0)" : "translateY(100%)" }}>
-            <button onClick={() => { setShowModal(prev => !prev) }}>Close</button>
+            <button className="brzydal" onClick={() => { setShowModal(prev => !prev) }}>Close</button>
             <div>
               {fieldsData.find(f => f.f === selectedObserveField.f)?.name == "Start" ? (
                 <div>
@@ -395,7 +397,7 @@ export default function Game() {
                         setShowBankModal(true);
                       }}
                     >
-                      💳 Bank Actions
+                      💳 Bank Services
                     </button>
                     {/* <button
                       className="game-bank-service-btn deposit-btn"
@@ -427,8 +429,18 @@ export default function Game() {
                 </div>
               ) : fieldsData.find(f => f.f === selectedObserveField.f)?.name == "Chance" ? (
                 <div>
-                  <h1>Chance</h1>
-                  <p>You can draw a Chance card here.</p>
+                  <h1>🎲 Chance</h1>
+                  <p>Draw a chance card and see what fate has in store!</p>
+                  <div>
+                    <button
+                      className="game-chance-draw-btn"
+                      onClick={() => {
+                        setShowChanceModal(true);
+                      }}
+                    >
+                      🎯 Draw Chance Card
+                    </button>
+                  </div>
                 </div>
               ) : fieldsData.find(f => f.f === selectedObserveField.f)?.name == "Bet" ? (
                 <div>
@@ -537,6 +549,13 @@ export default function Game() {
         isOpen={showBankModal}
         onClose={() => setShowBankModal(false)}
         currentPlayer={currentPlayer}
+        onAction={handleAddAction}
+      />
+
+      <ChanceModal
+        isOpen={showChanceModal}
+        onClose={() => setShowChanceModal(false)}
+        chanceCards={getGlobalGameState().cards || []}
         onAction={handleAddAction}
       />
     </div>
