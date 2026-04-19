@@ -152,6 +152,28 @@ export default function Game() {
   const stocks = Array.isArray(marketState?.stocks) ? marketState.stocks : [];
   const cryptos = Array.isArray(marketState?.cryptos) ? marketState.cryptos : [];
 
+  const xoffsets = [
+    0, -1, -2, -3, -4, -5,
+    -5, -5, -5, -5, -5, 
+    -4, -3, -2, -1, 0,
+    0, 0, 0, 0,
+  ];
+  const yoffsets = [
+    0, 0, 0, 0, 0, 0,
+    -1, -2, -3, -4, -5,
+    -5, -5, -5, -5, -5,
+    -4, -3, -2, -1
+  ];
+
+  const getPawnOffsets = (pos: number) => {
+    const posidx = pos % 20;
+    const scale = 370;
+    const xoff = xoffsets[posidx] * scale;
+    const zoff = yoffsets[posidx] * scale;
+
+    return {x: xoff, z: zoff}  
+  }
+
   useEffect(() => {
     if (!spline.current) return;
 
@@ -159,7 +181,9 @@ export default function Game() {
       const pawnId = p.pawn_id;
       const pawn = spline.current?.findObjectByName(pawnId);
       if (pawn && initPositions.current[pawnId] !== undefined) {
-        pawn.position.x = initPositions.current[pawnId] - (p.position || 0) * 370;
+        const offsets = getPawnOffsets(p.position)
+        pawn.position.x = initPositions.current[pawnId] + offsets.x;
+        pawn.position.z = initPositions.current[pawnId] + offsets.z;
       }
     });
   }, [allPlayers]);
@@ -192,7 +216,9 @@ export default function Game() {
     if (obj) obj.state = "selected";
     if (prevObj) prevObj.state = "Base State";
 
-    pawn.position.x -= dist * 370;
+    const offsets = getPawnOffsets(nextField.d);
+    pawn.position.x = initPositions.current[currentPlayer.pawn_id] + offsets.x;
+    pawn.position.z = initPositions.current[currentPlayer.pawn_id] + offsets.z;
 
     setSelectedField(nextField);
     setHasMovedThisTurn(true);
@@ -412,7 +438,9 @@ export default function Game() {
                           const pawnId = p.pawn_id;
                           const pawn = s.findObjectByName(pawnId);
                           if (pawn && initPositions.current[pawnId] !== undefined) {
-                            pawn.position.x = initPositions.current[pawnId] - (p.position || 0) * 370;
+                            const offsets = getPawnOffsets(p.position || 0);
+                            pawn.position.x = initPositions.current[pawnId] + offsets.x;
+                            pawn.position.z = initPositions.current[pawnId] + offsets.z;
                           }
                         });
                       }}
