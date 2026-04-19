@@ -117,7 +117,7 @@ async def handle_event(lobby: Lobby, user: User, msg: dict):
         steps = move_data["steps"]
         user.current_move = Move(steps=steps, actions=actions)
 
-        lobby.game_state.players[user.id].position += steps
+        # lobby.game_state.players[user.id].position += steps
 
         if all(user.current_move for user in lobby.users.values()):
             result = lobby.game_state.apply_moves({u.id: u.current_move for u in lobby.users.values()})

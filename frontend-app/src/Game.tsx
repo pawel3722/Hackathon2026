@@ -1,5 +1,4 @@
-import { useRef, useState } from "react";
-import { useEffect } from "react";
+import { useRef, useState, useEffect, useMemo } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import PlayerStatus from "./PlayerStatus";
 import type { Player } from "./types";
@@ -83,7 +82,8 @@ export default function Game() {
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [selectedField, setSelectedField] = useState<Field>(FIELD[0])
   const selectedFieldRef = useRef(FIELD[0]);
-  const spline = useRef<Application | null>(null)
+  const spline = useRef<Application | null>(null);
+  const initPositions = useRef<Record<string, number>>({});
   const [showModal, setShowModal] = useState(false)
   const [lastWsMessage, setLastWsMessage] = useState<any>(null);
   const [showMarkets, setShowMarkets] = useState(false);
@@ -122,7 +122,7 @@ export default function Game() {
   }, [gameIdFromRoute, playerId]);
 
   // Get player data from player state
-  const allPlayers = Array.isArray(playerState?.players) ? playerState.players : [];
+  const allPlayers = useMemo(() => Array.isArray(playerState?.players) ? playerState.players : [], [playerState]);
   
   const currentPlayer = allPlayers.find((p: Player) => p.id === playerId) || {
     id: playerId || "1",
@@ -144,6 +144,18 @@ export default function Game() {
 
   const stocks = Array.isArray(marketState?.stocks) ? marketState.stocks : [];
   const cryptos = Array.isArray(marketState?.cryptos) ? marketState.cryptos : [];
+
+  useEffect(() => {
+    if (!spline.current) return;
+    
+    allPlayers.forEach(p => {
+      const pawnId = p.pawn_id;
+      const pawn = spline.current?.findObjectByName(pawnId);
+      if (pawn && initPositions.current[pawnId] !== undefined) {
+        pawn.position.x = initPositions.current[pawnId] - (p.position || 0) * 370;
+      }
+    });
+  }, [allPlayers]);
 
   const onSplineMouseDown = (e: SplineEvent) => {
     const nextField = FIELD.find(f => f.f === e.target.name);
@@ -192,20 +204,25 @@ export default function Game() {
 
     console.log("handleEndTurn")
 
-    ws.send({
-      type: "move",
-      move: {
-        steps: 2,
-        actions: []
-      },
-    });
-  };
+      let stepsTravelled = selectedField.d - (currentPlayer.position || 0);
+      if (stepsTravelled < 0) {
+        // Assume wraparound
+        stepsTravelled = (selectedField.d + FIELD.length) - (currentPlayer.position || 0);
+      }
 
-  return (
-    <div className="game-container">
+      ws.send({
+        type: "move",
+        move: {
+          steps: stepsTravelled > 0 ? stepsTravelled : 0,
+          actions: []
+        },
+      });
+    };
 
-      <div className="game-modal" style={{ transform: showModal ? "translateY(0)" : "translateY(100%)" }}>
-        <button onClick={() => { setShowModal(prev => !prev) }}>Close</button>
+    return (
+      <div className="game-container">
+        <div className="game-modal" style={{ transform: showModal ? "translateY(0)" : "translateY(100%)" }}>
+          <button onClick={() => { setShowModal(prev => !prev) }}>Close</button>
         <div>
           {fieldsData.find(f => f.f === selectedField.f)?.name == "Start" ?(
             <div>
@@ -351,7 +368,23 @@ export default function Game() {
                 <Spline
                   scene="https://prod.spline.design/RBNliUZGiPREVqU2/scene.splinecode"
                   onSplineMouseDown={onSplineMouseDown}
-                  onLoad={(s) => spline.current = s}
+                  onLoad={(s) => {
+                    spline.current = s;
+                    for (let i = 1; i <= 6; i++) {
+                      const pawnId = `p${i}-start`;
+                      const pawn = s.findObjectByName(pawnId);
+                      if (pawn) {
+                        initPositions.current[pawnId] = pawn.position.x;
+                      }
+                    }
+                    allPlayers.forEach(p => {
+                      const pawnId = p.pawn_id;
+                      const pawn = s.findObjectByName(pawnId);
+                      if (pawn && initPositions.current[pawnId] !== undefined) {
+                        pawn.position.x = initPositions.current[pawnId] - (p.position || 0) * 370;
+                      }
+                    });
+                  }}
                 />
               </div>
             )}
