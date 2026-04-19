@@ -73,7 +73,7 @@ class Stock:
         self.price_history : list[float] = [float(price)]
 
 class StockDto:
-    def __init__(self, id : int, ticker : str, name : str, industry : str, price : float, number_of_shares : int, full_number_of_shares : int):
+    def __init__(self, id : int, ticker : str, name : str, industry : str, price : float, number_of_shares : int, full_number_of_shares : int, price_history : list[float]):
         self.id : int = id
         self.ticker : str = ticker
         self.name : str = name
@@ -81,7 +81,7 @@ class StockDto:
         self.price : float = price
         self.full_number_of_shares : int = full_number_of_shares
         self.number_of_shares : int = number_of_shares
-        self.price_history : list[float] = [float(price)]
+        self.price_history : list[float] = price_history + [price]
 
 class StockShare:
     def __init__(self, stock: StockDto, quantity: int):

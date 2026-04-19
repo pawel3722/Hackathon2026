@@ -5,7 +5,7 @@ def board():
     return [
         {"type": "go", "name": "Start"},
         {"type": "stock_market", "name": "WSE"},
-        {"type": "bank", "name": "Bank Pekao SA"},
+        {"type": "bank", "name": "PKO Bank Polski"},
         {"type": "crypto_exchange", "name": "OKX"},
         {"type": "real_estate", "name": "Garaże"},
         {"type": "chance", "name": "chance"},
@@ -15,7 +15,7 @@ def board():
         {"type": "real_estate", "name": "Kawalerki"},
         {"type": "park", "name": "Park Chrobrego"},
         {"type": "stock_market", "name": "NASDAQ"},
-        {"type": "bank", "name": "PKO Bank Polski"},
+        {"type": "bank", "name": "Bank Pekao SA"},
         {"type": "crypto_exchange", "name": "Coinbase"},
         {"type": "real_estate", "name": "Mieszkania"},
         {"type": "chance", "name": "chance"},
