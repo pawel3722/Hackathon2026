@@ -1,12 +1,13 @@
 import { useRef, useState, useEffect, useMemo } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import PlayerStatus from "./PlayerStatus";
-import type { Player } from "./types";
+import type { Player, Action } from "./types";
 import "./Game.css";
 import Spline, { type SplineEvent } from '@splinetool/react-spline';
 import type { Application } from "@splinetool/runtime";
 import { getGlobalGameState } from "./gameStateStore";
 import { PriceChart } from "./components/PriceChart";
+import { StockMarketModal } from "./components/StockMarketModal";
 
 type Field = {
   f: string;
@@ -87,6 +88,9 @@ export default function Game() {
   const [showModal, setShowModal] = useState(false)
   const [lastWsMessage, setLastWsMessage] = useState<any>(null);
   const [showMarkets, setShowMarkets] = useState(false);
+  const [showStockMarketModal, setShowStockMarketModal] = useState(false);
+  const [stockModalMode, setStockModalMode] = useState<'buy' | 'sell'>('buy');
+  const [pendingActions, setPendingActions] = useState<Action[]>([]);
   const [marketState, setMarketState] = useState<any>(() => getGlobalGameState());
   const [playerState, setPlayerState] = useState<any>(() => getGlobalGameState());
   const [isWaitingForState, setIsWaitingForState] = useState(false);
@@ -206,6 +210,10 @@ export default function Game() {
     navigate("/");
   };
 
+  const handleAddAction = (action: Action) => {
+    setPendingActions(prev => [...prev, action]);
+  };
+
   const handleEndTurn = () => {
     const ws = getActiveGameWebSocket();
     if (!ws) {
@@ -226,9 +234,12 @@ export default function Game() {
       type: "move",
       move: {
         steps: stepsTravelled > 0 ? stepsTravelled : 0,
-        actions: []
+        actions: pendingActions
       },
     });
+
+    // Clear pending actions after sending
+    setPendingActions([]);
   };
 
   return (
@@ -251,10 +262,20 @@ export default function Game() {
                   <p>You receive 200 PLN for passing Start!</p>
                 </div>
               ) : fieldsData.find(f => f.f === selectedField.f)?.name == "Stockmarket" ? (
-                <div>
-                  <h1>Stock Market - {getGlobalGameState().board[selectedField.d].name}</h1>
-                  <p>You can buy and sell stocks here.</p>
-                </div>
+                <div className="stock-market-modal">
+              <h1>📈 Stock Market</h1>
+              <p>Trade stocks and watch your wealth grow!</p>
+              <div>
+                <button onClick={() => {
+                  setStockModalMode('buy');
+                  setShowStockMarketModal(true);
+                }}>💰 Buy Stocks</button>
+                <button onClick={() => {
+                  setStockModalMode('sell');
+                  setShowStockMarketModal(true);
+                }}>📊 Sell Stocks</button>
+              </div>
+            </div>
               ) : fieldsData.find(f => f.f === selectedField.f)?.name == "Bank" ? (
                 <div>
                   <h1>Bank - {getGlobalGameState().board[selectedField.d].name}</h1>
@@ -342,6 +363,27 @@ export default function Game() {
                   {isWaitingForState ? "Waiting…" : "End Turn"}
                 </button>
               </div>
+
+{pendingActions.length > 0 && (
+            <div className="pending-actions">
+              <h3>Pending Actions ({pendingActions.length})</h3>
+              <div className="pending-actions-list">
+                {pendingActions.map((action, index) => (
+                  <div key={index} className="pending-action-item">
+                    <span className={`action-type ${action.action_type}`}>
+                      {action.action_type.toUpperCase()}
+                    </span>
+                    <span className="action-details">
+                      {action.assets_type} #{action.assets_id} × {action.amount}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+
+
               {hasMovedThisTurn && !isWaitingForState && (
                 <div className="move-info-banner">
                   Move completed. Perform actions for this field, then end your turn.
@@ -429,6 +471,15 @@ export default function Game() {
               </div>
             </div>
           </div>
-        </div>
-        );
+
+        <StockMarketModal
+          isOpen={showStockMarketModal}
+          onClose={() => setShowStockMarketModal(false)}
+          stocks={stocks}
+          currentPlayer={currentPlayer}
+          initialMode={stockModalMode}
+          onAction={handleAddAction}
+        />
+      </div>
+  );
 }
