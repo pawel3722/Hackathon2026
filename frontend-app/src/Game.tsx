@@ -96,6 +96,14 @@ export default function Game() {
   const [hasMovedThisTurn, setHasMovedThisTurn] = useState(false);
   const hasMovedThisTurnRef = useRef(false);
 
+  const [selectedObserveField, setSelectedObserveField] = useState<Field>(FIELD[0])
+  const [observe, setObserve] = useState(false)
+  const observeRef = useRef(observe);
+
+
+  useEffect(() => {
+    observeRef.current = observe;
+  }, [observe]);
 
   useEffect(() => {
     selectedFieldRef.current = selectedField;
@@ -157,7 +165,7 @@ export default function Game() {
 
   const xoffsets = [
     0, -1, -2, -3, -4, -5,
-    -5, -5, -5, -5, -5, 
+    -5, -5, -5, -5, -5,
     -4, -3, -2, -1, 0,
     0, 0, 0, 0,
   ];
@@ -174,7 +182,7 @@ export default function Game() {
     const xoff = xoffsets[posidx] * scale;
     const zoff = yoffsets[posidx] * scale;
 
-    return {x: xoff, z: zoff}  
+    return { x: xoff, z: zoff }
   }
 
   useEffect(() => {
@@ -192,41 +200,40 @@ export default function Game() {
   }, [allPlayers]);
 
   const onSplineMouseDown = (e: SplineEvent) => {
-    if (isWaitingForState || hasMovedThisTurnRef.current) return;
 
     const nextField = FIELD.find(f => f.f === e.target.name);
     const pawn = spline.current?.findObjectByName(currentPlayer.pawn_id);
 
     if (!nextField || !pawn) return;
 
-    const currentField = selectedFieldRef.current;
-    const dist = nextField.d - currentField.d;
+    if (!observeRef.current) {
+      const currentField = selectedFieldRef.current;
+      const dist = nextField.d - currentField.d;
 
-    // ❌ blokady
-    if (dist <= 0) {
-      console.log("Nie możesz się cofać ani stać w miejscu");
-      return;
+      if (dist <= 0) return;
+      if (dist > 3) return;
+
+      const obj = spline.current?.findObjectByName(e.target.name);
+      const prevObj = spline.current?.findObjectByName(currentField.f);
+
+      if (obj) obj.state = "selected";
+      if (prevObj) prevObj.state = "Base State";
+
+      const offsets = getPawnOffsets(nextField.d);
+      pawn.position.x = initPositions.current[currentPlayer.pawn_id] + offsets.x;
+      pawn.position.z = initPositions.current[currentPlayer.pawn_id] + offsets.z;
+
+      setSelectedField(nextField);
+      setSelectedObserveField(nextField);
+      setHasMovedThisTurn(true);
+      hasMovedThisTurnRef.current = true;
+      setObserve(true);
+    } else {
+      setSelectedObserveField(nextField);
     }
 
-    if (dist > 3) {
-      console.log("Możesz przesunąć się maksymalnie o 3 pola");
-      return;
-    }
-
-    const obj = spline.current?.findObjectByName(e.target.name);
-    const prevObj = spline.current?.findObjectByName(currentField.f);
-
-    if (obj) obj.state = "selected";
-    if (prevObj) prevObj.state = "Base State";
-
-    const offsets = getPawnOffsets(nextField.d);
-    pawn.position.x = initPositions.current[currentPlayer.pawn_id] + offsets.x;
-    pawn.position.z = initPositions.current[currentPlayer.pawn_id] + offsets.z;
-
-    setSelectedField(nextField);
-    setHasMovedThisTurn(true);
-    hasMovedThisTurnRef.current = true;
     setShowModal(prev => !prev);
+
   };
 
 
@@ -278,15 +285,97 @@ export default function Game() {
         </div>
       )}
 
-      <div className="game-modal" style={{ transform: showModal ? "translateY(0)" : "translateY(100%)" }}>
-        <button onClick={() => { setShowModal(prev => !prev) }}>Close</button>
+      <div className="game-header">
+        <h1 className="game-title">Moneypoly</h1>
+        <button className="leave-button" onClick={handleLeaveGame}>
+          Leave Game
+        </button>
+      </div>
+
+      <div className="game-content">
+        <div className="left-panel">
+          {selectedPlayer ? (
+            <PlayerStatus
+              player={selectedPlayer}
+              onClose={() => setSelectedPlayer(null)}
+            />
+          ) : (
+            <PlayerStatus
+              player={currentPlayer}
+              isCurrentPlayer={true}
+            />
+          )}
+
+          <div className="other-players">
+            <h3>Other Players</h3>
+            {otherPlayers.map((player: Player) => (
+              <div
+                key={player.id}
+                className="other-player-card"
+                onClick={() => setSelectedPlayer(player)}
+              >
+                <div className="player-name">{player.name}</div>
+                <div className="player-money">${player.money}</div>
+                <div className="player-properties">
+                  {player.properties.length} properties
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="game-actions">
+            <button className="action-button primary" disabled={isWaitingForState || hasMovedThisTurn}>Roll Dice</button>
+            <button className="action-button" disabled={isWaitingForState} onClick={() => setShowMarkets((v) => !v)}>
+              {showMarkets ? "Close Markets" : "Markets"}
+            </button>
+            <button className="action-button" disabled={isWaitingForState}>Sell Property</button>
+            <button className="action-button" disabled={isWaitingForState} onClick={handleEndTurn}>
+              {isWaitingForState ? "Waiting…" : "End Turn"}
+            </button>
+          </div>
+
+          {pendingActions.length > 0 && (
+            <div className="pending-actions">
+              <h3>Pending Actions ({pendingActions.length})</h3>
+              <div className="pending-actions-list">
+                {pendingActions.map((action, index) => (
+                  <div key={index} className="pending-action-item">
+                    <span className={`action-type ${action.action_type}`}>
+                      {action.action_type.toUpperCase()}
+                    </span>
+                    <span className="action-details">
+                      {action.assets_type} #{action.assets_id} × {action.amount}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="switch-container">
+            <p>Move</p>
+            <div className="switch">
+              <div style={{ transform: !observe ? "translateX(0)" : "translateX(200%)" }} onClick={() => {
+                if (isWaitingForState || hasMovedThisTurnRef.current) setObserve(true);
+                else setObserve(prev => !prev);
+              }} />
+            </div>
+            <p>Preview</p>
+          </div>
+
+        </div>
+
+        <div className="board-container">
+
+          <div className="game-modal" style={{ transform: showModal ? "translateY(0)" : "translateY(100%)" }}>
+            <button onClick={() => { setShowModal(prev => !prev) }}>Close</button>
             <div>
-              {fieldsData.find(f => f.f === selectedField.f)?.name == "Start" ? (
+              {fieldsData.find(f => f.f === selectedObserveField.f)?.name == "Start" ? (
                 <div>
                   <h1>Start</h1>
                   <p>You receive 200 PLN for passing Start!</p>
                 </div>
-              ) : fieldsData.find(f => f.f === selectedField.f)?.name == "Stockmarket" ? (
+              ) : fieldsData.find(f => f.f === selectedObserveField.f)?.name == "Stockmarket" ? (
                 <div className="stock-market-modal">
                   <h1>📈 Stock Market</h1>
                   <p>Trade stocks and watch your wealth grow!</p>
@@ -296,32 +385,32 @@ export default function Game() {
                     }}>💰 Open Stock Market</button>
                   </div>
                 </div>
-              ) : fieldsData.find(f => f.f === selectedField.f)?.name == "Bank" ? (
+              ) : fieldsData.find(f => f.f === selectedObserveField.f)?.name == "Bank" ? (
                 <div>
-                  <h1>Bank - {getGlobalGameState().board[selectedField.d].name}</h1>
+                  <h1>Bank - {getGlobalGameState().board[selectedObserveField.d].name}</h1>
                   <p>You can deposit and withdraw money here.</p>
                 </div>
-              ) : fieldsData.find(f => f.f === selectedField.f)?.name == "Crypto" ? (
+              ) : fieldsData.find(f => f.f === selectedObserveField.f)?.name == "Crypto" ? (
                 <div>
-                  <h1>Crypto Exchange - {getGlobalGameState().board[selectedField.d].name}</h1>
+                  <h1>Crypto Exchange - {getGlobalGameState().board[selectedObserveField.d].name}</h1>
                   <p>You can buy and sell cryptocurrencies here.</p>
                 </div>
-              ) : fieldsData.find(f => f.f === selectedField.f)?.name == "Estate" ? (
+              ) : fieldsData.find(f => f.f === selectedObserveField.f)?.name == "Estate" ? (
                 <div>
-                  <h1>Estate - {getGlobalGameState().board[selectedField.d].name}</h1>
+                  <h1>Estate - {getGlobalGameState().board[selectedObserveField.d].name}</h1>
                   <p>You can buy and sell properties here.</p>
                 </div>
-              ) : fieldsData.find(f => f.f === selectedField.f)?.name == "Chance" ? (
+              ) : fieldsData.find(f => f.f === selectedObserveField.f)?.name == "Chance" ? (
                 <div>
                   <h1>Chance</h1>
                   <p>You can draw a Chance card here.</p>
                 </div>
-              ) : fieldsData.find(f => f.f === selectedField.f)?.name == "Bet" ? (
+              ) : fieldsData.find(f => f.f === selectedObserveField.f)?.name == "Bet" ? (
                 <div>
                   <h1>Bookmaker</h1>
                   <p>You can place bets here.</p>
                 </div>
-              ) : fieldsData.find(f => f.f === selectedField.f)?.name == "Tax" ? (
+              ) : fieldsData.find(f => f.f === selectedObserveField.f)?.name == "Tax" ? (
                 <div>
                   <h1>Tax</h1>
                   <p>You must pay taxes here.</p>
@@ -335,171 +424,89 @@ export default function Game() {
             </div>
           </div>
 
-          <div className="game-header">
-            <h1 className="game-title">Moneypoly</h1>
-            <button className="leave-button" onClick={handleLeaveGame}>
-              Leave Game
-            </button>
-          </div>
-
-          <div className="game-content">
-            <div className="left-panel">
-              {selectedPlayer ? (
-                <PlayerStatus
-                  player={selectedPlayer}
-                  onClose={() => setSelectedPlayer(null)}
-                />
-              ) : (
-                <PlayerStatus
-                  player={currentPlayer}
-                  isCurrentPlayer={true}
-                />
-              )}
-
-              <div className="other-players">
-                <h3>Other Players</h3>
-                {otherPlayers.map((player: Player) => (
-                  <div
-                    key={player.id}
-                    className="other-player-card"
-                    onClick={() => setSelectedPlayer(player)}
-                  >
-                    <div className="player-name">{player.name}</div>
-                    <div className="player-money">${player.money}</div>
-                    <div className="player-properties">
-                      {player.properties.length} properties
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="game-actions">
-                <button className="action-button primary" disabled={isWaitingForState || hasMovedThisTurn}>Roll Dice</button>
-                <button className="action-button" disabled={isWaitingForState} onClick={() => setShowMarkets((v) => !v)}>
-                  {showMarkets ? "Close Markets" : "Markets"}
-                </button>
-                <button className="action-button" disabled={isWaitingForState}>Sell Property</button>
-                <button className="action-button" disabled={isWaitingForState} onClick={handleEndTurn}>
-                  {isWaitingForState ? "Waiting…" : "End Turn"}
-                </button>
-              </div>
-
-              {pendingActions.length > 0 && (
-                <div className="pending-actions">
-                  <h3>Pending Actions ({pendingActions.length})</h3>
-                  <div className="pending-actions-list">
-                    {pendingActions.map((action, index) => (
-                      <div key={index} className="pending-action-item">
-                        <span className={`action-type ${action.action_type}`}>
-                          {action.action_type.toUpperCase()}
-                        </span>
-                        <span className="action-details">
-                          {action.assets_type} #{action.assets_id} × {action.amount}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {hasMovedThisTurn && !isWaitingForState && (
-                <div className="move-info-banner">
-                  Move completed. Perform actions for this field, then end your turn.
-                </div>
-              )}
-
-              {lastWsMessage && (
-                <div className="game-debug-panel">
-                  <h3>Last WS message</h3>
-                  <pre>{JSON.stringify(lastWsMessage, null, 2)}</pre>
-                </div>
-              )}
-            </div>
-
-            <div className="board-container">
-              <div className="board">
-                {showMarkets ? (
-                  <div className="markets-view">
-                    {stocks.length === 0 && cryptos.length === 0 ? (
-                      <div className="markets-empty">No market data yet (start the game first).</div>
-                    ) : (
-                      <>
-                        {stocks.length > 0 && (
-                          <div className="markets-section">
-                            <h2 className="markets-title" style={{ textAlign: "center", fontSize: "1.5rem" }}>Stocks</h2>
-                            <div className="markets-grid">
-                              {stocks.map((s: any) => (
-                                <div key={`stock-${s.id}`} className="market-card">
-                                  <div className="market-card-title" style={{ textAlign: "center" }}>{s.name} - {Number(s.price).toFixed(2)} PLN</div>
-                                  <PriceChart priceHistory={Array.isArray(s.price_history) ? s.price_history : [s.price]} />
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        {cryptos.length > 0 && (
-                          <div className="markets-section">
-                            <h2 className="markets-title" style={{ textAlign: "center", fontSize: "1.5rem" }}>Crypto</h2>
-                            <div className="markets-grid">
-                              {cryptos.map((c: any) => (
-                                <div key={`crypto-${c.id}`} className="market-card">
-                                  <div className="market-card-title" style={{ textAlign: "center" }}>{c.name} - ${Number(c.price).toFixed(2)}</div>
-                                  <PriceChart priceHistory={Array.isArray(c.price_history) ? c.price_history : [c.price]} />
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </>
-                    )}
-                  </div>
+          <div className="board">
+            {showMarkets ? (
+              <div className="markets-view">
+                {stocks.length === 0 && cryptos.length === 0 ? (
+                  <div className="markets-empty">No market data yet (start the game first).</div>
                 ) : (
-                  <div className="board-placeholder">
-                    <Spline
-                      scene="https://prod.spline.design/RBNliUZGiPREVqU2/scene.splinecode"
-                      onSplineMouseDown={onSplineMouseDown}
-                      onLoad={(s) => {
-                        spline.current = s;
-                        for (let i = 1; i <= 6; i++) {
-                          const pawnId = `p${i}-start`;
-                          const pawn = s.findObjectByName(pawnId);
-                          if (pawn) {
-                            initPositions.current[pawnId] = pawn.position.x;
-                          }
-                        }
-                        allPlayers.forEach((p: Player) => {
-                          const pawnId = p.pawn_id;
-                          const pawn = s.findObjectByName(pawnId);
-                          if (pawn && initPositions.current[pawnId] !== undefined) {
-                            const offsets = getPawnOffsets(p.position || 0);
-                            pawn.position.x = initPositions.current[pawnId] + offsets.x;
-                            pawn.position.z = initPositions.current[pawnId] + offsets.z;
-                          }
-                        });
-                      }}
-                    />
-                    {isWaitingForState && (
-                      <div className="board-blocker">
-                        <div className="board-blocker-text">
-                          Waiting for turn to end...
+                  <>
+                    {stocks.length > 0 && (
+                      <div className="markets-section">
+                        <h2 className="markets-title" style={{ textAlign: "center", fontSize: "1.5rem" }}>Stocks</h2>
+                        <div className="markets-grid">
+                          {stocks.map((s: any) => (
+                            <div key={`stock-${s.id}`} className="market-card">
+                              <div className="market-card-title" style={{ textAlign: "center" }}>{s.name} - {Number(s.price).toFixed(2)} PLN</div>
+                              <PriceChart priceHistory={Array.isArray(s.price_history) ? s.price_history : [s.price]} />
+                            </div>
+                          ))}
                         </div>
                       </div>
                     )}
+
+                    {cryptos.length > 0 && (
+                      <div className="markets-section">
+                        <h2 className="markets-title" style={{ textAlign: "center", fontSize: "1.5rem" }}>Crypto</h2>
+                        <div className="markets-grid">
+                          {cryptos.map((c: any) => (
+                            <div key={`crypto-${c.id}`} className="market-card">
+                              <div className="market-card-title" style={{ textAlign: "center" }}>{c.name} - ${Number(c.price).toFixed(2)}</div>
+                              <PriceChart priceHistory={Array.isArray(c.price_history) ? c.price_history : [c.price]} />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            ) : (
+              <div className="board-placeholder">
+                <Spline
+                  scene="https://prod.spline.design/RBNliUZGiPREVqU2/scene.splinecode"
+                  onSplineMouseDown={onSplineMouseDown}
+                  onLoad={(s) => {
+                    spline.current = s;
+                    for (let i = 1; i <= 6; i++) {
+                      const pawnId = `p${i}-start`;
+                      const pawn = s.findObjectByName(pawnId);
+                      if (pawn) {
+                        initPositions.current[pawnId] = pawn.position.x;
+                      }
+                    }
+                    allPlayers.forEach((p: Player) => {
+                      const pawnId = p.pawn_id;
+                      const pawn = s.findObjectByName(pawnId);
+                      if (pawn && initPositions.current[pawnId] !== undefined) {
+                        const offsets = getPawnOffsets(p.position || 0);
+                        pawn.position.x = initPositions.current[pawnId] + offsets.x;
+                        pawn.position.z = initPositions.current[pawnId] + offsets.z;
+                      }
+                    });
+                  }}
+                />
+                {isWaitingForState && (
+                  <div className="board-blocker">
+                    <div className="board-blocker-text">
+                      Waiting for turn to end...
+                    </div>
                   </div>
                 )}
               </div>
-            </div>
+            )}
           </div>
-
-
-        <StockMarketModal
-          isOpen={showStockMarketModal}
-          onClose={() => setShowStockMarketModal(false)}
-          stocks={stocks}
-          currentPlayer={currentPlayer}
-          onAction={handleAddAction}
-        />
+        </div>
       </div>
-    );
-  }
+
+
+      <StockMarketModal
+        isOpen={showStockMarketModal}
+        onClose={() => setShowStockMarketModal(false)}
+        stocks={stocks}
+        currentPlayer={currentPlayer}
+        onAction={handleAddAction}
+      />
+    </div>
+  );
+}
