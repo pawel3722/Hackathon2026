@@ -408,7 +408,7 @@ export default function Game() {
                             initPositions.current[pawnId] = pawn.position.x;
                           }
                         }
-                        allPlayers.forEach(p => {
+                        allPlayers.forEach((p: Player) => {
                           const pawnId = p.pawn_id;
                           const pawn = s.findObjectByName(pawnId);
                           if (pawn && initPositions.current[pawnId] !== undefined) {
