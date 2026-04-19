@@ -327,7 +327,7 @@ export default function Game() {
 
           <div className="game-actions">
             <button className="action-button" disabled={isWaitingForState} onClick={() => setShowMarkets((v) => !v)}>
-              {showMarkets ? "Close Markets" : "Markets"}
+              {showMarkets ? "Close Financial Markets" : "See Financial Markets"}
             </button>
             <button className="action-button" disabled={isWaitingForState} onClick={handleEndTurn}>
               {isWaitingForState ? "Waiting…" : "End Turn"}
@@ -353,14 +353,14 @@ export default function Game() {
           )}
 
           <div className="switch-container">
-            <p>Move</p>
-            <div className="switch">
+            <p style={{ fontWeight: !observe ? "bold" : "normal", color: !observe ? "#111827" : "#444" }}>Move</p>
+            <div className="switch" style={{ backgroundColor: (isWaitingForState || hasMovedThisTurnRef.current) ? "#9ca3af" : "gainsboro" }}>
               <div style={{ transform: !observe ? "translateX(0)" : "translateX(200%)" }} onClick={() => {
                 if (isWaitingForState || hasMovedThisTurnRef.current) setObserve(true);
                 else setObserve(prev => !prev);
               }} />
             </div>
-            <p>Preview</p>
+            <p style={{ fontWeight: observe ? "bold" : "normal", color: observe ? "#111827" : "#444" }}>Preview</p>
           </div>
 
         </div>
@@ -402,22 +402,6 @@ export default function Game() {
                     >
                       💳 Bank Services
                     </button>
-                    {/* <button
-                      className="game-bank-service-btn deposit-btn"
-                      onClick={() => {
-                        setShowBankModal(true);
-                      }}
-                    >
-                      💰 Make Deposit
-                    </button>
-                    <button
-                      className="game-bank-service-btn insurance-btn"
-                      onClick={() => {
-                        setShowBankModal(true);
-                      }}
-                    >
-                      🛡️ Get Insurance
-                    </button> */}
                   </div>
                 </div>
               ) : fieldsData.find(f => f.f === selectedObserveField.f)?.name == "Crypto" ? (
@@ -473,7 +457,7 @@ export default function Game() {
                   <>
                     {stocks.length > 0 && (
                       <div className="markets-section">
-                        <h2 className="markets-title" style={{ textAlign: "center", fontSize: "1.5rem" }}>Stocks</h2>
+                        <h2 className="markets-title" style={{ textAlign: "center", paddingTop: "1rem", fontSize: "1.5rem" }}>Stocks</h2>
                         <div className="markets-grid">
                           {stocks.map((s: any) => (
                             <div key={`stock-${s.id}`} className="market-card">

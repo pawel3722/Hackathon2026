@@ -185,6 +185,7 @@
   padding: 0rem;
   overflow: hidden;
   position: relative;
+  cursor: url("data:image/svg+xml,%3Csvg width='32' height='48' viewBox='0 0 21 33' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%235b91f5'/%3E%3Cstop offset='100%25' stop-color='%232f66d8'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpolygon points='20.2,20.2 12.25,20.2 16,29 9.667,31.75 5.75,22.5 0,28 0,0' fill='%23ffffff'/%3E%3Cpolygon points='6.373,19.482 1.75,23.904 1.75,4.225 15.975,18.45 9.602,18.45 13.708,28.087 10.59,29.441' fill='url(%23g)'/%3E%3C/svg%3E"), auto;
 }
 
 .game-modal {
@@ -566,13 +567,9 @@ h1 {
 
 .game-chance-draw-btn:hover {
   background: linear-gradient(135deg, #ee5a24 0%, #ff6b6b 100%);
-  transform: translateY(-3px);
   box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
 }
 
-.game-chance-draw-btn:active {
-  transform: translateY(-1px);
-}
 .game-bank-service-btn credit-btn {
   background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
   color: white;

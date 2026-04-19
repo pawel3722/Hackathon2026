@@ -20,27 +20,6 @@
   font-size: 1.1rem;
 }
 
-.close-button {
-  background-color: transparent;
-  border: none;
-  color: #6b7280;
-  font-size: 1.5rem;
-  cursor: pointer;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 2rem;
-  height: 2rem;
-  border-radius: 0.25rem;
-  transition: background-color 0.2s ease, color 0.2s ease;
-}
-
-.close-button:hover {
-  background-color: #e5e7eb;
-  color: #111827;
-}
-
 .player-stats {
   display: flex;
   flex-direction: column;
@@ -55,7 +34,7 @@
 }
 
 .stat-label {
-  color: #6b7280;
+  color: #333;
   font-size: 0.9rem;
 }
 
@@ -91,7 +70,7 @@
 
 .no-properties {
   margin: 0;
-  color: #9ca3af;
+  color: #444;
   font-size: 0.85rem;
   font-style: italic;
 }

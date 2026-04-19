@@ -66,12 +66,12 @@ export function StockMarketModal({
 
   const handleBuyStock = async () => {
     if (!selectedStock) {
-      setError('Proszę wybrać akcję');
+      setError('Please select a stock');
       return;
     }
 
     if (totalPrice > currentPlayer.money) {
-      setError('Niewystarczające środki');
+      setError('Insufficient funds');
       return;
     }
 
@@ -95,7 +95,7 @@ export function StockMarketModal({
       setQuantity(1);
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Błąd podczas kupowania akcji');
+      setError(err instanceof Error ? err.message : 'Error while buying stock');
     } finally {
       setIsLoading(false);
     }
@@ -103,13 +103,13 @@ export function StockMarketModal({
 
   const handleSellStock = async () => {
     if (!selectedStock) {
-      setError('Proszę wybrać akcję');
+      setError('Please select a stock');
       return;
     }
 
     const ownedStock = currentPlayer.stocks.find(s => s.stock.id === selectedStock.id);
     if (!ownedStock || quantity > ownedStock.quantity) {
-      setError('Niewystarczająca ilość akcji');
+      setError('Insufficient stock quantity');
       return;
     }
 
@@ -133,7 +133,7 @@ export function StockMarketModal({
       setQuantity(1);
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Błąd podczas sprzedawania akcji');
+      setError(err instanceof Error ? err.message : 'Error while selling stock');
     } finally {
       setIsLoading(false);
     }
@@ -145,7 +145,7 @@ export function StockMarketModal({
     <div className="stock-market-modal-overlay" onClick={onClose}>
       <div className="stock-market-modal-content" onClick={e => e.stopPropagation()}>
         <div className="stock-market-header">
-          <h2>Rynek Akcji</h2>
+          <h2>Stock Market</h2>
           <button className="stock-market-close" onClick={onClose}>✕</button>
         </div>
 
@@ -160,7 +160,7 @@ export function StockMarketModal({
               setQuantity(1);
             }}
           >
-            Kup Akcje
+            Buy Stocks
           </button>
           <button
             className={`tab ${mode === 'sell' ? 'active' : ''}`}
@@ -171,7 +171,7 @@ export function StockMarketModal({
               setQuantity(1);
             }}
           >
-            Sprzedaj Akcje
+            Sell Stocks
           </button>
         </div>
 
@@ -182,7 +182,7 @@ export function StockMarketModal({
         {mode === 'buy' && (
           <div className="stock-market-section">
             <div className="stock-market-form-group">
-              <label htmlFor="buy-stock">Wybierz akcję:</label>
+              <label htmlFor="buy-stock">Select stock:</label>
               <select
                 id="buy-stock"
                 value={selectedStockId || ''}
@@ -191,10 +191,10 @@ export function StockMarketModal({
                   setQuantity(1);
                 }}
               >
-                <option value="">-- Wybierz --</option>
+                <option value="">-- Select --</option>
                 {stocks.map(stock => (
                   <option key={stock.id} value={stock.id}>
-                    {stock.ticker} - {stock.name} (${stock.price.toFixed(2)})
+                    {stock.ticker} - {stock.name} ({stock.price.toFixed(2)} PLN)
                   </option>
                 ))}
               </select>
@@ -203,7 +203,7 @@ export function StockMarketModal({
             {selectedStock && (
               <>
                 <div className="stock-market-form-group">
-                  <label htmlFor="buy-quantity">Ilość:</label>
+                  <label htmlFor="buy-quantity">Quantity:</label>
                   <input
                     id="buy-quantity"
                     className="inputbrzydki"
@@ -216,19 +216,19 @@ export function StockMarketModal({
 
                 <div className="stock-market-details">
                   <div className="detail-row">
-                    <span>Cena jednostkowa:</span>
-                    <span className="detail-value">${selectedStock.price.toFixed(2)}</span>
+                    <span>Unit price:</span>
+                    <span className="detail-value">{selectedStock.price.toFixed(2)} PLN</span>
                   </div>
                   <div className="detail-row">
-                    <span>Ilość:</span>
+                    <span>Quantity:</span>
                     <span className="detail-value">{quantity}</span>
                   </div>
                   <div className="detail-row total">
-                    <span>Cena całkowita:</span>
-                    <span className="detail-value">${totalPrice.toFixed(2)}</span>
+                    <span>Total price:</span>
+                    <span className="detail-value">{totalPrice.toFixed(2)} PLN</span>
                   </div>
                   <div className="detail-row">
-                    <span>Twoje pieniądze:</span>
+                    <span>Your money:</span>
                     <span className={`detail-value ${totalPrice > currentPlayer.money ? 'insufficient' : ''}`}>
                       ${currentPlayer.money.toFixed(2)}
                     </span>
@@ -240,7 +240,7 @@ export function StockMarketModal({
                   onClick={handleBuyStock}
                   disabled={isLoading || totalPrice > currentPlayer.money}
                 >
-                  {isLoading ? 'Przetwarzanie...' : 'Potwierdź Zakup'}
+                  {isLoading ? 'Processing...' : 'Confirm Purchase'}
                 </button>
               </>
             )}
@@ -251,11 +251,11 @@ export function StockMarketModal({
         {mode === 'sell' && (
           <div className="stock-market-section">
             {ownedStocks.length === 0 ? (
-              <p className="no-stocks">Nie posiadasz żadnych akcji</p>
+              <p className="no-stocks">You don't own any stocks</p>
             ) : (
               <>
                 <div className="stock-market-form-group">
-                  <label htmlFor="sell-stock">Wybierz akcję do sprzedaży:</label>
+                  <label htmlFor="sell-stock">Select stock to sell:</label>
                   <select
                     id="sell-stock"
                     value={selectedStockId || ''}
@@ -264,10 +264,10 @@ export function StockMarketModal({
                       setQuantity(1);
                     }}
                   >
-                    <option value="">-- Wybierz --</option>
+                    <option value="">-- Select --</option>
                     {ownedStocks.map(stock => (
                       <option key={stock.id} value={stock.id}>
-                        {stock.ticker} - {stock.name} (Posiadasz: {stock.ownedQuantity})
+                        {stock.ticker} - {stock.name} (Owned: {stock.ownedQuantity})
                       </option>
                     ))}
                   </select>
@@ -276,7 +276,7 @@ export function StockMarketModal({
                 {selectedStock && (
                   <>
                     <div className="stock-market-form-group">
-                      <label htmlFor="sell-quantity">Ilość do sprzedaży:</label>
+                      <label htmlFor="sell-quantity">Quantity to sell:</label>
                       <input
                         id="sell-quantity"
                         type="number"
@@ -289,19 +289,19 @@ export function StockMarketModal({
 
                     <div className="stock-market-details">
                       <div className="detail-row">
-                        <span>Cena jednostkowa:</span>
+                        <span>Unit price:</span>
                         <span className="detail-value">${selectedStock.price.toFixed(2)}</span>
                       </div>
                       <div className="detail-row">
-                        <span>Ilość do sprzedaży:</span>
+                        <span>Quantity to sell:</span>
                         <span className="detail-value">{quantity}</span>
                       </div>
                       <div className="detail-row total">
-                        <span>Otrzymasz:</span>
+                        <span>You will receive:</span>
                         <span className="detail-value profit">${totalPrice.toFixed(2)}</span>
                       </div>
                       <div className="detail-row">
-                        <span>Posiadasz:</span>
+                        <span>You own:</span>
                         <span className="detail-value">
                           {currentPlayer.stocks.find(s => s.stock.id === selectedStock.id)?.quantity || 0}
                         </span>
@@ -313,7 +313,7 @@ export function StockMarketModal({
                       onClick={handleSellStock}
                       disabled={isLoading}
                     >
-                      {isLoading ? 'Przetwarzanie...' : 'Potwierdź Sprzedaż'}
+                      {isLoading ? 'Processing...' : 'Confirm Sale'}
                     </button>
                   </>
                 )}

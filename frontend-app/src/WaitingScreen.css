@@ -26,7 +26,7 @@
 .waiting-title {
     font-size: 1.3rem;
     font-weight: bold;
-    margin-bottom: 0.6rem;
+    padding-bottom: 1.2rem;
     text-align: center;
     color: #111827;
     flex-shrink: 0;
@@ -290,7 +290,7 @@
     flex: 1;
     padding: 0.5rem 0.6rem;
     border: none;
-    border-radius: 0.75rem;
+    border-radius: 0.5rem;
     font-size: 0.75rem;
     font-weight: 500;
     cursor: pointer;

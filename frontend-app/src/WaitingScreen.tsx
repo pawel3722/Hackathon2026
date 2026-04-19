@@ -94,21 +94,20 @@ export default function WaitingScreen({
     return (
         <div className="waiting-container">
             <div className="waiting-card">
-                <h1 className="waiting-title">Oczekiwanie na graczy</h1>
+                <h1 className="waiting-title">Waiting for players</h1>
 
                 <div className="waiting-content">
                     <div className="waiting-left">
                         <div className="waiting-game-info">
                             <div className="waiting-info-item">
-                                <span className="waiting-info-label">Szczegóły gry:</span>
-                                {/* <span className="waiting-info-value">{gameId}</span> */}
+                                <span className="waiting-info-label">Game details:</span>
                             </div>
                             <div className="waiting-info-item">
-                                <span className="waiting-info-label">Trudność:</span>
+                                <span className="waiting-info-label">Difficulty:</span>
                                 <span className="waiting-info-value capitalize">{difficulty}</span>
                             </div>
                             <div className="waiting-info-item">
-                                <span className="waiting-info-label">Gracze:</span>
+                                <span className="waiting-info-label">Players:</span>
                                 <span className="waiting-info-value">
                                     {connectedPlayers}
                                 </span>
@@ -117,7 +116,7 @@ export default function WaitingScreen({
 
 
                         <div className="share-link-section">
-                            <p className="share-link-label">Kod lobby:</p>
+                            <p className="share-link-label">Lobby code:</p>
                             <div className="share-link-container">
                                 <input
                                     type="text"
@@ -125,21 +124,21 @@ export default function WaitingScreen({
                                     readOnly
                                     className="share-link-input"
                                 />
-                                <button onClick={copyToClipboard} className="copy-button" title="Kopiuj kod">
+                                <button onClick={copyToClipboard} className="copy-button" title="Copy code">
                                     <svg className="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                                     </svg>
                                 </button>
                             </div>
-                            {copied && <p className="copied-message">Kod skopiowany!</p>}
-                            <p className="share-link-hint">Przekaż ten kod innym graczom, aby mogli dołączyć.</p>
+                            {copied && <p className="copied-message">Code copied!</p>}
+                            <p className="share-link-hint">Share this code with other players so they can join.</p>
                         </div>
 
                     </div>
 
                     <div className="waiting-right">
                         <div className="players-section">
-                            <h2 className="players-title">Gracze</h2>
+                            <h2 className="players-title">Players</h2>
                             <div className="players-list">
                                 {playersList.map((player, index) => (
                                     <div key={index} className="player-item">
@@ -157,8 +156,8 @@ export default function WaitingScreen({
                 <div className="status-section">
                     <p className="status-message">
                         {isCreator
-                            ? "Możesz rozpocząć grę z obecnymi graczami. Kliknij 'Rozpocznij'."
-                            : "Czekaj, aż gospodarz rozpocznie grę."}
+                            ? "You can start the game with the current players. Click 'Start'."
+                            : "Wait for the host to start the game."}
                     </p>
                 </div>
                 <div className="action-buttons">
@@ -176,12 +175,12 @@ export default function WaitingScreen({
                             }}
                             disabled={connectedPlayers < 1 || isStarting}
                         >
-                            {isStarting ? 'Rozpoczynanie...' : 'Rozpocznij'}
+                            {isStarting ? 'Starting...' : 'Start'}
                         </button>
                     )}
 
                     <button className="button button-cancel" onClick={onCancel}>
-                        Anuluj
+                        Cancel
                     </button>
                 </div>
             </div>

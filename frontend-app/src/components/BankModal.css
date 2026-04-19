@@ -40,12 +40,13 @@
   padding: 24px;
   border-bottom: 2px solid #f0f0f0;
   background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
-  color: white;
+  color: #fff;
   border-radius: 12px 12px 0 0;
 }
 
 .bank-modal-header h2 {
   margin: 0;
+  color: #fff;
   font-size: 24px;
   font-weight: 600;
 }
@@ -55,7 +56,7 @@
   border: none;
   font-size: 28px;
   cursor: pointer;
-  color: white;
+  color: #ddd;
   padding: 0;
   width: 32px;
   height: 32px;
@@ -67,7 +68,7 @@
 }
 
 .bank-modal-close:hover {
-  background-color: rgba(255, 255, 255, 0.2);
+  color: #fff;
 }
 
 .bank-modal-tabs {

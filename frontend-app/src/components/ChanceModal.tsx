@@ -39,13 +39,12 @@ export const ChanceModal: React.FC<ChanceModalProps> = ({
           <p>Choose one of the three chance cards:</p>
           <div className="chance-cards-grid">
             {chanceCards.map((card) => (
-              <div key={card.id} className="chance-card">
+              <div key={card.id} className="chance-card" onClick={() => handleChooseCard(card)}>
                 <div className="chance-card-description">
                   {card.description}
                 </div>
                 <button
                   className="chance-card-choose-btn"
-                  onClick={() => handleChooseCard(card)}
                 >
                   Choose This Card
                 </button>

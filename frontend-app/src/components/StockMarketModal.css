@@ -39,7 +39,7 @@
   align-items: center;
   padding: 24px;
   border-bottom: 2px solid  f0f0f0;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
   color: white;
   border-radius: 12px 12px 0 0;
 }
@@ -48,6 +48,7 @@
   margin: 0;
   font-size: 24px;
   font-weight: 600;
+  color: white;
 }
 
 .stock-market-close {
@@ -85,7 +86,7 @@
   cursor: pointer;
   font-size: 16px;
   font-weight: 500;
-  color: #999;
+  color: #444;
   border-bottom: 3px solid transparent;
   transition: all 0.3s;
 }
@@ -190,7 +191,7 @@
 .stock-market-confirm {
   width: 100%;
   padding: 14px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
   color: white;
   border: none;
   border-radius: 6px;
@@ -222,7 +223,7 @@
 
 .no-stocks {
   text-align: center;
-  color: #999;
+  color: #444;
   padding: 40px 20px;
   font-size: 16px;
 }
