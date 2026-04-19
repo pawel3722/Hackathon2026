@@ -90,6 +90,8 @@ export default function Game() {
   const [marketState, setMarketState] = useState<any>(() => getGlobalGameState());
   const [playerState, setPlayerState] = useState<any>(() => getGlobalGameState());
   const [isWaitingForState, setIsWaitingForState] = useState(false);
+  const [hasMovedThisTurn, setHasMovedThisTurn] = useState(false);
+  const hasMovedThisTurnRef = useRef(false);
 
 
   useEffect(() => {
@@ -112,6 +114,8 @@ export default function Game() {
           setMarketState(gs);
           setPlayerState(gs);
           setIsWaitingForState(false);
+          setHasMovedThisTurn(false);
+          hasMovedThisTurnRef.current = false;
         }
       },
       (error: Event) => {
@@ -148,7 +152,7 @@ export default function Game() {
   const cryptos = Array.isArray(marketState?.cryptos) ? marketState.cryptos : [];
 
   const onSplineMouseDown = (e: SplineEvent) => {
-    if (isWaitingForState) return;
+    if (isWaitingForState || hasMovedThisTurnRef.current) return;
 
     const nextField = FIELD.find(f => f.f === e.target.name);
     const pawn = spline.current?.findObjectByName(currentPlayer.pawn_id);
@@ -178,6 +182,8 @@ export default function Game() {
     pawn.position.x -= dist * 370;
 
     setSelectedField(nextField);
+    setHasMovedThisTurn(true);
+    hasMovedThisTurnRef.current = true;
     setShowModal(prev => !prev);
   };
 
@@ -305,7 +311,7 @@ export default function Game() {
           </div>
 
           <div className="game-actions">
-            <button className="action-button primary" disabled={isWaitingForState}>Roll Dice</button>
+            <button className="action-button primary" disabled={isWaitingForState || hasMovedThisTurn}>Roll Dice</button>
             <button className="action-button" disabled={isWaitingForState} onClick={() => setShowMarkets((v) => !v)}>
               {showMarkets ? "Close Markets" : "Markets"}
             </button>
@@ -314,6 +320,11 @@ export default function Game() {
               {isWaitingForState ? "Waiting…" : "End Turn"}
             </button>
           </div>
+          {hasMovedThisTurn && !isWaitingForState && (
+            <div className="move-info-banner">
+              Move completed. Perform actions for this field, then end your turn.
+            </div>
+          )}
 
           {lastWsMessage && (
             <div className="game-debug-panel">
@@ -368,6 +379,13 @@ export default function Game() {
                   onSplineMouseDown={onSplineMouseDown}
                   onLoad={(s) => spline.current = s}
                 />
+                {isWaitingForState && (
+                  <div className="board-blocker">
+                    <div className="board-blocker-text">
+                      Waiting for turn to end...
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
