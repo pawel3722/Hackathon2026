@@ -58,13 +58,6 @@ export interface Deposit {
   maturity_date: string; // ISO date string
 }
 
-export interface Action {
-  action_type: string; // "buy", "sell", "bank", "stakeholder", "card"
-  assets_type: string; // "stock", "crypto", "property", "credit", "deposit", "insurance"
-  assets_id: number;
-  amount: number; // quantity for stocks, amount for other actions
-}
-
 export interface Player {
   id: string;
   name: string;
